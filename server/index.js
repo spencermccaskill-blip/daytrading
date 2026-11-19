@@ -36,7 +36,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   const settings = mergeSettings(s0.value);
   const journal = { trades: Array.isArray(j0.value?.trades) ? j0.value.trades : [] };
   const bad = { journal: j0.bad, settings: s0.bad };
-  const problem = () => (bad.journal ? 'data\\journal.json could not be read (it may be damaged).' : bad.settings ? 'data\\settings.json could not be read (it may be damaged).' : null);
+  const problem = () => (bad.journal ? 'The journal file (data folder, journal.json) could not be read (it may be damaged).' : bad.settings ? 'The settings file (data folder, settings.json) could not be read (it may be damaged).' : null);
   const refuse = (res) => res.status(409).json({ error: `${problem()} Nothing was saved, so the file is not overwritten. Fix or move the file, then restart The Desk.` });
   const store = new BarStore();
   store.load(readSaved(FILES.bars).value);
@@ -146,6 +146,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   setInterval(persistBars, 60000).unref();
   app.listen(PORT, () => {
     console.log(`The Desk is running at http://localhost:${PORT}`);
-    console.log('Keep this window open. Open your TradingView chart (MNQ1!, 5 minutes) in Edge with the bridge extension on.');
+    console.log('Keep this window open. Open your TradingView chart (MNQ1!, 5 minutes) in your browser with the bridge extension on.');
   });
 }

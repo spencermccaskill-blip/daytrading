@@ -57,6 +57,61 @@ cd $HOME\Downloads\daytrading-claude-stoic-darwin-br4ivc
 npm.cmd start
 ```
 
+## On a Mac
+
+The app is the same on a Mac; only the commands differ. You need Node.js once: download the
+"LTS" installer from https://nodejs.org and click through it.
+
+Open the **Terminal** app and paste these one line at a time:
+
+```
+cd ~/Downloads
+```
+```
+curl -L -o the-desk.zip https://github.com/spencermccaskill-blip/daytrading/archive/refs/heads/claude/stoic-darwin-br4ivc.zip
+```
+```
+unzip -o the-desk.zip
+```
+```
+cd daytrading-claude-stoic-darwin-br4ivc
+```
+```
+npm install
+```
+```
+npm start
+```
+
+Every day after that:
+
+```
+cd ~/Downloads/daytrading-claude-stoic-darwin-br4ivc
+```
+```
+npm start
+```
+
+Differences from Windows:
+
+- It is `npm`, not `npm.cmd`. Stop the server with **Control + C** (not Command).
+- The bridge extension works in **Edge or Chrome** on a Mac (`edge://extensions` or `chrome://extensions`,
+  Developer mode, Load unpacked, pick the `extension` folder). **Safari cannot load it.**
+- Hard refresh is **Command + Shift + R**.
+- Keep the Mac awake while trading: a sleeping Mac stops the feed, and The Desk will say "Feed stalled".
+
+### Bringing your journal and settings over
+
+They live in the `data` folder of the app on the Windows laptop and are not on GitHub (they are private).
+Copy these two files to the same `data` folder on the Mac, with The Desk stopped on both:
+
+- `data\journal.json` (every trade you logged: the guard is built from it)
+- `data\settings.json` (your Lucid plan and rules)
+
+Email them to yourself, or use a USB stick or iCloud Drive. `data\bars.json` does not need to move;
+the chart refills it. If you skip this, the Mac starts with an empty journal and default settings,
+so the guard would show a fresh $50,000 account.
+
 ## Connect TradingView in Edge (once)
 
 1. In Edge go to `edge://extensions` and switch on **Developer mode**.

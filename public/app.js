@@ -158,7 +158,7 @@ async function refresh() {
     $('price').classList.toggle('mute', !!old);
   } catch (e) {
     console.error(e);
-    $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'The page hit an error drawing this state. Refresh with Ctrl+Shift+R.';
+    $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'The page hit an error drawing this state. Refresh the page.';
   }
 }
 // The server stopped answering: nothing on screen is current, so say that instead of leaving old numbers up.
@@ -167,7 +167,7 @@ function offline() {
   $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'No connection to The Desk';
   $('answer').dataset.tone = 'warn'; $('aWindow').textContent = 'Not connected'; $('aSetup').textContent = '';
   $('aWord').textContent = 'No connection'; lastWord = 'No connection';
-  $('aSub').textContent = 'The Desk server on this laptop is not answering, so every number on this page is old. In PowerShell run npm.cmd start, then this page reconnects by itself.';
+  $('aSub').textContent = 'The Desk server on this laptop is not answering, so every number on this page is old. Start it again from the app folder (npm.cmd start on Windows, npm start on a Mac) and this page reconnects by itself.';
   $('aRight').innerHTML = ''; $('aChecks').innerHTML = '';
   $('gStatus').textContent = 'Unknown'; $('guard').dataset.status = 'offline';
 }
