@@ -1,122 +1,133 @@
+// The Desk: one local server. Reads bars posted by the TradingView bridge extension, keeps the
+// journal and settings in data/*.json, and serves the page. It never places an order.
 import express from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { BarStore, snapshot } from './engine.js';
-import { feeds, refreshCalendar, refreshNews } from './feeds.js';
-import { BACKTEST } from './backtest.js';
+import { BarStore } from './bars.js';
+import { buildState } from './desk.js';
+import { loadVerdicts } from './verdicts.js';
+import { computeGuard, checkTrade, defaultSettings, PLANS } from './guard.js';
+import { demoInput, SCENARIOS } from './demo.js';
+import { WINDOWS } from './sessions.js';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const PORT = Number(process.env.PORT) || 3000;
-const DATA = path.join(root, 'data');
-const SETTINGS_FILE = path.join(DATA, 'settings.json');
-const BARS_FILE = path.join(DATA, 'bars.json');
-fs.mkdirSync(DATA, { recursive: true });
-
 const readJSON = (f, d) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return d; } };
-const settings = { riskBudget: 250, instrument: 'MNQ', ...readJSON(SETTINGS_FILE, {}) };
-const pointValue = () => (settings.instrument === 'NQ' ? 20 : 2);
+const num = (v) => (v === '' || v == null ? NaN : Number(v));
 
-const store = new BarStore();
-store.load(readJSON(BARS_FILE, null));
-const feed = { symbol: null, lastPost: 0, error: null };
-
-const app = express();
-app.use(express.json({ limit: '5mb' }));
-
-// Let the Sweep Quest site (hosted on Higgsfield) read this laptop's data in your browser.
-const ALLOWED_ORIGINS = [/^https:\/\/sweep-quest\.[a-z0-9.-]+$/, /^http:\/\/localhost(:\d+)?$/];
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.some(r => r.test(origin))) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Allow-Private-Network', 'true');
-  }
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
-  next();
-});
-
-// Quest journal: one entry per trading day, kept in data/journal.json on this laptop.
-const JOURNAL_FILE = path.join(DATA, 'journal.json');
-const journal = readJSON(JOURNAL_FILE, { days: {}, checks: {} });
-const XP = { levels: 10, calendar: 10, wait: 15, size: 15, twoR: 15, flat: 10 };
-function progress() {
-  const days = Object.entries(journal.days).sort(([a], [b]) => a.localeCompare(b));
-  let xp = 0; for (const [, d] of days) xp += (d.checks || []).reduce((a, k) => a + (XP[k] || 0), 0) + (d.followed ? 25 : 0);
-  let streak = 0; for (let i = days.length - 1; i >= 0 && days[i][1].followed; i--) streak++;
-  const level = Math.floor(xp / 200) + 1;
-  return { xp, level, levelXp: xp % 200, levelSize: 200, streak, recent: days.slice(-14).map(([date, d]) => ({ date, followed: !!d.followed, r: d.r ?? null, took: !!d.took })) };
+/** Settings on disk merged over the defaults, so a new field never breaks an old file. */
+function loadSettings(file) {
+  const d = defaultSettings(), s = readJSON(file, {});
+  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument };
 }
-app.get('/api/journal', (_req, res) => res.json({ ...progress(), today: journal.days[new Date().toISOString().slice(0, 10)] || null, xpTable: XP }));
-app.post('/api/journal', (req, res) => {
-  const { date, checks, followed, took, r, note } = req.body || {};
-  const k = typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : new Date().toISOString().slice(0, 10);
-  const prev = journal.days[k] || {};
-  const day = { ...prev };
-  if (Array.isArray(checks)) day.checks = checks.filter(c => c in XP);
-  if (followed != null) day.followed = !!followed;
-  if (took != null) day.took = !!took;
-  if (r !== undefined) { const v = r === null || r === '' ? null : Number(r); if (v !== null && !Number.isFinite(v)) return res.status(400).json({ error: 'Result must be a number of R, like 2 or -1.' }); day.r = v; }
-  if (typeof note === 'string') day.note = note.slice(0, 500);
-  journal.days[k] = day;
-  fs.writeFileSync(JOURNAL_FILE, JSON.stringify(journal, null, 2));
-  res.json({ ...progress(), today: day });
-});
 
-// The Chrome extension posts the chart's bars here every few seconds.
-app.post('/api/bars', (req, res) => {
-  const { symbol, resolution, bars } = req.body || {};
-  const resMin = Number(resolution);
-  if (!Array.isArray(bars)) return res.status(400).json({ error: 'Expected a bars array.' });
-  if (!(resMin >= 1 && resMin <= 15 && 15 % resMin === 0)) {
-    feed.error = `Set the TradingView chart to 1, 3, 5 or 15 minutes (it is on "${resolution}").`;
-    feed.lastPost = Date.now();
-    return res.json({ ok: false, error: feed.error });
-  }
-  if (!/NQ/i.test(String(symbol))) feed.error = `The chart shows ${symbol}. Switch it to NQ1! or MNQ1!.`;
-  else feed.error = null;
-  if (!feed.error) store.ingest(bars, resMin);
-  feed.symbol = symbol; feed.lastPost = Date.now();
-  res.json({ ok: !feed.error });
-});
+export function createApp({ dataDir = path.join(root, 'data'), clock = () => Date.now() } = {}) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  const FILES = { settings: path.join(dataDir, 'settings.json'), bars: path.join(dataDir, 'bars.json'), journal: path.join(dataDir, 'journal.json') };
+  const save = (name, value) => fs.writeFileSync(FILES[name], JSON.stringify(value, null, name === 'bars' ? 0 : 2));
 
-app.get('/api/state', (_req, res) => {
-  const snap = snapshot(store, { riskBudget: settings.riskBudget, pointValue: pointValue() });
-  res.json({
-    now: Date.now(), feed: { ...feed, lastBarT: store.lastRawT, resMin: store.resMin },
-    settings, snap, backtest: BACKTEST,
-    calendar: feeds.calendar.filter(e => e.t > Date.now() - 12 * 36e5).slice(0, 25),
-    news: feeds.news.slice(0, 25), feedErrors: feeds.errors,
+  const settings = loadSettings(FILES.settings);
+  const j0 = readJSON(FILES.journal, null);
+  const journal = { trades: Array.isArray(j0?.trades) ? j0.trades : [] };
+  const store = new BarStore();
+  store.load(readJSON(FILES.bars, null));
+  const feed = { symbol: null, lastPost: 0, error: null };
+  let verdicts = loadVerdicts();
+
+  const app = express();
+  app.use(express.json({ limit: '8mb' }));
+
+  // The bridge extension posts the chart's bars here every couple of seconds.
+  app.post('/api/bars', (req, res) => {
+    const { symbol, resolution, bars } = req.body || {};
+    const resMin = Number(resolution);
+    if (!Array.isArray(bars)) return res.status(400).json({ error: 'Expected a bars array.' });
+    feed.lastPost = clock(); feed.symbol = String(symbol || '');
+    if (!(resMin >= 1 && resMin <= 15 && 15 % resMin === 0)) feed.error = `Set the TradingView chart to 5 minutes (it is on "${resolution}").`;
+    else if (!/NQ/i.test(feed.symbol)) feed.error = `The chart shows ${feed.symbol || 'another symbol'}. Switch it to MNQ1!.`;
+    else { feed.error = null; store.ingest(bars, resMin); }
+    res.json({ ok: !feed.error, error: feed.error });
   });
-});
 
-app.post('/api/settings', (req, res) => {
-  const { riskBudget, instrument } = req.body || {};
-  if (riskBudget != null) {
-    const v = Number(riskBudget);
-    if (!(v > 0 && v <= 100000)) return res.status(400).json({ error: 'Risk per trade must be a positive dollar amount.' });
-    settings.riskBudget = v;
-  }
-  if (instrument != null) {
-    if (!['MNQ', 'NQ'].includes(instrument)) return res.status(400).json({ error: 'Instrument must be MNQ or NQ.' });
-    settings.instrument = instrument;
-  }
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
-  res.json(settings);
-});
+  app.get('/api/state', (req, res) => {
+    const demo = req.query.demo;
+    if (demo) return SCENARIOS.includes(demo) ? res.json(buildState(demoInput(demo))) : res.status(404).json({ error: `Unknown demo. Try one of: ${SCENARIOS.join(', ')}.` });
+    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts }));
+  });
 
-app.use(express.static(path.join(root, 'public')));
+  // Rules per session, checklist and backtest results for the Playbook tab.
+  app.get('/api/playbook', (_req, res) => { verdicts = loadVerdicts(); res.json({ ...verdicts, windows: WINDOWS.map(w => ({ id: w.id, name: w.name })) }); });
 
-// Save bars every minute so a restart keeps today's levels.
-setInterval(() => { try { fs.writeFileSync(BARS_FILE, JSON.stringify(store.toJSON())); } catch {} }, 60000).unref();
-refreshCalendar(); refreshNews();
-setInterval(refreshCalendar, 30 * 60000).unref();
-setInterval(refreshNews, 5 * 60000).unref();
+  app.get('/api/settings', (_req, res) => res.json({ settings, plans: PLANS }));
+  app.post('/api/settings', (req, res) => {
+    const b = req.body || {}, a = b.account || {}, p = b.personal || {};
+    const next = structuredClone(settings);
+    if (a.plan != null) {
+      if (!PLANS[a.plan]) return res.status(400).json({ error: 'Plan must be Flex, Pro, Direct or Daily.' });
+      const pl = PLANS[a.plan];
+      Object.assign(next.account, { plan: a.plan, trailing: pl.trailing, dll: { ...pl.dll }, scaling: pl.scaling, maxMicros: pl.maxMicros, consistencyPct: pl.consistencyPct });
+    }
+    const money = [['startBalance', 'Starting balance'], ['maxLossLimit', 'Max loss limit'], ['lockBalance', 'Lock balance'], ['lockTrigger', 'Lock trigger'], ['maxMicros', 'Max micros']];
+    for (const [k, label] of money) if (a[k] != null) { const v = num(a[k]); if (!(v > 0)) return res.status(400).json({ error: `${label} must be a number above zero.` }); next.account[k] = v; }
+    if (a.trailing != null) { if (!['eod', 'intraday'].includes(a.trailing)) return res.status(400).json({ error: 'Trailing must be end of day or intraday.' }); next.account.trailing = a.trailing; }
+    if (a.dll != null) {
+      if (a.dll.on != null) next.account.dll.on = !!a.dll.on;
+      if (a.dll.amount != null) { const v = num(a.dll.amount); if (!(v > 0)) return res.status(400).json({ error: 'Daily loss limit must be a number above zero.' }); next.account.dll.amount = v; }
+    }
+    if (a.useScaling != null) next.account.scaling = a.useScaling ? PLANS.flex.scaling : null;
+    if (a.consistencyPct !== undefined) { const v = a.consistencyPct === null || a.consistencyPct === '' ? null : num(a.consistencyPct); if (v !== null && !(v > 0 && v <= 100)) return res.status(400).json({ error: 'Consistency must be a percent from 1 to 100, or empty for none.' }); next.account.consistencyPct = v; }
+    if (a.payoutRequested != null) next.account.payoutRequested = !!a.payoutRequested;
+    if (a.cycleStart !== undefined) next.account.cycleStart = /^\d{4}-\d{2}-\d{2}$/.test(a.cycleStart || '') ? a.cycleStart : null;
+    for (const [k, label] of [['riskPerTrade', 'Risk per trade'], ['dailyStop', 'Daily stop']]) if (p[k] != null) { const v = num(p[k]); if (!(v > 0)) return res.status(400).json({ error: `${label} must be a dollar amount above zero.` }); next.personal[k] = v; }
+    if (p.maxLossesPerDay != null) { const v = num(p.maxLossesPerDay); if (!(Number.isInteger(v) && v >= 1)) return res.status(400).json({ error: 'Losses per day must be a whole number, 1 or more.' }); next.personal.maxLossesPerDay = v; }
+    Object.assign(settings, next); save('settings', settings);
+    res.json({ settings, plans: PLANS });
+  });
 
-app.listen(PORT, () => {
-  console.log(`NQ Desk running at http://localhost:${PORT}`);
-  console.log('Open your TradingView chart on NQ1! or MNQ1! (1, 5 or 15 min) with the NQ Desk Bridge extension on.');
-});
+  // Manual journal: Spencer types in what Tradovate shows. This is what feeds the guard.
+  app.get('/api/journal', (_req, res) => res.json({ trades: [...journal.trades].sort((x, y) => y.ts - x.ts), guard: computeGuard(settings, journal, clock()) }));
+  app.post('/api/journal', (req, res) => {
+    const b = req.body || {}, pnl = num(b.pnl);
+    if (!Number.isFinite(pnl)) return res.status(400).json({ error: 'Enter the profit or loss in dollars, like 180 or -240.' });
+    const ts = b.ts != null ? num(b.ts) : clock();
+    if (!Number.isFinite(ts) || ts > clock() + 60000) return res.status(400).json({ error: 'The trade time cannot be in the future.' });
+    const kind = b.kind === 'adjustment' ? 'adjustment' : 'trade';
+    const opt = (v) => (Number.isFinite(num(v)) ? num(v) : null);
+    const row = { id: crypto.randomUUID(), kind, ts, pnl, side: ['LONG', 'SHORT'].includes(b.side) ? b.side : null, contracts: opt(b.contracts), entry: opt(b.entry), exit: opt(b.exit), setup: String(b.setup || '').slice(0, 60), followedRules: b.followedRules == null ? null : !!b.followedRules, note: String(b.note || '').slice(0, 300) };
+    journal.trades.push(row); save('journal', journal);
+    res.json({ trade: row, guard: computeGuard(settings, journal, clock()) });
+  });
+  app.delete('/api/journal/:id', (req, res) => {
+    const i = journal.trades.findIndex(t => t.id === req.params.id);
+    if (i < 0) return res.status(404).json({ error: 'That entry is already gone.' });
+    journal.trades.splice(i, 1); save('journal', journal);
+    res.json({ ok: true, guard: computeGuard(settings, journal, clock()) });
+  });
+
+  // PASS or BLOCK for a trade idea typed in by hand.
+  app.post('/api/check', (req, res) => {
+    const entry = num(req.body?.entry), stop = num(req.body?.stop);
+    if (!Number.isFinite(entry) || !Number.isFinite(stop)) return res.status(400).json({ error: 'Enter both the entry and the stop price.' });
+    const stopPoints = Math.abs(entry - stop), check = checkTrade(computeGuard(settings, journal, clock()), settings, { stopPoints });
+    const dir = Math.sign(entry - stop);
+    res.json({ ...check, stopPoints, side: dir > 0 ? 'LONG' : 'SHORT', target2R: dir ? entry + dir * 2 * stopPoints : null });
+  });
+
+  app.use('/fonts/outfit', express.static(path.join(root, 'node_modules', '@fontsource', 'outfit')));
+  app.use('/fonts/plex', express.static(path.join(root, 'node_modules', '@fontsource', 'ibm-plex-mono')));
+  app.use(express.static(path.join(root, 'public')));
+
+  const persistBars = () => { try { store.prune(); save('bars', store.toJSON()); } catch { /* disk hiccup: try again next minute */ } };
+  return { app, persistBars, store, journal, settings };
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const PORT = Number(process.env.PORT) || 3000;
+  const { app, persistBars } = createApp();
+  setInterval(persistBars, 60000).unref();
+  app.listen(PORT, () => {
+    console.log(`The Desk is running at http://localhost:${PORT}`);
+    console.log('Keep this window open. Open your TradingView chart (MNQ1!, 5 minutes) in Edge with the bridge extension on.');
+  });
+}
