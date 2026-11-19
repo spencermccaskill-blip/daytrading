@@ -93,7 +93,7 @@ export function drawChart(canvas, state, hover) {
     ...levels.map(l => ({ y: y(l.price), text: l.name.replace('Prior day', 'Prior').replace('Evening range', 'Range').replace('Opening range', 'Range'), px: l.price, col: levelColor(l.name), dim: l.swept })),
     ...ch.projections.map(p => ({ y: y(p.price), text: p.kind === 'trigger' ? 'Trigger' : p.kind === 'entry' ? 'Entry' : p.label, px: p.price, col: projColor[p.kind], strong: true })),
   ];
-  if (state.price != null) pills.push({ y: y(state.price), text: 'Last', px: state.price, col: C.ink, strong: true, fill: true });
+  if (state.price != null) pills.push({ y: y(state.price), text: ['off', 'stale', 'error'].includes(state.feed.status) ? (narrow ? 'Old' : 'Last (old)') : 'Last', px: state.price, col: C.ink, strong: true, fill: true });
   pills.sort((a, b) => a.y - b.y);
   const ph = narrow ? 17 : 19, gap = 3;
   for (let i = 1; i < pills.length; i++) if (pills[i].y - pills[i - 1].y < ph + gap) pills[i].y = pills[i - 1].y + ph + gap;

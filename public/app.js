@@ -145,7 +145,11 @@ async function refresh() {
     $('demo').hidden = !state.demo;
     $('feed').dataset.status = state.feed.status;
     $('feedLabel').textContent = state.feed.label + (state.feed.symbol && state.feed.status !== 'error' ? ' · ' + state.feed.symbol.split(':').pop() : '');
+    const old = ['off', 'stale', 'error'].includes(state.feed.status) && state.feed.lastBarT;
+    $('chartNote').textContent = old ? `Old data, not live. Last bar ${tzDate.format(state.feed.lastBarT)} Denver.` : '15 minute bars, Denver time. Lines ahead of now are rule levels, not a forecast.';
+    $('chartNote').className = 'small ' + (old ? 'warn' : 'mute');
     drawGuard(state.guard); drawTimeline(state); drawAnswer(state); drawLevels(state); paintChart();
+    $('price').classList.toggle('mute', !!old);
   } catch (e) {
     $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'The Desk server is not answering. Start it with npm.cmd start.';
   }

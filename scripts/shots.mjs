@@ -13,7 +13,8 @@ for (const [label, viewport, scale] of [['desktop', { width: 1320, height: 900 }
     const [demo, hash] = n.split('#');
     await page.goto(`${base}/?demo=${demo}${hash ? '#' + hash : ''}`);
     await page.waitForFunction(() => document.getElementById('aWord').textContent !== '–');
-    await page.waitForTimeout(900);
+    await page.evaluate(() => scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(500);
+    await page.evaluate(() => scrollTo(0, 0)); await page.waitForTimeout(600);
     await page.screenshot({ path: `screenshots/${label}-${n.replace('#', '-')}.png`, fullPage: true });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     if (overflow > 0) errors.push(`${label} ${n}: page scrolls sideways by ${overflow}px`);
