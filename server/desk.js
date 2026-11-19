@@ -17,6 +17,8 @@ function feedState(now, store, feed) {
   const age = now - feed.lastPost;
   if (feed.error) return { status: 'error', label: feed.error, symbol, delayed: false, lastBarT, error: feed.error };
   if (age > STALE_AFTER) return { status: 'stale', label: `Feed stalled ${age > 120000 ? Math.round(age / 60000) + ' min' : Math.round(age / 1000) + ' s'} ago`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
+  // The chart is connected but has sent no new bar for a long time: market shut, or the tab went to sleep.
+  if (lastBarT && now - lastBarT > 45 * MIN) return { status: 'stale', label: `No new bars for ${Math.round((now - lastBarT) / 36e5) >= 2 ? Math.round((now - lastBarT) / 36e5) + ' hours' : Math.round((now - lastBarT) / MIN) + ' min'}`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
   const lagMin = lastBarT ? Math.max(0, Math.round((now - lastBarT) / MIN) - (store.resMin || 5)) : 0;
   const delayed = /_DL/i.test(symbol || '') || lagMin >= 3;
   return { status: delayed ? 'delayed' : 'live', label: delayed ? `Delayed ${lagMin >= 3 ? 'about ' + lagMin + ' min' : 'data'}` : 'Live', symbol, delayed, delayMin: lagMin, lastBarT, ageSec: Math.round(age / 1000), error: null };
@@ -45,7 +47,7 @@ function answerFor({ now, session, feed, guard, settings, live, evaluated }) {
   if (guard.lockout) return { kind: 'locked', tone: 'bad', headline: guard.breached ? 'Account limit reached' : 'Locked out', sub: guard.lockout.reason, countdownTo: guard.lockout.until, countdownLabel: 'Unlocks in' };
   if (!session.current) return { kind: 'closed', tone: 'idle', headline: 'No trade right now', sub: next ? (next.live ? `Next window: ${next.name}.` : `Next window: ${next.name}. No setup passed the test there, so that is a stand-down too.`) : 'No window ahead.', ...countdown };
   if (!live.length) return { kind: 'standdown', tone: 'idle', headline: 'Stand down', sub: `No setup passed the backtest for the ${session.current.name} window. Nothing to trade here.`, ...countdown };
-  if (feed.status === 'off' || feed.status === 'stale' || feed.status === 'error') return { kind: 'nofeed', tone: 'warn', headline: feed.status === 'stale' ? 'Feed stalled' : 'No live data', sub: feed.status === 'error' ? feed.error : feed.status === 'stale' ? 'The chart stopped sending bars. No signal can be trusted until it is back. Check the TradingView tab.' : 'Open your TradingView chart (MNQ1!, 5 minutes) with the bridge extension on.', windowEndsAt: session.current.end };
+  if (feed.status === 'off' || feed.status === 'stale' || feed.status === 'error') return { kind: 'nofeed', tone: 'warn', headline: feed.status === 'stale' ? 'Feed stalled' : 'No live data', sub: feed.status === 'error' ? feed.error : feed.status === 'stale' ? 'The chart has stopped sending new bars. No signal can be trusted until it is back. Check the TradingView tab.' : 'Open your TradingView chart (MNQ1!, 5 minutes) with the bridge extension on.', windowEndsAt: session.current.end };
 
   const best = evaluated.sort((a, b) => RANK[b.res.phase] - RANK[a.res.phase])[0];
   const { setup, res } = best, base = { kind: 'signal', setup: { id: setup.id, name: setup.name, code: setup.code }, windowEndsAt: session.current.end, delayed: feed.delayed };

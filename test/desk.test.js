@@ -83,3 +83,11 @@ test('chart payload: levels, rule-based projections only, and every demo scenari
   for (const name of SCENARIOS) assert.ok(demo(name).answer.headline, name);
   assert.equal(demo('long').demo, true);
 });
+
+test('connected chart with no new bar for 45+ minutes counts as stalled, not as delayed data', () => {
+  const inp = demoInput('long');
+  const s = buildState({ ...inp, now: inp.now + 50 * 60000, feed: { symbol: 'CME_MINI:MNQ1!', lastPost: inp.now + 50 * 60000 - 1000 } });
+  assert.equal(s.feed.status, 'stale');
+  assert.match(s.feed.label, /No new bars for 5\d min/);
+  assert.equal(s.answer.kind, 'nofeed');
+});
