@@ -13,26 +13,34 @@ import { demoInput, SCENARIOS } from './demo.js';
 import { WINDOWS } from './sessions.js';
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const readJSON = (f, d) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return d; } };
+/** Reads a saved file. A missing file is normal (first run). A file that exists but cannot be read is a problem to report, never to paper over. */
+function readSaved(file) {
+  if (!fs.existsSync(file)) return { value: null, bad: false };
+  try { return { value: JSON.parse(fs.readFileSync(file, 'utf8')), bad: false }; } catch { return { value: null, bad: true }; }
+}
 const num = (v) => (v === '' || v == null ? NaN : Number(v));
 
 /** Settings on disk merged over the defaults, so a new field never breaks an old file. */
-function loadSettings(file) {
-  const d = defaultSettings(), s = readJSON(file, {});
+function mergeSettings(saved) {
+  const d = defaultSettings(), s = saved || {};
   return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument };
 }
 
 export function createApp({ dataDir = path.join(root, 'data'), clock = () => Date.now() } = {}) {
   fs.mkdirSync(dataDir, { recursive: true });
   const FILES = { settings: path.join(dataDir, 'settings.json'), bars: path.join(dataDir, 'bars.json'), journal: path.join(dataDir, 'journal.json') };
-  const save = (name, value) => fs.writeFileSync(FILES[name], JSON.stringify(value, null, name === 'bars' ? 0 : 2));
+  // Write to a side file first, then swap it in, so a crash mid-save cannot leave half a journal.
+  const save = (name, value) => { const tmp = FILES[name] + '.tmp'; fs.writeFileSync(tmp, JSON.stringify(value, null, name === 'bars' ? 0 : 2)); fs.renameSync(tmp, FILES[name]); };
 
-  const settings = loadSettings(FILES.settings);
-  const j0 = readJSON(FILES.journal, null);
-  const journal = { trades: Array.isArray(j0?.trades) ? j0.trades : [] };
+  const s0 = readSaved(FILES.settings), j0 = readSaved(FILES.journal);
+  const settings = mergeSettings(s0.value);
+  const journal = { trades: Array.isArray(j0.value?.trades) ? j0.value.trades : [] };
+  const bad = { journal: j0.bad, settings: s0.bad };
+  const problem = () => (bad.journal ? 'data\\journal.json could not be read (it may be damaged).' : bad.settings ? 'data\\settings.json could not be read (it may be damaged).' : null);
+  const refuse = (res) => res.status(409).json({ error: `${problem()} Nothing was saved, so the file is not overwritten. Fix or move the file, then restart The Desk.` });
   const store = new BarStore();
-  store.load(readJSON(FILES.bars, null));
-  const feed = { symbol: null, lastPost: 0, error: null };
+  store.load(readSaved(FILES.bars).value);
+  const feed = { symbol: null, lastPost: 0, lastChange: 0, lastSig: '', error: null };
   let verdicts = loadVerdicts();
 
   const app = express();
@@ -43,17 +51,23 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const { symbol, resolution, bars } = req.body || {};
     const resMin = Number(resolution);
     if (!Array.isArray(bars)) return res.status(400).json({ error: 'Expected a bars array.' });
-    feed.lastPost = clock(); feed.symbol = String(symbol || '');
+    const sym = String(symbol || '');
+    if (feed.symbol && sym !== feed.symbol) store.clear(); // another contract: its prices must not mix into the levels
+    feed.lastPost = clock(); feed.symbol = sym;
     if (!(resMin >= 1 && resMin <= 15 && 15 % resMin === 0)) feed.error = `Set the TradingView chart to 5 minutes (it is on "${resolution}").`;
     else if (!/NQ/i.test(feed.symbol)) feed.error = `The chart shows ${feed.symbol || 'another symbol'}. Switch it to MNQ1!.`;
-    else { feed.error = null; store.ingest(bars, resMin); }
+    else {
+      feed.error = null; store.ingest(bars, resMin, clock());
+      const last = store.last(), sig = last ? [last.t, last.o, last.h, last.l, last.c, last.v].join() : '';
+      if (sig !== feed.lastSig) { feed.lastSig = sig; feed.lastChange = clock(); } // the chart is moving
+    }
     res.json({ ok: !feed.error, error: feed.error });
   });
 
   app.get('/api/state', (req, res) => {
     const demo = req.query.demo;
     if (demo) return SCENARIOS.includes(demo) ? res.json(buildState(demoInput(demo))) : res.status(404).json({ error: `Unknown demo. Try one of: ${SCENARIOS.join(', ')}.` });
-    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts }));
+    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts, problem: problem() }));
   });
 
   // Rules per session, checklist and backtest results for the Playbook tab.
@@ -61,10 +75,11 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
 
   app.get('/api/settings', (_req, res) => res.json({ settings, plans: PLANS }));
   app.post('/api/settings', (req, res) => {
+    if (bad.settings) return refuse(res);
     const b = req.body || {}, a = b.account || {}, p = b.personal || {};
     const next = structuredClone(settings);
     if (a.plan != null) {
-      if (!PLANS[a.plan]) return res.status(400).json({ error: 'Plan must be Flex, Pro, Direct or Daily.' });
+      if (!Object.hasOwn(PLANS, a.plan)) return res.status(400).json({ error: 'Plan must be Flex, Pro, Direct or Daily.' });
       const pl = PLANS[a.plan];
       Object.assign(next.account, { plan: a.plan, trailing: pl.trailing, dll: { ...pl.dll }, scaling: pl.scaling, maxMicros: pl.maxMicros, consistencyPct: pl.consistencyPct });
     }
@@ -88,10 +103,12 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   // Manual journal: Spencer types in what Tradovate shows. This is what feeds the guard.
   app.get('/api/journal', (_req, res) => res.json({ trades: [...journal.trades].sort((x, y) => y.ts - x.ts), guard: computeGuard(settings, journal, clock()) }));
   app.post('/api/journal', (req, res) => {
+    if (bad.journal) return refuse(res);
     const b = req.body || {}, pnl = num(b.pnl);
     if (!Number.isFinite(pnl)) return res.status(400).json({ error: 'Enter the profit or loss in dollars, like 180 or -240.' });
-    const ts = b.ts != null ? num(b.ts) : clock();
-    if (!Number.isFinite(ts) || ts > clock() + 60000) return res.status(400).json({ error: 'The trade time cannot be in the future.' });
+    const ts = b.ts == null ? clock() : b.ts;
+    if (typeof ts !== 'number' || !Number.isFinite(ts) || ts < Date.UTC(2020, 0, 1)) return res.status(400).json({ error: 'That trade time could not be read.' });
+    if (ts > clock() + 60000) return res.status(400).json({ error: 'The trade time cannot be in the future.' });
     const kind = b.kind === 'adjustment' ? 'adjustment' : 'trade';
     const opt = (v) => (Number.isFinite(num(v)) ? num(v) : null);
     const row = { id: crypto.randomUUID(), kind, ts, pnl, side: ['LONG', 'SHORT'].includes(b.side) ? b.side : null, contracts: opt(b.contracts), entry: opt(b.entry), exit: opt(b.exit), setup: String(b.setup || '').slice(0, 60), followedRules: b.followedRules == null ? null : !!b.followedRules, note: String(b.note || '').slice(0, 300) };
@@ -99,6 +116,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     res.json({ trade: row, guard: computeGuard(settings, journal, clock()) });
   });
   app.delete('/api/journal/:id', (req, res) => {
+    if (bad.journal) return refuse(res);
     const i = journal.trades.findIndex(t => t.id === req.params.id);
     if (i < 0) return res.status(404).json({ error: 'That entry is already gone.' });
     journal.trades.splice(i, 1); save('journal', journal);

@@ -88,7 +88,7 @@ npm.cmd run backtest
 Re-runs every registered setup on `data/history` and rewrites `research/RESULTS.md`.
 
 To see every screen state with made-up data, add `?demo=` to the address, for example
-http://localhost:3000/?demo=long . Names: closed, standdown, watching, armed, long, short, won, lost,
+http://localhost:3000/?demo=long . Names: closed, standdown, watching, armed, long, late, short, won, lost,
 blocked, locked, stale. A banner marks it as demo data.
 
 ## Files

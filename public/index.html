@@ -78,9 +78,11 @@
     <section class="view" id="view-journal" hidden>
       <div class="grid two">
         <section class="panel">
-          <div class="p-head"><h2>Log a trade</h2><span class="mute small">Copy the result from Tradovate. This is what feeds the guard.</span></div>
+          <div class="p-head"><h2>Log a trade</h2><span class="mute small">Copy the result from Tradovate. This is what feeds the guard. Set the time the trade closed, not the time you are typing.</span></div>
           <form id="jForm" class="form">
             <label>Profit or loss, dollars<input name="pnl" inputmode="decimal" placeholder="-240 or 180" required></label>
+            <label>When the trade closed<input name="when" type="datetime-local" required></label>
+            <label>Kind<select name="kind"><option value="trade">Trade</option><option value="adjustment">Adjustment (fee, payout, correction)</option></select></label>
             <label>Side<select name="side"><option value="">–</option><option>LONG</option><option>SHORT</option></select></label>
             <label>Contracts (MNQ)<input name="contracts" inputmode="numeric" placeholder="1"></label>
             <label>Setup<input name="setup" placeholder="What was the reason"></label>

@@ -2,7 +2,7 @@
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');
 const base = process.env.BASE || 'http://localhost:3111';
-const names = process.argv.slice(2).length ? process.argv.slice(2) : ['closed', 'standdown', 'watching', 'armed', 'long', 'short', 'won', 'lost', 'blocked', 'locked', 'stale'];
+const names = process.argv.slice(2).length ? process.argv.slice(2) : ['closed', 'standdown', 'watching', 'armed', 'long', 'late', 'short', 'won', 'lost', 'blocked', 'locked', 'stale'];
 const browser = await chromium.launch();
 const errors = [];
 for (const [label, viewport, scale] of [['desktop', { width: 1320, height: 900 }, 1], ['phone', { width: 390, height: 844 }, 2]]) {

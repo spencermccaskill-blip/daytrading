@@ -88,6 +88,7 @@ function drawAnswer(s) {
     const done = a.exit != null;
     const cells = [['Entry', px(a.entry), ''], ['Stop', px(a.stop), 'bad'], ['Target', a.target != null ? px(a.target) : 'none', 'good']];
     if (done) cells.push(['Out at', px(a.exit), ''], ['Result', signed(a.r, 2) + 'R', a.r > 0 ? 'good' : 'bad']);
+    else if (a.fresh === false && a.state !== 'Blocked') cells.push(['Now', signed(a.rNow, 2) + 'R', a.rNow >= 0 ? 'good' : 'bad'], ['Entry was', short(a.signalT), '']);
     else cells.push(['Size', a.contracts ? `${a.contracts} MNQ` : 'none', a.contracts ? '' : 'bad'], ['Risk', a.contracts ? usd(a.riskDollars) : usd(a.stopPoints * 2) + ' on 1', a.contracts ? '' : 'bad']);
     right = `<div class="nums">${cells.map(([l, v, c]) => `<div><span class="lbl">${l}</span><b class="${c}">${v}</b></div>`).join('')}</div>`;
     if (a.check) checks = checkList(a.check);
@@ -138,10 +139,15 @@ setInterval(tick, 1000);
 
 // ── Poll ──
 async function refresh() {
+  let next;
   try {
     const r = await fetch('/api/state' + (demo ? '?demo=' + encodeURIComponent(demo) : ''), { cache: 'no-store' });
     if (!r.ok) throw new Error((await r.json()).error || 'HTTP ' + r.status);
-    state = await r.json(); fetchedAt = Date.now();
+    next = await r.json();
+  } catch { return offline(); }
+  document.body.classList.remove('offline');
+  try {
+    state = next; fetchedAt = Date.now();
     $('demo').hidden = !state.demo;
     $('feed').dataset.status = state.feed.status;
     $('feedLabel').textContent = state.feed.label + (state.feed.symbol && state.feed.status !== 'error' ? ' · ' + state.feed.symbol.split(':').pop() : '');
@@ -151,8 +157,19 @@ async function refresh() {
     drawGuard(state.guard); drawTimeline(state); drawAnswer(state); drawLevels(state); paintChart();
     $('price').classList.toggle('mute', !!old);
   } catch (e) {
-    $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'The Desk server is not answering. Start it with npm.cmd start.';
+    console.error(e);
+    $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'The page hit an error drawing this state. Refresh with Ctrl+Shift+R.';
   }
+}
+// The server stopped answering: nothing on screen is current, so say that instead of leaving old numbers up.
+function offline() {
+  document.body.classList.add('offline');
+  $('feed').dataset.status = 'error'; $('feedLabel').textContent = 'No connection to The Desk';
+  $('answer').dataset.tone = 'warn'; $('aWindow').textContent = 'Not connected'; $('aSetup').textContent = '';
+  $('aWord').textContent = 'No connection'; lastWord = 'No connection';
+  $('aSub').textContent = 'The Desk server on this laptop is not answering, so every number on this page is old. In PowerShell run npm.cmd start, then this page reconnects by itself.';
+  $('aRight').innerHTML = ''; $('aChecks').innerHTML = '';
+  $('gStatus').textContent = 'Unknown'; $('guard').dataset.status = 'offline';
 }
 refresh(); setInterval(refresh, 2000);
 document.fonts?.ready.then(paintChart);
@@ -181,7 +198,10 @@ async function api(method, url, body) {
 const say = (id, text, ok) => { const n = $(id); n.textContent = text; n.className = 'msg ' + (ok ? 'ok' : 'err'); };
 
 // ── Journal ──
+// Fill the time box with this laptop's current time; change it when logging a trade from earlier.
+function stampNow() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); $('jForm').elements.when.value = d.toISOString().slice(0, 16); }
 async function loadJournal() {
+  if (!$('jForm').elements.when.value) stampNow();
   const j = await api('GET', '/api/journal');
   $('jBalance').textContent = `Balance ${usd(j.guard.balance)} · limit at ${usd(j.guard.floor)}`;
   $('jList').innerHTML = j.trades.length ? `<table><thead><tr><th>When (Denver)</th><th>Side</th><th class="n">Size</th><th>Setup</th><th>Rules</th><th class="n">Result</th><th></th></tr></thead><tbody>${j.trades.map(t => `<tr><td>${tzDate.format(t.ts)}</td><td>${t.kind === 'adjustment' ? 'Adjustment' : esc(t.side || '')}</td><td class="n">${t.contracts ?? ''}</td><td>${esc(t.setup)}${t.note ? ` <span class="mute">${esc(t.note)}</span>` : ''}</td><td>${t.followedRules == null ? '' : t.followedRules ? 'Followed' : '<span class="warn">Broke</span>'}</td><td class="n ${t.pnl < 0 ? 'bad' : 'good'}">${usd(t.pnl, true)}</td><td><button class="btn ghost" data-del="${esc(t.id)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<p class="empty">Nothing logged yet. After each trade, type the result from Tradovate above. The guard counts from here.</p>';
@@ -189,7 +209,8 @@ async function loadJournal() {
 $('jList').addEventListener('click', async (e) => { const id = e.target.dataset?.del; if (!id || !confirm('Remove this entry from the journal?')) return; await api('DELETE', '/api/journal/' + id); loadJournal(); refresh(); });
 $('jForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = new FormData(e.target), body = Object.fromEntries(f); body.followedRules = f.has('followedRules');
-  try { await api('POST', '/api/journal', body); e.target.reset(); say('jMsg', 'Added.', true); loadJournal(); refresh(); } catch (err) { say('jMsg', err.message, false); }
+  body.ts = new Date(body.when).getTime(); delete body.when;
+  try { await api('POST', '/api/journal', body); e.target.reset(); stampNow(); say('jMsg', 'Added.', true); loadJournal(); refresh(); } catch (err) { say('jMsg', err.message, false); }
 });
 $('cForm').addEventListener('submit', async (e) => {
   e.preventDefault();

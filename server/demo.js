@@ -41,6 +41,7 @@ const SPEC = {
   watching:  { now: D + 'T13:36', path: BASE },
   armed:     { now: D + 'T13:51', path: BASE },
   long:      { now: D + 'T14:21', path: [...BASE, ...WIN] },
+  late:      { now: D + 'T14:41', path: [...BASE, ...WIN] },                // same trade 20 minutes on: the entry has passed
   short:     { now: D + 'T14:21', path: [...BASE, ...WIN], mirror: true },
   won:       { now: D + 'T15:41', path: [...BASE, ...WIN] },
   lost:      { now: D + 'T15:06', path: [...BASE, ...LOSS] },

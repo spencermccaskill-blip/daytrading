@@ -5,16 +5,19 @@ import { Series, makeCtx } from './strategies/common.js';
 export class BarStore {
   constructor() { this.raw = new Map(); this.bars = new Map(); this.lastRawT = 0; this.resMin = null; this.cache = null; }
 
-  /** rows: [[tSec, o, h, l, c, v], ...] from the chart; resMin: chart resolution in minutes. */
-  ingest(rows, resMin) {
+  clear() { this.raw.clear(); this.bars.clear(); this.lastRawT = 0; this.cache = null; }
+
+  /** rows: [[tSec, o, h, l, c, v], ...] from the chart; resMin: chart resolution in minutes; now: rows dated after it are refused. */
+  ingest(rows, resMin, now = Infinity) {
     if (!Array.isArray(rows) || !rows.length) return 0;
     if (this.resMin && resMin !== this.resMin) { this.raw.clear(); this.bars.clear(); this.lastRawT = 0; }
     this.resMin = resMin; this.cache = null;
     const touched = new Set(); let n = 0;
     for (const r of rows) {
+      if (!Array.isArray(r)) continue;
       const t = r[0] * 1000;
-      if (!Number.isFinite(t) || ![r[1], r[2], r[3], r[4]].every(Number.isFinite)) continue;
-      this.raw.set(t, { t, o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] || 0 });
+      if (!Number.isFinite(t) || t > now + BAR || ![r[1], r[2], r[3], r[4]].every(x => Number.isFinite(x) && x > 0)) continue;
+      this.raw.set(t, { t, o: r[1], h: r[2], l: r[3], c: r[4], v: Number(r[5]) || 0 });
       touched.add(Math.floor(t / BAR) * BAR); n++;
       if (t > this.lastRawT) this.lastRawT = t;
     }

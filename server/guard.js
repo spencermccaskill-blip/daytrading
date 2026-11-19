@@ -38,22 +38,26 @@ export function computeGuard(settings, journal, now) {
   const rows = [...(journal?.trades || [])].filter(r => Number.isFinite(r.pnl) && Number.isFinite(r.ts)).sort((x, y) => x.ts - y.ts);
   const today = tradingDay(now);
   let balance = a.startBalance, peak = a.startBalance, highEod = a.startBalance, lastEod = a.startBalance, day = null;
-  let dayPnl = 0, tradesToday = 0, lossesToday = 0;
+  let dayPnl = 0, tradesToday = 0, lossesToday = 0, minDayPnl = 0, breachedEver = false;
+  const floorOf = (hi) => (a.payoutRequested || hi > a.lockTrigger ? a.lockBalance : Math.min(hi - a.maxLossLimit, a.lockBalance));
   const dayProfit = new Map();
   for (const r of rows) {
     const d = tradingDay(r.ts);
     if (day && d !== day) { highEod = Math.max(highEod, balance); lastEod = balance; } // the previous day closed
-    day = d; balance += r.pnl; peak = Math.max(peak, balance);
+    day = d; balance += r.pnl;
+    // Once the balance has touched the limit the account is gone, whatever is logged afterwards.
+    if (balance - floorOf(a.trailing === 'intraday' ? peak : highEod) <= 0) breachedEver = true;
+    peak = Math.max(peak, balance);
     if (r.kind === 'adjustment') continue;
     if (!a.cycleStart || d >= a.cycleStart) dayProfit.set(d, (dayProfit.get(d) || 0) + r.pnl);
-    if (d === today) { dayPnl += r.pnl; tradesToday++; if (r.pnl < 0) lossesToday++; }
+    if (d === today) { dayPnl += r.pnl; tradesToday++; if (r.pnl < 0) lossesToday++; minDayPnl = Math.min(minDayPnl, dayPnl); }
   }
   if (day && day < today) { highEod = Math.max(highEod, balance); lastEod = balance; }
 
   const high = a.trailing === 'intraday' ? peak : highEod;
   const floorLocked = !!a.payoutRequested || high > a.lockTrigger;
-  const floor = floorLocked ? a.lockBalance : Math.min(high - a.maxLossLimit, a.lockBalance);
-  const room = balance - floor, breached = room <= 0;
+  const floor = floorOf(high);
+  const room = balance - floor, breached = breachedEver || room <= 0;
 
   let dllAmount = null;
   if (a.dll?.on) dllAmount = a.dll.scalePct && highEod > a.lockTrigger ? Math.max(a.dll.amount, (a.dll.scalePct / 100) * (highEod - a.startBalance)) : a.dll.amount;
@@ -65,8 +69,8 @@ export function computeGuard(settings, journal, now) {
 
   let lockout = null; const until = dayEnd(now);
   if (breached) lockout = { reason: 'At or under the max loss limit. Stop trading and check the account in Tradovate.', until: null };
-  else if (dllRoom === 0) lockout = { reason: `Lucid daily loss limit of $${dllAmount.toLocaleString('en-US')} reached. Locked until the next session.`, until };
-  else if (stopRoom === 0) lockout = { reason: `Your daily stop of $${me.dailyStop} is hit. Done for the day.`, until };
+  else if (dllAmount != null && minDayPnl <= -dllAmount) lockout = { reason: `Lucid daily loss limit of $${dllAmount.toLocaleString('en-US')} reached. Locked until the next session.`, until };
+  else if (minDayPnl <= -me.dailyStop) lockout = { reason: `Your daily stop of $${me.dailyStop} is hit. Done for the day.`, until };
   else if (lossesToday >= me.maxLossesPerDay) lockout = { reason: `${me.maxLossesPerDay === 2 ? 'Two' : me.maxLossesPerDay} losses today. Done for the day.`, until };
 
   let consistency = null;
@@ -97,6 +101,7 @@ export function checkTrade(guard, settings, { stopPoints }) {
   else add('Stop fits your risk', byRisk >= 1, byRisk >= 1
     ? `${stopPoints.toFixed(1)} points x ${contracts} ${sym} = ${usd(riskDollars)} at risk (limit ${usd(risk)}).`
     : `${stopPoints.toFixed(1)} points is ${usd(stopPoints * pv)} on 1 ${sym}, over your ${usd(risk)}. Skip it. Never shrink the stop to fit.`);
+  if (!Number.isFinite(contracts)) add('Position size', false, 'The plan settings are incomplete, so the size cannot be worked out. Open Settings and save them again.');
   if (valid && byRisk > guard.maxContracts) add('Position size', true, `Capped at the ${guard.maxContracts} ${sym} your plan allows right now.`);
   if (contracts >= 1) {
     add('Room to the max loss limit', riskDollars < guard.room, riskDollars < guard.room ? `${usd(guard.room)} of room, ${usd(riskDollars)} at risk.` : `Only ${usd(guard.room)} of room to the max loss limit. A full loss would breach the account.`);
