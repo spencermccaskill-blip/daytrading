@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#05060a">
+<title>NQ Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap bar">
+    <span class="brand">NQ Desk</span>
+    <nav class="tabs" aria-label="Views">
+      <button type="button" data-tab="desk" aria-current="page">Desk</button>
+      <button type="button" data-tab="playbook">Playbook</button>
+    </nav>
+    <span class="status" id="status">● Connecting</span>
+    <div class="clocks">
+      <span><span class="lbl">New York</span> <span class="mono" id="clkET">--:--:--</span></span>
+      <span><span class="lbl">UTC</span> <span class="mono" id="clkUTC">--:--:--</span></span>
+      <span class="mute session" id="session"></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" id="notice" hidden></div>
+
+<main class="wrap" id="desk">
+  <div class="row">
+    <section class="panel signal" id="signal" aria-live="polite">
+      <div class="head">
+        <h2>NY sweep + shift</h2>
+        <div class="pills" role="tablist" aria-label="Signal view">
+          <button type="button" role="tab" data-view="signal" aria-selected="true">Signal</button>
+          <button type="button" role="tab" data-view="chart" aria-selected="false">Chart</button>
+        </div>
+      </div>
+      <div id="viewSignal">
+        <div class="lbl sub-head">Signals 9:45 to 11:00 ET · flat 12:00 ET</div>
+        <div class="word" id="word">Waiting for data</div>
+        <p class="line" id="line">Start TradingView on MNQ1! at 5 minutes with the NQ Desk Bridge extension on.</p>
+        <dl class="nums" id="nums"></dl>
+      </div>
+      <div id="viewChart" hidden>
+        <div class="chart-bar">
+          <div class="pills small-pills" role="tablist" aria-label="Timeframe" id="tfPills">
+            <button type="button" role="tab" data-tf="5">5m</button>
+            <button type="button" role="tab" data-tf="15">15m</button>
+            <button type="button" role="tab" data-tf="60">1h</button>
+          </div>
+          <span class="lbl" id="chartNote"></span>
+        </div>
+        <div class="chart" id="chart"><p class="mute">The chart appears once prices come through.</p></div>
+        <div class="legend lbl">Bands are the liquidity pools: <span class="k-asia">Asian</span> · <span class="k-lon">London</span> · <span class="k-pd">Prior day</span> · <span class="k-vw">VWAP</span>. The shaded area on the right is time still to come: it shows where your rules would enter, with stop and target, not a price forecast. Signals always use 15m closes.</div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Levels</h2>
+      <ul class="ladder" id="ladder"><li class="mute">Levels appear once the chart sends today's bars.</li></ul>
+    </section>
+  </div>
+  <section class="panel news">
+    <div>
+      <h2>US releases</h2>
+      <ul class="list" id="cal"><li class="mute">Loading.</li></ul>
+    </div>
+    <div>
+      <h2>Headlines</h2>
+      <ul class="list scroll" id="headlines"><li class="mute">Loading.</li></ul>
+    </div>
+  </section>
+  <section class="panel london">
+    <div class="head"><h2>London sweep + reclaim</h2><span class="short small">Benched: negative backtest</span></div>
+    <p class="line" id="ldLine">Waiting for data.</p>
+  </section>
+</main>
+
+<main class="wrap" id="playbook" hidden>
+  <div class="row">
+    <section class="panel">
+      <h2>Risk</h2>
+      <form id="riskForm">
+        <label class="lbl" for="budget">Risk per trade ($)</label>
+        <input id="budget" class="mono" inputmode="decimal">
+        <div class="seg" role="radiogroup" aria-label="Instrument">
+          <button type="button" role="radio" data-inst="MNQ">MNQ <span class="mute">$2/pt</span></button>
+          <button type="button" role="radio" data-inst="NQ">NQ <span class="mute">$20/pt</span></button>
+        </div>
+      </form>
+      <dl class="nums two">
+        <div><dt class="lbl">Max stop for 1 contract</dt><dd class="mono cyan" id="maxStop">--</dd></div>
+        <div><dt class="lbl">Size on a typical 107 pt stop</dt><dd class="mono" id="typSize">--</dd></div>
+      </dl>
+      <p class="short small" id="riskErr"></p>
+    </section>
+    <section class="panel">
+      <h2>The rules</h2>
+      <ol class="rules">
+        <li><b>Wait for the sweep.</b> After 9:30 ET, price trades through the Asian, London (2 to 5 ET) or prior day high or low.</li>
+        <li><b>Enter on the 15m close.</b> A 15-minute bar closes through the last 3 bars, against the sweep, between 9:45 and 11:00 ET.</li>
+        <li><b>Stop past the extreme.</b> One point beyond the session high or low since 9:30 ET.</li>
+        <li><b>Take 2R.</b> Target is twice the risk. No moving it.</li>
+        <li><b>Flat by noon.</b> Out at 12:00 ET whatever happens. One trade a day.</li>
+        <li><b>Skip what doesn't fit.</b> If one contract risks more than your budget, there is no trade.</li>
+      </ol>
+    </section>
+  </div>
+  <section class="panel">
+    <h2>Before you trade</h2>
+    <ul class="checks" id="checks"></ul>
+    <p class="short small" id="checkErr"></p>
+  </section>
+  <section class="panel">
+    <div class="head"><h2>Backtest</h2><span class="lbl">NQ 15m, Dec 2018 to Oct 20 2026, 1 pt cost per trade</span></div>
+    <div class="pills wide" role="tablist" aria-label="Strategy" id="btTabs"></div>
+    <div class="bt">
+      <div>
+        <div class="head"><h3 id="btName"></h3><span class="small" id="btVerdict"></span></div>
+        <p class="mute small" id="btRules"></p>
+        <div class="tw"><table class="bt-table" id="btTable"></table></div>
+        <div class="lbl gap-s">Average R per trade by year</div>
+        <div id="years"></div>
+      </div>
+      <div>
+        <h3>What it means</h3>
+        <div class="mono big" id="btBig"></div>
+        <div class="lbl">per trade, 2024 to today</div>
+        <p class="note" id="btNote"></p>
+        <h3 class="gap">What the research says</h3>
+        <ul class="facts">
+          <li>TJR style without a trend filter did no better than random entries in London.</li>
+          <li>Opening range breakout has a small edge on NQ that costs erase.</li>
+          <li>ICT fair value gap on Nasdaq made about 3% a year over 10 years and lost in 2025 to 2026.</li>
+          <li>Roughly 5 to 14% of prop evaluations pass; about 45% of funded traders ever get paid.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="wrap mute small foot">Signals follow fixed, backtested rules. They are information, not instructions. You decide and place every trade.</footer>
+<script src="app.js"></script>
+</body>
+</html>
