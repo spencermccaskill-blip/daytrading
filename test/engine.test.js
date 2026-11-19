@@ -1,71 +1,83 @@
+// The standard carried over from NQ Desk: the live engine must reproduce the backtest trade-for-trade.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BarStore, etOffset, etTime, levels, nyModel, londonModel } from '../server/engine.js';
+import { BarStore } from '../server/bars.js';
+import { STRATEGIES, byId } from '../server/strategies/index.js';
+import { loadHistory, tradingDates } from '../research/history.js';
+import { runStrategy } from '../research/backtest.js';
+import { BAR, DAY } from '../server/time.js';
+import { flat, Z } from './helpers.js';
 
-const M = 60000;
-// Build a 5-minute day: flat at 100 except where overrides set {t: [o,h,l,c]}.
-function day(dateKey, overrides = {}) {
-  const rows = [];
-  const start = Date.parse(dateKey + 'T00:00Z');
-  for (let t = start; t < start + 21 * 60 * M; t += 5 * M) {
-    const o = overrides[t] || [100, 101, 99, 100];
-    rows.push([t / 1000, ...o, 10]);
+const hist = loadHistory();
+const row = (b) => [b.t / 1000, b.o, b.h, b.l, b.c, b.v];
+const core = (t) => (!t || t.status === "open") ? null : [t.dir, t.signalT, t.entry, t.stop, t.target, t.status, t.exitPx, t.r];
+
+test('5m bars aggregate into 15m; the bar still forming is never a closed bar', () => {
+  const s = new BarStore();
+  const five = (t, o, h, l, c) => [Z(t) / 1000, o, h, l, c, 10];
+  s.ingest([five('2026-07-01T13:30', 100, 102, 99, 101), five('2026-07-01T13:35', 101, 105, 100, 104), five('2026-07-01T13:40', 104, 104, 98, 99)], 5);
+  assert.equal(s.ctx().s.bars.length, 0); // feed has not moved past 13:45 yet
+  s.ingest([five('2026-07-01T13:45', 99, 100, 98, 99)], 5);
+  assert.deepEqual(s.ctx().s.bars.map(b => [b.t, b.o, b.h, b.l, b.c, b.v]), [[Z('2026-07-01T13:30'), 100, 105, 98, 99, 30]]);
+  assert.equal(s.ctx().raw.bars.length, 4);
+  assert.equal(s.last().c, 99);
+});
+
+test('an open 15m bar never produces a signal', () => {
+  const D = '2026-07-01', s = new BarStore();
+  const bars = flat('2026-06-10', D, { [D + 'T13:30']: [100, 103, 99.5, 102], [D + 'T13:45']: [102, 102, 94, 95] });
+  s.ingest(bars.filter(b => b.t <= Z(D + 'T13:45')).map(row), 15); // the 13:45 bar is the newest: still forming
+  const r = byId('ny_sweep_shift').evaluate(s.ctx(), D);
+  assert.equal(r.trade, undefined);
+  assert.equal(r.phase, 'armed');
+});
+
+test('live engine reproduces the backtest trade-for-trade, every setup, every day of the last three contracts', () => {
+  const recent = hist.contracts.slice(-3).map(c => c.code);
+  const dates = [...tradingDates(hist)].filter(d => recent.includes(d.contract.code));
+  let days = 0, trades = 0;
+  for (const strat of STRATEGIES) {
+    const want = new Map(runStrategy(hist, strat).map(t => [t.key, t]));
+    for (const code of recent) {
+      const contract = hist.contracts.find(c => c.code === code);
+      const store = new BarStore(); let fed = 0;
+      for (const { key } of dates.filter(d => d.contract.code === code)) {
+        // Feed the chart forward to two days past this date, as the extension would have by then.
+        const upTo = Date.parse(key + 'T00:00Z') + 2 * DAY, all = contract.ctx.s.bars;
+        const chunk = []; while (fed < all.length && all[fed].t < upTo) chunk.push(row(all[fed++]));
+        store.ingest(chunk, 15);
+        const live = strat.evaluate(store.ctx(), key).trade, bt = want.get(key);
+        days++;
+        if (!bt) { assert.ok(!live || live.status === 'open', `${strat.id} ${key}: live has a trade the backtest does not`); continue; }
+        assert.deepEqual(core(live), core(bt), `${strat.id} ${key}`);
+        trades++;
+      }
+    }
   }
-  return rows;
-}
-
-test('daylight saving offset', () => {
-  assert.equal(etOffset(Date.parse('2026-07-01T12:00Z')), -4);
-  assert.equal(etOffset(Date.parse('2026-12-01T12:00Z')), -5);
-  assert.equal(new Date(etTime('2026-10-20', 9.5)).toISOString(), '2026-10-20T13:30:00.000Z');
-  assert.equal(new Date(etTime('2026-12-01', 9.5)).toISOString(), '2026-12-01T14:30:00.000Z');
+  assert.ok(days > 1000 && trades > 300, `checked ${days} setup-days, ${trades} trades`);
+  console.log(`      matched ${trades} trades over ${days} setup-days`);
 });
 
-test('5m bars aggregate into 15m and levels read the sessions', () => {
-  const s = new BarStore();
-  s.ingest(day('2026-10-19'), 5);
-  const ov = {}; ov[Date.parse('2026-10-20T03:00Z')] = [100, 110, 99, 100]; // Asian high 110
-  ov[Date.parse('2026-10-20T07:00Z')] = [100, 101, 90, 100]; // London (3 ET) low 90
-  s.ingest(day('2026-10-20', ov).filter(r => r[0] * 1000 < Date.parse('2026-10-20T13:00Z')), 5);
-  const L = levels(s);
-  assert.equal(L.date, '2026-10-20');
-  assert.equal(L.asia.high, 110);
-  assert.equal(L.london.low, 90);
-  assert.equal(L.prior.high, 101);
-  assert.equal(s.bars.get(Date.parse('2026-10-20T03:00Z')).h, 110);
-});
-
-test('NY model: sweep of prior-day high then shift down gives a short with 2R target', () => {
-  const s = new BarStore();
-  s.ingest(day('2026-10-19'), 15);
-  const ov = {};
-  const T = (hhmm) => Date.parse(`2026-10-20T${hhmm}Z`);
-  ov[T('13:30')] = [100, 103, 99.5, 102]; // 9:30 ET bar sweeps 101 (asia/london/pd highs)
-  ov[T('13:45')] = [102, 102.5, 95, 96];  // 9:45 ET bar closes below lows of prior 3 bars (99)
-  ov[T('14:00')] = [96, 96.5, 80, 81];    // runs to target
-  const rows = day('2026-10-20', ov).filter(r => r[0] * 1000 <= T('14:15'));
-  // feed 15m bars (already 15m aligned since day() steps 5m: keep only :00/:15/:30/:45)
-  s.ingest(rows.filter(r => (r[0] / 60) % 15 === 0), 15);
-  const L = levels(s);
-  const ny = nyModel(s, L, { riskBudget: 250, pointValue: 2 });
-  assert.equal(ny.trade.side, 'SHORT');
-  assert.equal(ny.trade.entry, 96);
-  assert.equal(ny.trade.stop, 104); // session high 103 + 1
-  assert.equal(ny.trade.target, 96 - 2 * 8);
-  assert.equal(ny.trade.status, 'target');
-  assert.equal(ny.trade.contracts, 15);
-  const ld = londonModel(s, L, { riskBudget: 250, pointValue: 2 });
-  assert.ok(['done', 'watching', 'armed', 'in-trade'].includes(ld.phase));
-});
-
-test('open 15m bar is never used for a signal', () => {
-  const s = new BarStore();
-  s.ingest(day('2026-10-19'), 5);
-  const T = (hhmm) => Date.parse(`2026-10-20T${hhmm}Z`);
-  const ov = {}; ov[T('13:30')] = [100, 103, 99.5, 102]; ov[T('13:45')] = [102, 102, 94, 95];
-  // stop the feed at 13:45 (only first 5m of the 13:45 bucket) → bucket not closed
-  s.ingest(day('2026-10-20', ov).filter(r => r[0] * 1000 <= T('13:45')), 5);
-  const ny = nyModel(s, levels(s), { riskBudget: 250, pointValue: 2 });
-  assert.equal(ny.trade, undefined);
-  assert.equal(ny.phase, 'armed');
+test('bar by bar, a signal never changes once given, and ends where the backtest ends (last 30 days)', () => {
+  const contract = hist.contracts.at(-1), all = contract.ctx.s.bars;
+  const dates = [...tradingDates(hist)].filter(d => d.contract.code === contract.code).slice(-32, -2);
+  for (const strat of STRATEGIES) {
+    const want = new Map(runStrategy(hist, strat).map(t => [t.key, t]));
+    const store = new BarStore(); let fed = 0;
+    for (const { key } of dates) {
+      // Feed to 06:00 UTC the next morning: past the evening session's midnight-ET flat, before any next-day signal.
+      const end = Date.parse(key + 'T00:00Z') + DAY + 6 * 36e5; let first = null, live = null;
+      while (fed < all.length && all[fed].t < end) {
+        store.ingest([row(all[fed++])], 15);
+        if (all[fed - 1].t < Date.parse(key + 'T00:00Z')) continue;
+        live = strat.evaluate(store.ctx(), key).trade;
+        if (live && !first) {
+          first = live;
+          assert.equal(first.signalT + BAR, store.lastRawT, `${strat.id} ${key}: signal appears on the bar after its signal bar closes, not before`);
+        }
+        if (first) assert.deepEqual([live?.signalT, live?.entry, live?.stop, live?.target], [first.signalT, first.entry, first.stop, first.target], `${strat.id} ${key}: signal changed after it was given`);
+      }
+      assert.deepEqual(core(live), core(want.get(key)), `${strat.id} ${key}`);
+    }
+  }
 });
