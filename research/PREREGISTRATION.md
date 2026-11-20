@@ -121,3 +121,64 @@ Before today: about 10 (NY sweep + shift; London sweep + reclaim in 5 exit versi
 breakout; London TJR; TJR + trend; 1 AM range breakout). Registered today: 6 new (N2, M1, M2,
 M3, A1, A2). Total about 16. With that many tries, **one result with a t-stat near 2 is
 expected by luck alone**; a single marginal pass must be read with that in mind.
+
+---
+
+# Addendum, 2026-11-20: popular setups, shown with a score
+
+Written before any of these were run. On 2026-11-20 Spencer changed how The Desk uses the tests:
+
+- **The backtest is no longer a gate.** The Desk shows the most active setup in each window whether
+  or not it passed, with a score. The six pass rules above are unchanged and are still reported.
+- **Score out of 10** = the share of that setup's tested trades since 2024-01-01 that ended in
+  profit after the 1 point cost, times 10 (51.4% of trades = 5.1). It is the same for every signal
+  from a setup. It is a historical win rate, not a forecast, and a high win rate with small wins
+  can still lose money, so the average R is always shown beside it.
+- The setups below were chosen because they are widely taught and traded (prop-firm and broker
+  material, ICT/TJR-style content, TradingView scripts). **None has an audited track record.**
+  Sources disagree on details; where they do, the simplest common version is used. All are
+  15-minute forms because the history is 15-minute bars.
+
+Simulation rules are the same as above (closed bars, 1 point cost, stop-first, skip stops under
+5 points, one trade per setup per day). London times are London clock time.
+
+### Asia evening
+
+**A3. Evening range fade.** Range = high/low of 18:00–19:00 ET. A bar opening 19:00–21:45 trades
+beyond the range but closes back inside it: fade it. Stop 1 point beyond that bar's extreme.
+Target = the far side of the range (skipped if that is less than 1R away). Flat 00:00 ET.
+
+### London (08:00–12:00 London)
+
+Asian range for all three = high/low from 00:00 UTC to the 08:00 London open.
+
+**L1. London sweep + reclaim ("Judas swing").** From 08:00 a bar trades beyond the Asian high or
+low. Then a bar opening 08:00–10:45 closes back inside the range: trade back into it. Stop 1 point
+beyond the extreme since 08:00. Target 2R. Flat 12:00 London. (The October test of this lost money.)
+
+**L2. London breakout.** The first bar opening 08:00–10:45 that closes outside the Asian range:
+trade with it. Stop at the middle of the Asian range. Target 2R. Flat 12:00 London.
+
+**L3. London opening range breakout.** Range = high/low of 08:00–08:30 London. First bar opening
+08:30–10:15 that closes outside it: trade with it. Stop 1 point beyond the other side. Target 2R.
+Flat 12:00 London.
+
+### NY open
+
+**N3. Initial balance breakout.** Initial balance = high/low of 9:30–10:30 ET. First bar opening
+10:30–11:45 that closes outside it: trade with it. Stop at the middle of the initial balance.
+Target = half the initial balance range beyond the broken edge. Flat 16:00 ET.
+
+**N4. Silver Bullet, 15-minute form** (ICT). A pool (same pools as N1) is swept after 9:30 ET.
+Then three bars leave a fair value gap in the other direction (after a low sweep: the third bar's
+low is above the first bar's high), with the third bar closing between 10:00 and 11:00 ET. Enter
+at that close. Stop 1 point beyond the first bar's extreme. Target 2R. Flat 12:00 ET. The original
+uses 1- to 5-minute charts and a limit order in the gap; this is a simplification.
+
+### NY midday / close
+
+**M4. VWAP bounce.** A bar opening 12:00–15:00 ET touches VWAP and closes back on the side the
+previous three bars all closed on (above = long, below = short). Stop 1 point beyond that bar's
+extreme. Target 2R. Flat 16:00 ET.
+
+Variants tried now: about 16 before, plus these 7 = about 23.
