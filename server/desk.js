@@ -2,7 +2,7 @@
 // Pure: same inputs, same output. The server calls it with the real clock; tests and demos pass their own.
 import { sessionAt } from './sessions.js';
 import { computeGuard, checkTrade } from './guard.js';
-import { liveSetups } from './verdicts.js';
+import { liveSetups, windowSetups } from './verdicts.js';
 import { byId } from './strategies/index.js';
 import { sessionRanges } from './strategies/sweep.js';
 import { rth, vwapMap } from './strategies/common.js';
@@ -52,13 +52,19 @@ const pts = (x) => Math.round(x * 4) / 4;
 function answerFor({ session, feed, guard, settings, live, evaluated, dataNow }) {
   const next = session.next, countdown = next ? { countdownTo: next.start, countdownLabel: `${next.name} opens in` } : {};
   if (guard.lockout) return { kind: 'locked', tone: 'bad', headline: guard.breached ? 'Account limit reached' : 'Locked out', sub: guard.lockout.reason, countdownTo: guard.lockout.until, countdownLabel: 'Unlocks in' };
-  if (!session.current && !live.length) return { kind: 'closed', tone: 'idle', headline: 'No trade right now', sub: next ? (next.live ? `Next window: ${next.name}.` : `Next window: ${next.name}. No setup passed the test there, so that is a stand-down too.`) : 'No window ahead.', ...countdown };
-  if (!live.length) return { kind: 'standdown', tone: 'idle', headline: 'Stand down', sub: `No setup passed the backtest for the ${session.current.name} window. Nothing to trade here.`, ...countdown };
+  if (!session.current && !live.length) return { kind: 'closed', tone: 'idle', headline: 'No trade right now', sub: next ? `Next window: ${next.name}.` : 'No window ahead.', ...countdown };
+  if (!live.length) return { kind: 'standdown', tone: 'idle', headline: 'Stand down', sub: `No setup is built for the ${session.current.name} window. Nothing to trade here.`, ...countdown };
   const windowEndsAt = session.current?.end ?? null;
   if (feed.status === 'off' || feed.status === 'stale' || feed.status === 'error') return { kind: 'nofeed', tone: 'warn', headline: feed.status === 'stale' ? 'Feed stalled' : 'No live data', sub: feed.status === 'error' ? feed.error : feed.status === 'stale' ? 'Prices have stopped updating. No signal can be trusted until they are back.' : 'No prices are arriving. Check the internet connection, or open your TradingView chart (MNQ1!, 5 minutes) with the bridge extension on.', windowEndsAt };
 
-  const best = evaluated.sort((a, b) => RANK[b.res.phase] - RANK[a.res.phase])[0];
-  const { setup, res } = best, base = { kind: 'signal', setup: { id: setup.id, name: setup.name, code: setup.code }, windowEndsAt, delayed: feed.delayed };
+  // Most active setup first (in a trade, then armed, then watching); ties go to the better tested average.
+  const order = [...evaluated].sort((a, b) => RANK[b.res.phase] - RANK[a.res.phase] || (b.setup.avgR ?? -9) - (a.setup.avgR ?? -9));
+  const { setup, res } = order[0];
+  const evidence = (s) => s.score == null ? 'Not tested.' : `Won ${Math.round(s.winPct)}% of ${s.trades} tested trades since 2024, averaging ${s.avgR >= 0 ? '+' : ''}${s.avgR.toFixed(2)}R a trade${s.avgR <= 0 ? ': it lost money in testing' : ''}. ${s.proven ? 'Passed every test rule.' : 'Not proven.'}`;
+  const word = (r) => r.trade ? (r.trade.status === 'open' ? r.trade.side : r.trade.status === 'target' ? 'Target hit' : r.trade.status === 'stopped' ? 'Stopped' : 'Closed') : r.phase === 'armed' ? 'Armed' : r.phase === 'done' ? 'Done' : 'Watching';
+  const others = order.slice(1).map(e => ({ name: e.setup.name, code: e.setup.code, score: e.setup.score, avgR: e.setup.avgR, state: word(e.res), side: e.res.trade?.side ?? null, open: e.res.trade?.status === 'open' }));
+  const disagree = order[0].res.trade?.status === 'open' && others.some(o => o.open && o.side !== order[0].res.trade.side);
+  const base = { kind: 'signal', setup: { id: setup.id, name: setup.name, code: setup.code }, score: setup.score, avgR: setup.avgR, proven: !!setup.proven, evidence: evidence(setup), others, disagree, windowEndsAt, delayed: feed.delayed };
   const sized = (stopPoints) => checkTrade(guard, settings, { stopPoints });
   const t = res.trade;
   if (t && t.status === 'open') {
@@ -85,7 +91,7 @@ function answerFor({ session, feed, guard, settings, live, evaluated, dataNow })
 export function buildState({ now, store, feed, settings, journal, verdicts, demo = false, problem = null }) {
   const session = sessionAt(now);
   const hasLive = (id) => liveSetups(verdicts, id).length > 0;
-  session.timeline = session.timeline.map(w => ({ ...w, live: hasLive(w.id) }));
+  session.timeline = session.timeline.map(w => ({ ...w, live: hasLive(w.id), setups: windowSetups(verdicts, w.id).length }));
   if (session.current) session.current = { ...session.current, live: hasLive(session.current.id) };
   if (session.next) session.next = { ...session.next, live: hasLive(session.next.id) };
 
@@ -95,10 +101,10 @@ export function buildState({ now, store, feed, settings, journal, verdicts, demo
   const f = feedState(now, store, feed);
   const ctx = store.ctx(), key = etKey(now), price = store.last()?.c ?? null;
   const run = (setup) => ({ setup, res: byId(setup.id).evaluate(ctx, key) });
-  const live = session.current ? liveSetups(verdicts, session.current.id) : [];
+  const live = session.current ? windowSetups(verdicts, session.current.id) : [];
   let evaluated = ctx.s.bars.length ? live.map(run) : [];
   // A passed setup from an earlier window whose trade is still open stays on the page until it is closed.
-  if (ctx.s.bars.length) for (const s of verdicts.setups.filter(s => s.label === 'Passed' && !s.carried && !live.includes(s))) { const e = run(s); if (e.res.phase === 'in-trade') { evaluated.push(e); live.push(s); } }
+  if (ctx.s.bars.length) for (const s of verdicts.setups.filter(s => !s.carried && !live.includes(s))) { const e = run(s); if (e.res.phase === 'in-trade') { evaluated.push(e); live.push(s); } }
   const answer = answerFor({ dataNow: ctx.now, session, feed: evaluated.length || !live.length ? f : { ...f, status: f.status === 'live' || f.status === 'delayed' ? 'off' : f.status }, guard, settings, live, evaluated });
 
   const shown = answer.kind === 'signal' ? evaluated.find(e => e.setup.id === answer.setup.id)?.res : null;

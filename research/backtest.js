@@ -19,7 +19,7 @@ export function runStrategy(hist, strat) {
     const t = res.trade;
     if (!t || t.status === 'open') continue;
     // Same entry bar, same stop distance, same exits, both directions: feeds the random-direction benchmark.
-    const flip = (dir) => manage(contract.ctx, { ...t, dir, stop: t.entry - dir * t.risk, target: strat.targetR ? t.entry + dir * strat.targetR * t.risk : null }, res.times.flat).r;
+    const flip = (dir) => manage(contract.ctx, { ...t, dir, stop: t.entry - dir * t.risk, target: t.target != null ? t.entry + dir * Math.abs(t.target - t.entry) : null }, res.times.flat).r;
     trades.push({ key, contract: contract.code, dir: t.dir, signalT: t.signalT, entry: t.entry, stop: t.stop, risk: t.risk, target: t.target, status: t.status, exitPx: t.exitPx, exitT: t.exitT, r: t.r, long: flip(1), short: flip(-1) });
   }
   return trades;

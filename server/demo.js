@@ -56,7 +56,8 @@ export function demoInput(name) {
   const store = new BarStore();
   store.ingest(makeBars(sp.path, now, sp.mirror), 5);
   const verdicts = loadVerdicts();
-  if (!sp.real) verdicts.setups = verdicts.setups.map(s => (s.id === 'ny_sweep_shift' ? { ...s, label: 'Passed', demo: true } : s));
+  // Demos walk one setup through its states: only NY sweep + shift is switched on. 'standdown' shows a window with nothing built.
+  verdicts.setups = sp.real ? [] : verdicts.setups.filter(s => s.id === 'ny_sweep_shift').map(s => ({ ...s, label: 'Passed', proven: true, demo: true }));
   const history = [['2026-07-09T15:10', 410], ['2026-07-10T14:40', -235], ['2026-07-13T15:30', 180], ['2026-07-14T14:50', 320]];
   const trades = [...history.map(([t, pnl]) => [Z(t), pnl]), ...(sp.trades || []).map(([t, pnl]) => [Z(D + t), pnl])]
     .map(([ts, pnl], i) => ({ id: 'demo' + i, kind: 'trade', ts, pnl, side: pnl > 0 ? 'LONG' : 'SHORT', contracts: 1, setup: 'Demo', note: '' }));

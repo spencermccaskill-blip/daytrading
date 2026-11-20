@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildState } from '../server/desk.js';
-import { loadVerdicts } from '../server/verdicts.js';
+import { loadVerdicts, windowSetups } from '../server/verdicts.js';
 import { demoInput, SCENARIOS } from '../server/demo.js';
 import { defaultSettings } from '../server/guard.js';
 import { BarStore } from '../server/bars.js';
@@ -9,18 +9,32 @@ import { BarStore } from '../server/bars.js';
 const Z = (s) => Date.parse(s + 'Z');
 const demo = (name) => buildState(demoInput(name));
 
-test('real verdicts: nothing passed, so every window is stand-down and no setup is live', () => {
+test('real verdicts: nothing is proven, but every window shows its setups with a score', () => {
   const v = loadVerdicts();
-  assert.equal(v.setups.filter(s => s.label === 'Passed').length, 0);
-  assert.ok(v.setups.find(s => s.id === 'ny_sweep_shift').label === 'Promising, not proven');
-  assert.ok(v.setups.some(s => s.window === 'london' && s.label === 'Benched'));
-  for (const [iso, id] of [['2026-07-15T23:00', 'asia'], ['2026-07-15T08:00', 'london'], ['2026-07-15T14:00', 'nyopen'], ['2026-07-15T17:00', 'nymid']]) {
-    const s = buildState({ now: Z(iso), store: new BarStore(), feed: { symbol: null, lastPost: 0 }, settings: defaultSettings(), journal: { trades: [] }, verdicts: v });
-    assert.equal(s.session.current.id, id);
-    assert.equal(s.answer.kind, 'standdown', id);
-    assert.match(s.answer.headline, /stand down/i);
-    assert.ok(s.session.timeline.every(w => w.live === false));
-  }
+  assert.equal(v.setups.filter(s => s.proven).length, 0);
+  const n1 = v.setups.find(s => s.id === 'ny_sweep_shift');
+  assert.deepEqual([n1.label, n1.score, n1.trades], ['Promising, not proven', 5.1, 383]);
+  for (const id of ['asia', 'london', 'nyopen', 'nymid']) assert.ok(windowSetups(v, id).length >= 3, id);
+  assert.equal(windowSetups(v, 'nyopen')[0].id, 'ny_orb15'); // ranked by tested average, not by win rate
+  // No bars at all: never a signal.
+  const empty = buildState({ now: Z('2026-07-15T14:00'), store: new BarStore(), feed: { symbol: null, lastPost: 0 }, settings: defaultSettings(), journal: { trades: [] }, verdicts: v });
+  assert.equal(empty.answer.kind, 'nofeed');
+  // With bars: the most active setup is shown with its score and an honest line about its testing.
+  const s = buildState({ ...demoInput('long'), verdicts: v });
+  assert.equal(s.answer.kind, 'signal');
+  assert.equal(s.answer.proven, false);
+  assert.ok(s.answer.score > 0 && s.answer.score < 10);
+  assert.match(s.answer.evidence, /Won \d+% of \d+ tested trades since 2024.*Not proven\./);
+  assert.ok(s.answer.others.length >= 3);
+  assert.ok(s.session.timeline.every(w => w.live === false && w.setups >= 3));
+});
+
+test('a setup that lost money in testing says so next to its score', () => {
+  const v = loadVerdicts(), ib = v.setups.find(s => s.id === 'ny_ib');
+  assert.ok(ib.score >= 5.5 && ib.avgR < 0); // wins often, loses overall
+  v.setups = v.setups.filter(s => s.id === 'ny_ib');
+  const s = buildState({ ...demoInput('won'), verdicts: v });
+  assert.match(s.answer.evidence, /lost money in testing/);
 });
 
 test('outside every window: no trade right now, with a countdown to the next window', () => {

@@ -9,8 +9,8 @@ const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} vs ${b}`);
 // July 2026: New York is UTC-4, so 9:30 ET = 13:30Z and 18:00 ET = 22:00Z. 2026-07-01 is a Wednesday.
 const D = '2026-07-01', FROM = '2026-06-10';
 
-test('registry: seven setups, each tied to one window', () => {
-  assert.deepEqual(STRATEGIES.map(s => s.id), ['ny_sweep_shift', 'ny_orb15', 'nymid_noise', 'nymid_last30', 'nymid_vwap', 'asia_orb', 'asia_sweep']);
+test('registry: fourteen setups, each tied to one window', () => {
+  assert.deepEqual(STRATEGIES.map(s => s.id), ['ny_sweep_shift', 'ny_orb15', 'nymid_noise', 'nymid_last30', 'nymid_vwap', 'asia_orb', 'asia_sweep', 'asia_fade', 'london_sweep', 'london_breakout', 'london_orb', 'ny_ib', 'ny_silver_bullet', 'nymid_vwap_bounce']);
   for (const s of STRATEGIES) assert.ok(['asia', 'london', 'nyopen', 'nymid'].includes(s.window) && s.rules.length && s.source);
   assert.equal(COST_POINTS, 1);
 });
@@ -136,4 +136,49 @@ test('a trade whose exit is not known yet stays open and has no result', () => {
   assert.equal(r.phase, 'in-trade');
   assert.equal(r.trade.status, 'open');
   assert.equal(r.trade.r, null);
+});
+
+// ── Popular setups added 2026-11-20 (July: London is UTC+1, so 08:00 London = 07:00Z) ──
+const sig = (t) => t && [t.side, t.entry, t.stop, t.target];
+
+test('A3 evening range fade: a poke above the first-hour range that closes back inside is a short to the far side', () => {
+  const bars = flat(FROM, '2026-07-02', { [D + 'T22:00']: [100, 110, 90, 100], [D + 'T23:00']: [100, 116, 99, 104] });
+  assert.deepEqual(sig(run('asia_fade', bars, D).trade), ['SHORT', 104, 117, 90]);
+  const small = flat(FROM, '2026-07-02', { [D + 'T23:00']: [100, 107, 99.5, 100.5] }); // far side is under 1R away
+  assert.equal(run('asia_fade', small, D).trade, undefined);
+});
+
+test('L1 London sweep + reclaim: Asian high swept, close back inside is a short', () => {
+  const bars = flat(FROM, D, { [D + 'T07:00']: [100, 105, 99.5, 102], [D + 'T07:15']: [102, 102.5, 99.6, 100] });
+  assert.deepEqual(sig(run('london_sweep', bars, D).trade), ['SHORT', 100, 106, 88]);
+  assert.equal(run('london_sweep', bars, D, Z(D + 'T07:15')).phase, 'armed');
+});
+
+test('L2 London breakout: close above the Asian range, stop at its middle', () => {
+  const bars = flat(FROM, D, { [D + 'T07:15']: [100, 106.5, 99.5, 106] });
+  assert.deepEqual(sig(run('london_breakout', bars, D).trade), ['LONG', 106, 100, 118]);
+});
+
+test('L3 London opening range: close above the first 30 minutes', () => {
+  const bars = flat(FROM, D, { [D + 'T07:30']: [100, 105.5, 99.5, 105] });
+  assert.deepEqual(sig(run('london_orb', bars, D).trade), ['LONG', 105, 98, 119]);
+  assert.equal(run('london_orb', bars, D, Z(D + 'T07:30')).phase, 'armed');
+});
+
+test('N3 initial balance breakout: stop at the middle, target half the range beyond the edge', () => {
+  const bars = flat(FROM, D, { [D + 'T13:30']: [100, 110, 90, 100], [D + 'T14:30']: [100, 113.5, 99.5, 113] });
+  assert.deepEqual(sig(run('ny_ib', bars, D).trade), ['LONG', 113, 100, 120]);
+});
+
+test('N4 Silver Bullet: low swept, then a fair value gap up that completes by 11:00 ET', () => {
+  const bars = flat(FROM, D, { [D + 'T13:30']: [100, 100.5, 95, 96], [D + 'T13:45']: [96, 104, 95.5, 103], [D + 'T14:00']: [103, 110, 101.5, 109] });
+  assert.deepEqual(sig(run('ny_silver_bullet', bars, D).trade), ['LONG', 109, 94, 139]);
+  const late = flat(FROM, D, { [D + 'T13:30']: [100, 100.5, 95, 96], [D + 'T14:45']: [96, 104, 95.5, 103], [D + 'T15:00']: [103, 110, 101.5, 109] });
+  assert.equal(run('ny_silver_bullet', late, D).trade, undefined); // gap completes after 11:00 ET
+});
+
+test('M4 VWAP bounce: three closes above VWAP, then a touch that closes back above', () => {
+  const up = [105, 106, 104.5, 105.5];
+  const bars = flat(FROM, D, { [D + 'T15:15']: up, [D + 'T15:30']: up, [D + 'T15:45']: up, [D + 'T16:00']: [105.5, 106, 100, 104] });
+  assert.deepEqual(sig(run('nymid_vwap_bounce', bars, D).trade), ['LONG', 104, 99, 114]);
 });

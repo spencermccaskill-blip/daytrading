@@ -42,6 +42,11 @@ export function etTime(key, hours) {
   const [y, m, d] = key.split('-').map(Number);
   return zonedToUtc(NY, y, m, d, Math.floor(hours), Math.round((hours % 1) * 60));
 }
+/** Instant of `hours` London time on date key 'YYYY-MM-DD'. */
+export function londonTime(key, hours) {
+  const [y, m, d] = key.split('-').map(Number);
+  return zonedToUtc(LONDON, y, m, d, Math.floor(hours), Math.round((hours % 1) * 60));
+}
 export const etKey = (t) => zoned(t, NY).key;
 export const utcKey = (t) => new Date(t).toISOString().slice(0, 10);
 export const addDays = (key, n) => new Date(Date.parse(key + 'T12:00Z') + n * DAY).toISOString().slice(0, 10);

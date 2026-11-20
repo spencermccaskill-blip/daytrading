@@ -16,6 +16,13 @@ No setup is promised to win. This is the fair test and what it found.
 | M3 VWAP trend | nymid | **No edge** | 497 | 33.2 | -0.033 | -1.31 | 22.1R, $1,614 | 0 of 6 |
 | A1 Evening range breakout | asia | **No edge** | 570 | 46.0 | +0.001 | 0.03 | 29.9R, $5,555 | 0 of 6 |
 | A2 Evening sweep + shift | asia | **No edge** | 134 | 47.0 | +0.018 | 0.22 | 8.8R, $2,058 | 2 of 6 |
+| A3 Evening range fade | asia | **Benched** | 438 | 33.8 | -0.018 | -0.23 | 33.9R, $8,837 | 1 of 6 |
+| L1 London sweep + reclaim | london | **Benched** | 377 | 37.9 | -0.098 | -1.57 | 38.4R, $8,979 | 0 of 6 |
+| L2 London breakout | london | **No edge** | 402 | 41.3 | -0.097 | -2.40 | 50.4R, $9,176 | 0 of 6 |
+| L3 London opening range | london | **Benched** | 534 | 44.6 | -0.041 | -1.06 | 44.1R, $8,840 | 1 of 6 |
+| N3 Initial balance breakout | nyopen | **No edge** | 382 | 60.2 | -0.015 | -0.40 | 17.2R, $2,967 | 0 of 6 |
+| N4 Silver Bullet (15m form) | nyopen | **Promising, not proven** | 288 | 47.6 | +0.014 | 0.31 | 15.7R, $3,706 | 1 of 6 |
+| M4 VWAP bounce | nymid | **Benched** | 251 | 34.3 | -0.078 | -0.92 | 32.7R, $7,115 | 0 of 6 |
 
 Dollar drawdown is on MNQ at $250 risk with whole contracts; signals whose stop is too wide for one contract are skipped.
 
@@ -192,6 +199,181 @@ Pass rules:
 - **missed**: Positive in each of 2024, 2025, 2026
 - met: Worst drawdown no deeper than 10R
 - met: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## A3 Evening range fade: Benched
+
+Source: Widely taught range-fade setup, no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 725 | 33.0 | -0.110 | -1.91 | 85.4R |
+| 2024 on (judge) | 438 | 33.8 | -0.018 | -0.23 | 33.9R |
+| Last 12 months | 168 | 34.5 | +0.095 | 0.69 | 18.0R |
+| Judge period without its best year (2026) | 296 | 34.8 | -0.043 | -0.47 | 30.4R |
+
+By year: 2018 -0.531 (12), 2019 -0.198 (101), 2020 -0.052 (132), 2021 -0.054 (154), 2022 -0.060 (163), 2023 -0.200 (175), 2024 -0.035 (134), 2025 -0.050 (162), 2026 +0.035 (142).
+
+Random-direction benchmark (same entries and stops, 500 runs): average +0.026R, 95th percentile +0.137R. The setup made -0.018R.
+
+On the account: median stop 14 NQ points. 100% of signals fit $250 on at least 1 MNQ (437 of 438). Those trades: net -$2,804, worst drawdown $8,837 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- met: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## L1 London sweep + reclaim: Benched
+
+Source: ICT "Judas swing" / your old London playbook, no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 687 | 39.9 | -0.047 | -1.01 | 42.3R |
+| 2024 on (judge) | 377 | 37.9 | -0.098 | -1.57 | 38.4R |
+| Last 12 months | 134 | 38.1 | -0.066 | -0.63 | 22.6R |
+| Judge period without its best year (2025) | 250 | 36.0 | -0.131 | -1.69 | 34.2R |
+
+By year: 2018 -0.033 (12), 2019 -0.114 (112), 2020 -0.063 (103), 2021 +0.076 (135), 2022 -0.123 (145), 2023 -0.030 (192), 2024 -0.074 (137), 2025 -0.033 (127), 2026 -0.200 (113).
+
+Random-direction benchmark (same entries and stops, 500 runs): average -0.082R, 95th percentile +0.008R. The setup made -0.098R.
+
+On the account: median stop 26 NQ points. 99% of signals fit $250 on at least 1 MNQ (373 of 377). Those trades: net -$8,691, worst drawdown $8,979 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- **missed**: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## L2 London breakout: No edge
+
+Source: Widely taught Asian-range breakout, no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 749 | 45.4 | +0.015 | 0.45 | 28.7R |
+| 2024 on (judge) | 402 | 41.3 | -0.097 | -2.40 | 50.4R |
+| Last 12 months | 139 | 43.2 | -0.082 | -1.43 | 16.6R |
+| Judge period without its best year (2026) | 282 | 39.4 | -0.127 | -2.48 | 42.0R |
+
+By year: 2018 -0.130 (14), 2019 +0.028 (136), 2020 +0.144 (128), 2021 -0.091 (131), 2022 +0.107 (159), 2023 -0.084 (195), 2024 -0.132 (148), 2025 -0.121 (134), 2026 -0.027 (120).
+
+Random-direction benchmark (same entries and stops, 500 runs): average -0.011R, 95th percentile +0.060R. The setup made -0.097R.
+
+On the account: median stop 60 NQ points. 84% of signals fit $250 on at least 1 MNQ (337 of 402). Those trades: net -$6,724, worst drawdown $9,176 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- **missed**: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## L3 London opening range: Benched
+
+Source: Widely taught opening-range breakout, no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 958 | 44.8 | -0.021 | -0.75 | 25.2R |
+| 2024 on (judge) | 534 | 44.6 | -0.041 | -1.06 | 44.1R |
+| Last 12 months | 197 | 43.7 | +0.008 | 0.12 | 20.5R |
+| Judge period without its best year (2025) | 355 | 42.8 | -0.050 | -1.04 | 36.6R |
+
+By year: 2018 +0.190 (19), 2019 -0.087 (180), 2020 +0.030 (178), 2021 -0.003 (176), 2022 +0.023 (196), 2023 -0.061 (228), 2024 -0.067 (188), 2025 -0.022 (179), 2026 -0.031 (167).
+
+Random-direction benchmark (same entries and stops, 500 runs): average -0.025R, 95th percentile +0.039R. The setup made -0.041R.
+
+On the account: median stop 53 NQ points. 94% of signals fit $250 on at least 1 MNQ (503 of 534). Those trades: net -$3,620, worst drawdown $8,840 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- met: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## N3 Initial balance breakout: No edge
+
+Source: Market-profile setup taught by brokers and prop firms, no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 732 | 67.5 | +0.053 | 1.97 | 10.2R |
+| 2024 on (judge) | 382 | 60.2 | -0.015 | -0.40 | 17.2R |
+| Last 12 months | 144 | 57.6 | -0.035 | -0.57 | 15.1R |
+| Judge period without its best year (2024) | 248 | 57.3 | -0.049 | -1.05 | 16.7R |
+
+By year: 2018 +0.153 (16), 2019 +0.014 (131), 2020 -0.013 (139), 2021 +0.131 (131), 2022 +0.135 (154), 2023 +0.006 (177), 2024 +0.048 (134), 2025 -0.020 (129), 2026 -0.079 (119).
+
+Random-direction benchmark (same entries and stops, 500 runs): average -0.019R, 95th percentile +0.038R. The setup made -0.015R.
+
+On the account: median stop 101 NQ points. 68% of signals fit $250 on at least 1 MNQ (260 of 382). Those trades: net -$1,613, worst drawdown $2,967 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- **missed**: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## N4 Silver Bullet (15m form): Promising, not proven
+
+Source: ICT setup, simplified from 1-5 minute charts; no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 545 | 51.9 | +0.071 | 2.03 | 12.3R |
+| 2024 on (judge) | 288 | 47.6 | +0.014 | 0.31 | 15.7R |
+| Last 12 months | 101 | 56.4 | +0.122 | 1.48 | 5.6R |
+| Judge period without its best year (2026) | 202 | 43.1 | -0.051 | -0.99 | 15.6R |
+
+By year: 2018 +0.106 (6), 2019 +0.072 (104), 2020 +0.024 (109), 2021 +0.069 (106), 2022 +0.130 (102), 2023 +0.065 (124), 2024 -0.019 (102), 2025 -0.084 (100), 2026 +0.168 (86).
+
+Random-direction benchmark (same entries and stops, 500 runs): average -0.004R, 95th percentile +0.062R. The setup made +0.014R.
+
+On the account: median stop 130 NQ points. 47% of signals fit $250 on at least 1 MNQ (134 of 288). Those trades: net -$920, worst drawdown $3,706 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- met: Last 12 months above zero
+- **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
+
+## M4 VWAP bounce: Benched
+
+Source: Widely taught VWAP pullback, no audited source.
+
+| Period | Trades | Win % | Avg R | t-stat | Worst drawdown |
+|---|---|---|---|---|---|
+| 2019-2023 (look-at) | 445 | 35.1 | -0.081 | -1.27 | 43.4R |
+| 2024 on (judge) | 251 | 34.3 | -0.078 | -0.92 | 32.7R |
+| Last 12 months | 88 | 36.4 | -0.032 | -0.22 | 14.6R |
+| Judge period without its best year (2026) | 172 | 33.1 | -0.107 | -1.06 | 28.1R |
+
+By year: 2018 -0.224 (7), 2019 -0.104 (80), 2020 +0.019 (86), 2021 -0.086 (78), 2022 +0.016 (90), 2023 -0.217 (111), 2024 -0.030 (91), 2025 -0.193 (81), 2026 -0.016 (79).
+
+Random-direction benchmark (same entries and stops, 500 runs): average -0.047R, 95th percentile +0.072R. The setup made -0.078R.
+
+On the account: median stop 24 NQ points. 98% of signals fit $250 on at least 1 MNQ (247 of 251). Those trades: net -$4,572, worst drawdown $7,115 against the $2,000 limit.
+
+Pass rules:
+- **missed**: Average at least +0.10R after costs
+- **missed**: t-stat at least 2.0
+- **missed**: Positive in each of 2024, 2025, 2026
+- **missed**: Worst drawdown no deeper than 10R
+- **missed**: Last 12 months above zero
 - **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
 
 ## Carried over from October 2026 (not re-run here)

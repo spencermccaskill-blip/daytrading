@@ -66,11 +66,11 @@ test('bars from the bridge: wrong symbol or timeframe is reported, good bars rea
     const state = (await s.call('GET', '/api/state')).json;
     assert.equal(state.price, 25005);
     assert.equal(state.feed.status, 'delayed');
-    assert.equal(state.answer.kind, 'standdown');
+    assert.equal(state.answer.kind, 'nofeed'); // one unfinished bar is not enough to evaluate anything
     assert.equal((await s.call('GET', '/api/state?demo=long')).json.answer.state, 'LONG');
     assert.equal((await s.call('GET', '/api/state?demo=nope')).status, 404);
     const pb = (await s.call('GET', '/api/playbook')).json;
-    assert.equal(pb.setups.length, 11);
+    assert.equal(pb.setups.length, 16);
     assert.equal((await fetch(s.base + '/')).status, 200);
   } finally { s.close(); }
 });
