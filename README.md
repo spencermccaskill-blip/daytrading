@@ -1,7 +1,7 @@
 # The Desk
 
 One time-aware dashboard for NQ / MNQ day trading. It runs on your laptop at http://localhost:3000,
-reads your open TradingView chart through a small browser extension, and replaces NQ Desk and London Desk.
+fetches delayed MNQ prices by itself (or reads your open TradingView chart through a small browser extension), and replaces NQ Desk and London Desk.
 
 **It never places an order. Signals are information, not instructions.**
 
@@ -112,7 +112,20 @@ Email them to yourself, or use a USB stick or iCloud Drive. `data\bars.json` doe
 the chart refills it. If you skip this, the Mac starts with an empty journal and default settings,
 so the guard would show a fresh $50,000 account.
 
-## Connect TradingView in Edge (once)
+## Where the prices come from
+
+The Desk fetches MNQ prices by itself, so **no chart tab needs to be open**. They come from Yahoo
+Finance, free and about 10 minutes delayed. It is an unofficial service: it can refuse requests or
+stop working without notice, and when it does The Desk says "Feed stalled" and shows no signal.
+The top right of the page says "fetched automatically" when this feed is in use.
+
+If a TradingView chart with the bridge extension is open, The Desk uses that instead (it says
+"from your chart"), and switches back to fetching 3 minutes after the tab goes quiet. The two are
+never mixed. You can turn the automatic fetch off in Settings.
+
+The Mac still has to be on and awake, with The Desk running in Terminal.
+
+## Connect TradingView in Edge (optional)
 
 1. In Edge go to `edge://extensions` and switch on **Developer mode**.
 2. If the old "NQ Desk Bridge" is listed, click **Remove** on it.

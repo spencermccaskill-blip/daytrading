@@ -11,6 +11,9 @@ import { loadVerdicts } from './verdicts.js';
 import { computeGuard, checkTrade, defaultSettings, PLANS } from './guard.js';
 import { demoInput, SCENARIOS } from './demo.js';
 import { WINDOWS } from './sessions.js';
+import { fetchYahoo, YAHOO_SYMBOL } from './yahoo.js';
+
+const BRIDGE_QUIET = 180000; // the chart tab has been silent this long: fetch prices ourselves
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 /** Reads a saved file. A missing file is normal (first run). A file that exists but cannot be read is a problem to report, never to paper over. */
@@ -23,10 +26,10 @@ const num = (v) => (v === '' || v == null ? NaN : Number(v));
 /** Settings on disk merged over the defaults, so a new field never breaks an old file. */
 function mergeSettings(saved) {
   const d = defaultSettings(), s = saved || {};
-  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument };
+  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument, feed: { auto: s.feed?.auto !== false } };
 }
 
-export function createApp({ dataDir = path.join(root, 'data'), clock = () => Date.now() } = {}) {
+export function createApp({ dataDir = path.join(root, 'data'), clock = () => Date.now(), fetchImpl = fetch } = {}) {
   fs.mkdirSync(dataDir, { recursive: true });
   const FILES = { settings: path.join(dataDir, 'settings.json'), bars: path.join(dataDir, 'bars.json'), journal: path.join(dataDir, 'journal.json') };
   // Write to a side file first, then swap it in, so a crash mid-save cannot leave half a journal.
@@ -40,7 +43,21 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   const refuse = (res) => res.status(409).json({ error: `${problem()} Nothing was saved, so the file is not overwritten. Fix or move the file, then restart The Desk.` });
   const store = new BarStore();
   store.load(readSaved(FILES.bars).value);
-  const feed = { symbol: null, lastPost: 0, lastChange: 0, lastSig: '', error: null };
+  const feed = { symbol: null, source: null, lastPost: 0, lastBridge: 0, lastChange: 0, lastSig: '', error: null, fetchError: null, nextTry: 0 };
+  const noteChange = () => { const last = store.last(), sig = last ? [last.t, last.o, last.h, last.l, last.c, last.v].join() : ''; if (sig !== feed.lastSig) { feed.lastSig = sig; feed.lastChange = clock(); } };
+
+  // No chart tab feeding us? Fetch delayed MNQ bars ourselves. An open chart tab always wins.
+  async function pollPrices() {
+    const now = clock();
+    if (!settings.feed.auto || now - feed.lastBridge < BRIDGE_QUIET || now < feed.nextTry) return;
+    const first = feed.source !== 'yahoo';
+    const got = await fetchYahoo(first ? '1mo' : '1d', fetchImpl);
+    if (clock() - feed.lastBridge < BRIDGE_QUIET) return; // the chart came back while we were fetching
+    if (got.error) { feed.fetchError = got.error; feed.nextTry = clock() + 45000; return; }
+    if (feed.symbol !== YAHOO_SYMBOL) store.clear();       // never mix two sources in the levels
+    Object.assign(feed, { symbol: YAHOO_SYMBOL, source: 'yahoo', lastPost: clock(), error: null, fetchError: null });
+    store.ingest(got.rows, 5, clock()); noteChange();
+  }
   let verdicts = loadVerdicts();
 
   const app = express();
@@ -53,13 +70,12 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     if (!Array.isArray(bars)) return res.status(400).json({ error: 'Expected a bars array.' });
     const sym = String(symbol || '');
     if (feed.symbol && sym !== feed.symbol) store.clear(); // another contract: its prices must not mix into the levels
-    feed.lastPost = clock(); feed.symbol = sym;
+    feed.lastPost = feed.lastBridge = clock(); feed.symbol = sym; feed.source = 'chart'; feed.fetchError = null;
     if (!(resMin >= 1 && resMin <= 15 && 15 % resMin === 0)) feed.error = `Set the TradingView chart to 5 minutes (it is on "${resolution}").`;
     else if (!/NQ/i.test(feed.symbol)) feed.error = `The chart shows ${feed.symbol || 'another symbol'}. Switch it to MNQ1!.`;
     else {
       feed.error = null; store.ingest(bars, resMin, clock());
-      const last = store.last(), sig = last ? [last.t, last.o, last.h, last.l, last.c, last.v].join() : '';
-      if (sig !== feed.lastSig) { feed.lastSig = sig; feed.lastChange = clock(); } // the chart is moving
+      noteChange(); // the chart is moving
     }
     res.json({ ok: !feed.error, error: feed.error });
   });
@@ -94,6 +110,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     if (a.consistencyPct !== undefined) { const v = a.consistencyPct === null || a.consistencyPct === '' ? null : num(a.consistencyPct); if (v !== null && !(v > 0 && v <= 100)) return res.status(400).json({ error: 'Consistency must be a percent from 1 to 100, or empty for none.' }); next.account.consistencyPct = v; }
     if (a.payoutRequested != null) next.account.payoutRequested = !!a.payoutRequested;
     if (a.cycleStart !== undefined) next.account.cycleStart = /^\d{4}-\d{2}-\d{2}$/.test(a.cycleStart || '') ? a.cycleStart : null;
+    if (b.feed?.auto != null) next.feed.auto = !!b.feed.auto;
     for (const [k, label] of [['riskPerTrade', 'Risk per trade'], ['dailyStop', 'Daily stop']]) if (p[k] != null) { const v = num(p[k]); if (!(v > 0)) return res.status(400).json({ error: `${label} must be a dollar amount above zero.` }); next.personal[k] = v; }
     if (p.maxLossesPerDay != null) { const v = num(p.maxLossesPerDay); if (!(Number.isInteger(v) && v >= 1)) return res.status(400).json({ error: 'Losses per day must be a whole number, 1 or more.' }); next.personal.maxLossesPerDay = v; }
     Object.assign(settings, next); save('settings', settings);
@@ -137,15 +154,16 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   app.use(express.static(path.join(root, 'public')));
 
   const persistBars = () => { try { store.prune(); save('bars', store.toJSON()); } catch { /* disk hiccup: try again next minute */ } };
-  return { app, persistBars, store, journal, settings };
+  return { app, persistBars, pollPrices, store, journal, settings };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const PORT = Number(process.env.PORT) || 3000;
-  const { app, persistBars } = createApp();
+  const { app, persistBars, pollPrices } = createApp();
   setInterval(persistBars, 60000).unref();
+  pollPrices(); setInterval(pollPrices, 15000).unref();
   app.listen(PORT, () => {
     console.log(`The Desk is running at http://localhost:${PORT}`);
-    console.log('Keep this window open. Open your TradingView chart (MNQ1!, 5 minutes) in your browser with the bridge extension on.');
+    console.log('Keep this window open. Prices are fetched automatically (about 10 minutes delayed). An open TradingView chart with the bridge extension is used instead when there is one.');
   });
 }

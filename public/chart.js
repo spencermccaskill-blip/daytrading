@@ -24,7 +24,7 @@ export function drawChart(canvas, state, hover) {
   const font = (px, w = 400) => `${w} ${px}px "IBM Plex Mono", ui-monospace, monospace`;
 
   const ch = state.chart, bars = [...ch.bars]; if (ch.forming) bars.push(ch.forming);
-  if (!bars.length) { g.fillStyle = C.mute; g.font = `400 15px Outfit, system-ui, sans-serif`; g.fillText('No bars yet. Open your TradingView chart with the bridge on.', 12, 30); return null; }
+  if (!bars.length) { g.fillStyle = C.mute; g.font = `400 15px Outfit, system-ui, sans-serif`; g.fillText('No bars yet. Prices load by themselves within a few seconds.', 12, 30); return null; }
   const tNow = Math.max(state.feed.lastBarT || 0, bars.at(-1)[0]) + (ch.forming ? 0 : BAR);
   const back = (narrow ? 7 : 12) * HOUR, ahead = (narrow ? 2 : 3) * HOUR;
   const t0 = tNow - back, t1 = tNow + ahead;

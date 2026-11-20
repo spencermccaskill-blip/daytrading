@@ -13,17 +13,22 @@ const FROZEN_AFTER = 180000; // posts keep coming but the newest bar has not cha
 const RANK = { 'in-trade': 5, armed: 4, watching: 3, done: 2, waiting: 1, 'no-data': 0 };
 
 function feedState(now, store, feed) {
+  const source = feed?.source || null, auto = source === 'yahoo';
+  return { ...feedCore(now, store, feed, auto), source };
+}
+function feedCore(now, store, feed, auto) {
   const lastBarT = store?.lastRawT || 0, symbol = feed?.symbol || null;
-  if (!feed?.lastPost) return { status: 'off', label: 'No chart connected', symbol, delayed: false, lastBarT, error: feed?.error || null };
+  if (!feed?.lastPost) return { status: 'off', label: feed?.fetchError || 'No prices yet', symbol, delayed: false, lastBarT, error: feed?.error || null };
   const age = now - feed.lastPost;
   if (feed.error) return { status: 'error', label: feed.error, symbol, delayed: false, lastBarT, error: feed.error };
-  if (age > STALE_AFTER) return { status: 'stale', label: `Feed stalled ${age > 120000 ? Math.round(age / 60000) + ' min' : Math.round(age / 1000) + ' s'} ago`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
-  if (feed.lastChange && now - feed.lastChange > FROZEN_AFTER) return { status: 'stale', label: `Chart frozen: no change for ${Math.round((now - feed.lastChange) / MIN)} min`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
-  // The chart is connected but has sent no new bar for a long time: market shut, or the tab went to sleep.
+  if (age > (auto ? 45000 : STALE_AFTER)) return { status: 'stale', label: `Feed stalled ${age > 120000 ? Math.round(age / 60000) + ' min' : Math.round(age / 1000) + ' s'} ago`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
+  // The fetched feed only moves when a delayed bar updates, so give it longer before calling it frozen.
+  if (feed.lastChange && now - feed.lastChange > (auto ? 3 * FROZEN_AFTER : FROZEN_AFTER)) return { status: 'stale', label: `Prices frozen: no change for ${Math.round((now - feed.lastChange) / MIN)} min`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
+  // Connected but no new bar for a long time: market shut, or the tab went to sleep.
   if (lastBarT && now - lastBarT > 45 * MIN) return { status: 'stale', label: `No new bars for ${Math.round((now - lastBarT) / 36e5) >= 2 ? Math.round((now - lastBarT) / 36e5) + ' hours' : Math.round((now - lastBarT) / MIN) + ' min'}`, symbol, delayed: false, lastBarT, ageSec: Math.round(age / 1000), error: null };
   const lagMin = lastBarT ? Math.max(0, Math.round((now - lastBarT) / MIN) - (store.resMin || 5)) : 0;
-  const delayed = /_DL/i.test(symbol || '') || lagMin >= 3;
-  return { status: delayed ? 'delayed' : 'live', label: delayed ? `Delayed ${lagMin >= 3 ? 'about ' + lagMin + ' min' : 'data'}` : 'Live', symbol, delayed, delayMin: lagMin, lastBarT, ageSec: Math.round(age / 1000), error: null };
+  const delayed = auto || /_DL/i.test(symbol || '') || lagMin >= 3;
+  return { status: delayed ? 'delayed' : 'live', label: delayed ? `Delayed ${lagMin >= 3 ? 'about ' + lagMin + ' min' : 'about 10 min'}` : 'Live', symbol, delayed, delayMin: lagMin, lastBarT, ageSec: Math.round(age / 1000), error: null };
 }
 
 function standardLevels(ctx, key, price, setupLevels, since) {
@@ -50,7 +55,7 @@ function answerFor({ session, feed, guard, settings, live, evaluated, dataNow })
   if (!session.current && !live.length) return { kind: 'closed', tone: 'idle', headline: 'No trade right now', sub: next ? (next.live ? `Next window: ${next.name}.` : `Next window: ${next.name}. No setup passed the test there, so that is a stand-down too.`) : 'No window ahead.', ...countdown };
   if (!live.length) return { kind: 'standdown', tone: 'idle', headline: 'Stand down', sub: `No setup passed the backtest for the ${session.current.name} window. Nothing to trade here.`, ...countdown };
   const windowEndsAt = session.current?.end ?? null;
-  if (feed.status === 'off' || feed.status === 'stale' || feed.status === 'error') return { kind: 'nofeed', tone: 'warn', headline: feed.status === 'stale' ? 'Feed stalled' : 'No live data', sub: feed.status === 'error' ? feed.error : feed.status === 'stale' ? 'The chart has stopped sending new bars. No signal can be trusted until it is back. Check the TradingView tab.' : 'Open your TradingView chart (MNQ1!, 5 minutes) with the bridge extension on.', windowEndsAt };
+  if (feed.status === 'off' || feed.status === 'stale' || feed.status === 'error') return { kind: 'nofeed', tone: 'warn', headline: feed.status === 'stale' ? 'Feed stalled' : 'No live data', sub: feed.status === 'error' ? feed.error : feed.status === 'stale' ? 'Prices have stopped updating. No signal can be trusted until they are back.' : 'No prices are arriving. Check the internet connection, or open your TradingView chart (MNQ1!, 5 minutes) with the bridge extension on.', windowEndsAt };
 
   const best = evaluated.sort((a, b) => RANK[b.res.phase] - RANK[a.res.phase])[0];
   const { setup, res } = best, base = { kind: 'signal', setup: { id: setup.id, name: setup.name, code: setup.code }, windowEndsAt, delayed: feed.delayed };

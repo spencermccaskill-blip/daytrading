@@ -107,7 +107,7 @@ function drawAnswer(s) {
 // ── Levels ──
 function drawLevels(s) {
   $('price').textContent = s.price != null ? px(s.price) : '';
-  if (!s.levels.length) { $('levels').innerHTML = '<p class="empty">No levels yet. They appear once the chart has sent the overnight sessions.</p>'; return; }
+  if (!s.levels.length) { $('levels').innerHTML = '<p class="empty">No levels yet. They appear once the overnight sessions have loaded.</p>'; return; }
   let html = '', placed = false;
   for (const l of s.levels) {
     const here = !placed && s.price != null && l.price < s.price; if (here) placed = true;
@@ -150,7 +150,7 @@ async function refresh() {
     state = next; fetchedAt = Date.now();
     $('demo').hidden = !state.demo;
     $('feed').dataset.status = state.feed.status;
-    $('feedLabel').textContent = state.feed.label + (state.feed.symbol && state.feed.status !== 'error' ? ' · ' + state.feed.symbol.split(':').pop() : '');
+    $('feedLabel').textContent = state.feed.label + (state.feed.source === 'yahoo' ? ' · MNQ, fetched automatically' : state.feed.symbol && state.feed.status !== 'error' ? ' · ' + state.feed.symbol.split(':').pop() + ' from your chart' : '');
     const old = ['off', 'stale', 'error'].includes(state.feed.status) && state.feed.lastBarT;
     $('chartNote').textContent = old ? `Old data, not live. Last bar ${tzDate.format(state.feed.lastBarT)} Denver.` : '15 minute bars, Denver time. Lines ahead of now are rule levels, not a forecast.';
     $('chartNote').className = 'small ' + (old ? 'warn' : 'mute');
@@ -273,11 +273,12 @@ function fillSettings({ settings: s, plans: p }) {
   f.trailing.value = a.trailing; f.dllOn.checked = !!a.dll.on; f.dllAmount.value = a.dll.amount; f.consistencyPct.value = a.consistencyPct ?? '';
   f.useScaling.checked = !!a.scaling; f.payoutRequested.checked = !!a.payoutRequested;
   for (const k of ['riskPerTrade', 'dailyStop', 'maxLossesPerDay']) f[k].value = s.personal[k];
+  f.feedAuto.checked = s.feed?.auto !== false;
 }
 async function loadSettings() { fillSettings(await api('GET', '/api/settings')); }
 $('sForm').elements.plan.addEventListener('change', async (e) => { try { fillSettings(await api('POST', '/api/settings', { account: { plan: e.target.value } })); say('sMsg', `Switched to ${plans[e.target.value].name} defaults.`, true); refresh(); } catch (err) { say('sMsg', err.message, false); } });
 $('sForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = e.target.elements;
-  const body = { account: { startBalance: f.startBalance.value, maxLossLimit: f.maxLossLimit.value, lockBalance: f.lockBalance.value, lockTrigger: f.lockTrigger.value, maxMicros: f.maxMicros.value, trailing: f.trailing.value, dll: { on: f.dllOn.checked, amount: f.dllAmount.value }, consistencyPct: f.consistencyPct.value === '' ? null : f.consistencyPct.value, useScaling: f.useScaling.checked, payoutRequested: f.payoutRequested.checked }, personal: { riskPerTrade: f.riskPerTrade.value, dailyStop: f.dailyStop.value, maxLossesPerDay: f.maxLossesPerDay.value } };
+  const body = { account: { startBalance: f.startBalance.value, maxLossLimit: f.maxLossLimit.value, lockBalance: f.lockBalance.value, lockTrigger: f.lockTrigger.value, maxMicros: f.maxMicros.value, trailing: f.trailing.value, dll: { on: f.dllOn.checked, amount: f.dllAmount.value }, consistencyPct: f.consistencyPct.value === '' ? null : f.consistencyPct.value, useScaling: f.useScaling.checked, payoutRequested: f.payoutRequested.checked }, personal: { riskPerTrade: f.riskPerTrade.value, dailyStop: f.dailyStop.value, maxLossesPerDay: f.maxLossesPerDay.value }, feed: { auto: f.feedAuto.checked } };
   try { fillSettings(await api('POST', '/api/settings', body)); say('sMsg', 'Saved.', true); refresh(); } catch (err) { say('sMsg', err.message, false); }
 });
