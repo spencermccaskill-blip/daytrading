@@ -63,3 +63,17 @@ export function demoInput(name) {
     .map(([ts, pnl], i) => ({ id: 'demo' + i, kind: 'trade', ts, pnl, side: pnl > 0 ? 'LONG' : 'SHORT', contracts: 1, setup: 'Demo', note: '' }));
   return { now, store, feed: { symbol: 'CME_MINI_DL:MNQ1!', lastPost: sp.stale ? now - 4 * 60000 : now - 1500 }, settings: defaultSettings(), journal: { trades }, verdicts, demo: true };
 }
+
+/** Made-up calendar and headlines for the demo screens. */
+export function demoNews(now) {
+  const m = 60000;
+  return {
+    calendar: [{ title: 'CPI m/m', impact: 'High', t: now - 51 * m, forecast: '0.3%', previous: '0.2%' }, { title: 'Crude Oil Inventories', impact: 'Medium', t: now + 129 * m, forecast: '', previous: '' }, { title: 'FOMC Meeting Minutes', impact: 'High', t: now + 339 * m, forecast: '', previous: '' }],
+    headlines: [
+      { src: 'Demo', title: 'Demo headline: White House weighs response as talks stall', link: 'https://example.com/demo-1', t: now - 47 * m },
+      { src: 'Demo', title: 'Demo headline: Fed officials split on the next rate cut', link: 'https://example.com/demo-2', t: now - 190 * m },
+      { src: 'Demo', title: 'Demo headline: Retailers report a slow start to the season', link: 'https://example.com/demo-3', t: now - 260 * m },
+    ],
+    errors: {}, updated: {},
+  };
+}

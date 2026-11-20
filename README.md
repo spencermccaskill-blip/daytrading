@@ -15,11 +15,20 @@ What the page shows, top to bottom:
 
 Journal, Playbook (rules, checklist, backtest results) and Settings are behind tabs.
 
-## The honest state of the strategies
+## What the setups and scores mean
 
-A setup may signal only if it passed a test whose rules were written down first
-(`research/PREREGISTRATION.md`). **Right now nothing has passed, so every window says stand down.**
-Results are in `research/RESULTS.md`. That is the test working, not the app being broken.
+Each of the four windows has three or four setups (fourteen in all). The Desk shows the most active
+one, with the others one click away. **None has passed every test rule**, so every one is marked
+"Not proven".
+
+The **score out of 10** is that setup's win rate in testing since 2024 (51% of trades = 5.1). It is
+the same for every signal from that setup and is not a forecast. A setup can win often and still lose
+money, so the average result per trade is shown next to it, and the line says plainly when a setup
+lost money in testing. Rules are in `research/PREREGISTRATION.md`, results in `research/RESULTS.md`.
+
+The **News** tab shows scheduled US releases, headlines sorted by market-moving topic, what MNQ did
+in the 15 and 60 minutes after each, and any unusually large 15-minute moves in the last day. It is
+context: it cannot predict how the market will react to a headline.
 
 ## Start it (Windows, PowerShell)
 

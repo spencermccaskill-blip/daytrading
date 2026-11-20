@@ -105,3 +105,15 @@ test('connected chart with no new bar for 45+ minutes counts as stalled, not as 
   assert.match(s.feed.label, /No new bars for 5\d min/);
   assert.equal(s.answer.kind, 'nofeed');
 });
+
+test('a signal too wide to take does not hide a setup that can still be traded', () => {
+  const v = loadVerdicts();
+  v.setups = v.setups.filter(s => ['ny_sweep_shift', 'ny_ib'].includes(s.id));
+  const tight = defaultSettings(); tight.personal.riskPerTrade = 100;       // the demo LONG needs $195 on 1 MNQ: cannot be taken
+  const s = buildState({ ...demoInput('late'), verdicts: v, settings: tight }); // 10:41 ET: the first hour is set, so the breakout setup is armed
+  assert.equal(s.answer.setup.id, 'ny_ib');
+  assert.equal(s.answer.state, 'Armed');
+  assert.ok(s.answer.others.some(o => o.name === 'NY sweep + shift' && o.state === 'LONG'));
+  const normal = buildState({ ...demoInput('late'), verdicts: v });
+  assert.equal(normal.answer.setup.id, 'ny_sweep_shift');                    // at $250 it fits, so the live signal leads
+});

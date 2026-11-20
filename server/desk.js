@@ -58,7 +58,9 @@ function answerFor({ session, feed, guard, settings, live, evaluated, dataNow })
   if (feed.status === 'off' || feed.status === 'stale' || feed.status === 'error') return { kind: 'nofeed', tone: 'warn', headline: feed.status === 'stale' ? 'Feed stalled' : 'No live data', sub: feed.status === 'error' ? feed.error : feed.status === 'stale' ? 'Prices have stopped updating. No signal can be trusted until they are back.' : 'No prices are arriving. Check the internet connection, or open your TradingView chart (MNQ1!, 5 minutes) with the bridge extension on.', windowEndsAt };
 
   // Most active setup first (in a trade, then armed, then watching); ties go to the better tested average.
-  const order = [...evaluated].sort((a, b) => RANK[b.res.phase] - RANK[a.res.phase] || (b.setup.avgR ?? -9) - (a.setup.avgR ?? -9));
+  // A signal whose stop is too wide to take at all sits below an armed setup: it must not hide something tradable.
+  const rank = (e) => (e.res.trade?.status === 'open' && Math.floor(settings.personal.riskPerTrade / (e.res.trade.risk * settings.instrument.pointValue)) < 1 ? 3.5 : RANK[e.res.phase]);
+  const order = [...evaluated].sort((a, b) => rank(b) - rank(a) || (b.setup.avgR ?? -9) - (a.setup.avgR ?? -9));
   const { setup, res } = order[0];
   const evidence = (s) => s.score == null ? 'Not tested.' : `Won ${Math.round(s.winPct)}% of ${s.trades} tested trades since 2024, averaging ${s.avgR >= 0 ? '+' : ''}${s.avgR.toFixed(2)}R a trade${s.avgR <= 0 ? ': it lost money in testing' : ''}. ${s.proven ? 'Passed every test rule.' : 'Not proven.'}`;
   const word = (r) => r.trade ? (r.trade.status === 'open' ? r.trade.side : r.trade.status === 'target' ? 'Target hit' : r.trade.status === 'stopped' ? 'Stopped' : 'Closed') : r.phase === 'armed' ? 'Armed' : r.phase === 'done' ? 'Done' : 'Watching';
@@ -88,7 +90,7 @@ function answerFor({ session, feed, guard, settings, live, evaluated, dataNow })
   return { ...base, tone: 'watch', state: 'Watching', headline: 'Watching', sub: res.message };
 }
 
-export function buildState({ now, store, feed, settings, journal, verdicts, demo = false, problem = null }) {
+export function buildState({ now, store, feed, settings, journal, verdicts, demo = false, problem = null, news = null }) {
   const session = sessionAt(now);
   const hasLive = (id) => liveSetups(verdicts, id).length > 0;
   session.timeline = session.timeline.map(w => ({ ...w, live: hasLive(w.id), setups: windowSetups(verdicts, w.id).length }));
@@ -124,8 +126,12 @@ export function buildState({ now, store, feed, settings, journal, verdicts, demo
   const formingRaw = ctx.raw.between(lastClosedEnd, Infinity);
   const forming = formingRaw.length ? [Math.floor(formingRaw[0].t / BAR) * BAR, formingRaw[0].o, Math.max(...formingRaw.map(r => r.h)), Math.min(...formingRaw.map(r => r.l)), formingRaw.at(-1).c] : null;
 
+  // A scheduled release right now is shown on the answer itself.
+  if (news?.caution) answer.caution = news.caution;
+  const top = news?.headlines.find(h => h.topic) || null;
   return {
     now, demo, session, feed: f, guard, answer, price, levels,
+    news: news && { next: news.next, caution: news.caution, top: top && { title: top.title, topic: top.topic, t: top.t, reaction: top.reaction }, shock: news.shocks[0] || null },
     chart: { bars: closed, forming, projections, windows: session.timeline, markers: shown?.times || null },
   };
 }

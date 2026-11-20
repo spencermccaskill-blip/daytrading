@@ -66,7 +66,7 @@ function drawTimeline(s) {
   const n = pct(nowMs());
   html += `<div class="tl-now${n > 82 ? ' flip' : ''}" id="tlNow" style="left:${n}%"><span>now ${short(nowMs())}</span></div>`;
   $('timeline').innerHTML = html;
-  $('tlKey').textContent = timeline.some(w => w.live) ? 'Solid outline: a tested setup is live in that window. Dashed: stand down.' : 'All windows dashed: no setup passed the test, so every window is a stand-down.';
+  $('tlKey').textContent = timeline.some(w => w.live) ? 'Solid outline: a setup that passed every test rule is live there. Dashed: setups are shown with a score but are not proven.' : 'All windows dashed: setups are shown with a score, but none has passed the test rules.';
 }
 
 // ── The answer ──
@@ -76,7 +76,8 @@ function drawAnswer(s) {
   el.dataset.tone = a.tone;
   const cur = s.session.current;
   $('aWindow').innerHTML = cur ? `${esc(cur.name)} window · <span class="mono" data-until="${cur.end}" data-prefix="ends in "></span>` : 'Between windows';
-  $('aSetup').textContent = a.setup ? a.setup.name : '';
+  $('aSetup').textContent = a.setup ? a.setup.name + (a.score != null ? ` · ${a.score.toFixed(1)} / 10` : '') : '';
+  drawScore(a);
   const word = $('aWord');
   if (word.textContent !== a.headline) { word.textContent = a.headline; if (lastWord !== null && !reduceMotion) { word.classList.remove('pop'); void word.offsetWidth; word.classList.add('pop'); } lastWord = a.headline; }
   $('aSub').textContent = a.sub || '';
@@ -102,6 +103,29 @@ function drawAnswer(s) {
   const when = a.signalT && a.exit == null ? ` Signal bar closed ${short(a.signalT)} Denver. Setup is flat by ${short(a.flatAt)}.` : '';
   $('aFoot').textContent = 'Signals are information, not instructions. You place every trade yourself on Tradovate.' + when + late;
   tick();
+}
+
+// Score, evidence, the caution line and the other setups in this window.
+function drawScore(a) {
+  const sc = $('aScore'), ot = $('aOthers'), ca = $('aCaution');
+  ca.hidden = !a.caution; ca.textContent = a.caution || '';
+  sc.hidden = a.score == null;
+  if (a.score != null) {
+    const tone = a.avgR > 0.05 ? 'good' : a.avgR > 0 ? 'warn' : 'bad';
+    sc.innerHTML = `<div class="score"><span class="lbl">Score</span><b class="mono">${a.score.toFixed(1)}<small> / 10</small></b><i class="meter"><i style="width:${a.score * 10}%;background:var(--${tone === 'good' ? 'long' : tone === 'warn' ? 'armed' : 'short'})"></i></i></div><p>${esc(a.evidence)}${a.disagree ? ' <b class="warn">Another setup in this window points the other way.</b>' : ''} <span class="mute">The score is the share of past tested trades that ended in profit. It is the same for every signal from this setup and is not a forecast for this one.</span></p>`;
+  }
+  ot.hidden = !a.others?.length;
+  if (a.others?.length) ot.innerHTML = `<details><summary>Also in this window: ${a.others.length} more setup${a.others.length > 1 ? 's' : ''}</summary><div class="others">${a.others.map(o => `<div class="other"><span class="nm">${esc(o.name)}</span><span class="st ${o.state === 'LONG' ? 'good' : o.state === 'SHORT' ? 'bad' : o.state === 'Armed' ? 'warn' : 'mute'}">${esc(o.state)}</span><span class="mono">${o.score != null ? o.score.toFixed(1) + ' / 10' : ''}</span><span class="mono ${o.avgR > 0 ? 'good' : 'bad'}">${o.avgR != null ? signed(o.avgR, 2) + 'R avg' : ''}</span></div>`).join('')}</div></details>`;
+}
+
+// One line under the timeline: the next release, or the latest market-moving headline.
+function drawNewsLine(n) {
+  const el = $('newsLine');
+  if (!n || (!n.next && !n.top && !n.caution)) { el.hidden = true; return; }
+  el.hidden = false;
+  const move = (r) => (r && r.m15 != null ? ` MNQ ${signed(r.m15, 0)} in 15 min.` : '');
+  el.innerHTML = n.caution ? `<b class="warn">${esc(n.caution)}</b>`
+    : `${n.next ? `Next US release: <b>${esc(n.next.title)}</b> <span class="mono" data-until="${n.next.t}" data-prefix="in "></span>.` : 'No high-impact US release left this week.'}${n.top ? ` <span class="mute">Latest: ${esc(n.top.title)} (${short(n.top.t)}).${move(n.top.reaction)}</span>` : ''}`;
 }
 
 // ── Levels ──
@@ -154,7 +178,7 @@ async function refresh() {
     const old = ['off', 'stale', 'error'].includes(state.feed.status) && state.feed.lastBarT;
     $('chartNote').textContent = old ? `Old data, not live. Last bar ${tzDate.format(state.feed.lastBarT)} Denver.` : '15 minute bars, Denver time. Lines ahead of now are rule levels, not a forecast.';
     $('chartNote').className = 'small ' + (old ? 'warn' : 'mute');
-    drawGuard(state.guard); drawTimeline(state); drawAnswer(state); drawLevels(state); paintChart();
+    drawGuard(state.guard); drawTimeline(state); drawNewsLine(state.news); drawAnswer(state); drawLevels(state); paintChart();
     $('price').classList.toggle('mute', !!old);
   } catch (e) {
     console.error(e);
@@ -168,14 +192,14 @@ function offline() {
   $('answer').dataset.tone = 'warn'; $('aWindow').textContent = 'Not connected'; $('aSetup').textContent = '';
   $('aWord').textContent = 'No connection'; lastWord = 'No connection';
   $('aSub').textContent = 'The Desk server on this laptop is not answering, so every number on this page is old. Start it again from the app folder (npm.cmd start on Windows, npm start on a Mac) and this page reconnects by itself.';
-  $('aRight').innerHTML = ''; $('aChecks').innerHTML = '';
+  $('aRight').innerHTML = ''; $('aChecks').innerHTML = ''; $('aScore').hidden = true; $('aOthers').hidden = true; $('aCaution').hidden = true; $('newsLine').hidden = true;
   $('gStatus').textContent = 'Unknown'; $('guard').dataset.status = 'offline';
 }
 refresh(); setInterval(refresh, 2000);
 document.fonts?.ready.then(paintChart);
 
 // ── Tabs ──
-const loaders = { journal: loadJournal, playbook: loadPlaybook, settings: loadSettings };
+const loaders = { journal: loadJournal, playbook: loadPlaybook, news: loadNews, settings: loadSettings };
 function showTab(name) {
   for (const b of document.querySelectorAll('.tabs button')) b.toggleAttribute('aria-current', b.dataset.tab === name), b.dataset.tab === name && b.setAttribute('aria-current', 'page');
   for (const v of document.querySelectorAll('.view')) v.hidden = v.id !== 'view-' + name;
@@ -220,6 +244,18 @@ $('cForm').addEventListener('submit', async (e) => {
   } catch (err) { $('cOut').innerHTML = `<p class="msg err">${esc(err.message)}</p>`; }
 });
 
+// ── News ──
+const tzDay = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Denver', weekday: 'short', hour: 'numeric', minute: '2-digit' });
+async function loadNews() {
+  const n = await api('GET', '/api/news' + (demo ? '?demo=' + encodeURIComponent(demo) : '')), now = nowMs();
+  $('nErr').textContent = Object.values(n.errors || {}).join(' ');
+  const rows = [...n.today.filter(e => e.t <= now), ...n.week];
+  $('nCal').innerHTML = rows.length ? `<table><thead><tr><th>When</th><th>Release</th><th>Impact</th><th class="n">Forecast</th><th class="n">Previous</th></tr></thead><tbody>${rows.map(e => `<tr${e.t <= now ? ' class="mute"' : ''}><td class="n" style="text-align:left">${tzDay.format(e.t)}</td><td>${esc(e.title)}</td><td class="${e.impact === 'High' ? 'bad' : 'warn'}">${e.impact}</td><td class="n">${esc(e.forecast)}</td><td class="n">${esc(e.previous)}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">No US releases loaded yet.</p>';
+  $('nShocks').innerHTML = n.shocks.length ? n.shocks.map(s => `<div class="shock"><div><b class="mono ${s.move < 0 ? 'bad' : 'good'}">${signed(s.move, 0)} points</b> <span class="mute">in 15 minutes at ${tzDay.format(s.t)} (${s.times} times the usual bar)</span></div>${s.headline ? `<a href="${esc(s.headline.link)}" target="_blank" rel="noopener">${esc(s.headline.title)}</a> <span class="mute small">${esc(s.headline.src)}, ${short(s.headline.t)}. Close in time; not proof it was the cause.</span>` : '<span class="mute small">No headline found within 45 minutes of it.</span>'}</div>`).join('') : '<p class="empty">No unusually large 15-minute moves in the last day.</p>';
+  const rx = (r) => !r || r.m15 == null ? '<span class="mute">too recent</span>' : `<span class="${r.m15 < 0 ? 'bad' : r.m15 > 0 ? 'good' : 'mute'}">${signed(r.m15, 0)}</span> <span class="mute">15m</span>${r.m60 != null ? ` · <span class="${r.m60 < 0 ? 'bad' : r.m60 > 0 ? 'good' : 'mute'}">${signed(r.m60, 0)}</span> <span class="mute">1h</span>` : ''}`;
+  $('nHeads').innerHTML = n.headlines.length ? n.headlines.map(h => `<div class="head-row"><span class="mono mute">${short(h.t)}</span><span class="hl">${h.topic ? `<span class="chip topic">${esc(h.topic)}</span> ` : ''}<a href="${esc(h.link)}" target="_blank" rel="noopener">${esc(h.title)}</a> <span class="mute small">${esc(h.src)}</span></span><span class="mono rx">${rx(h.reaction)}</span></div>`).join('') : '<p class="empty">No headlines in the last 24 hours yet.</p>';
+}
+
 // ── Playbook ──
 let pb = null, pbWin = null;
 const f3 = (x) => (x == null ? 'n/a' : signed(x, 3)), f1 = (x, d = 1) => (x == null ? 'n/a' : x.toFixed(d));
@@ -229,8 +265,8 @@ async function loadPlaybook() {
   const passed = pb.setups.filter(s => s.label === 'Passed');
   $('pbData').textContent = pb.data ? `NQ 15-minute bars, ${pb.data.start} to ${pb.data.end}` : 'Backtest not run yet';
   $('pbLead').textContent = passed.length
-    ? `${passed.length} setup${passed.length > 1 ? 's' : ''} passed every rule and may signal: ${passed.map(s => s.name).join(', ')}.`
-    : `No setup passed. Every window is a stand-down until one does. About ${pb.variantsTried} variants have been tried on this data, so one result with a t-stat near 2 is what luck alone would give.`;
+    ? `${passed.length} setup${passed.length > 1 ? 's' : ''} passed every test rule: ${passed.map(s => s.name).join(', ')}.`
+    : `No setup has passed every test rule. The Desk shows them anyway, each with its score: the share of its tested trades since 2024 that ended in profit. A high score with a negative average still loses money. About ${pb.variantsTried} variants have been tried on this data, so one result with a t-stat near 2 is what luck alone would give.`;
   $('pbTabs').innerHTML = pb.windows.map(w => `<button role="tab" aria-selected="${w.id === pbWin}" data-win="${w.id}" style="--c:${WIN_VAR[w.id]}">${esc(w.name)}</button>`).join('');
   drawPlaybook();
 }
@@ -238,7 +274,7 @@ $('pbTabs').addEventListener('click', (e) => { const w = e.target.dataset?.win; 
 function drawPlaybook() {
   const list = pb.setups.filter(s => s.window === pbWin);
   $('pbBody').innerHTML = list.map(s => {
-    const r = s.result, tag = `<span class="tag ${s.label.split(/[ ,]/)[0]}">${esc(s.label)}</span>`;
+    const r = s.result, tag = `<span class="tag ${s.label.split(/[ ,]/)[0]}">${esc(s.label)}</span>${s.score != null ? ` <span class="tag">${s.score.toFixed(1)} / 10</span>` : ''}`;
     let res = '';
     if (r) {
       const rows = [['2019-2023 (look-at)', r.tune], ['2024 on (judged)', r.judge], ['Last 12 months', r.last12], [`Judged, without ${r.withoutBest.year}`, r.withoutBest]];

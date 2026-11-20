@@ -22,6 +22,7 @@
         <button data-tab="desk" aria-current="page">Desk</button>
         <button data-tab="journal">Journal</button>
         <button data-tab="playbook">Playbook</button>
+        <button data-tab="news">News</button>
         <button data-tab="settings">Settings</button>
       </nav>
       <div class="meta">
@@ -41,13 +42,14 @@
     </section>
   </header>
 
-  <div class="demo" id="demo" hidden>Demo data. Not a real signal. In the real backtest no setup passed.</div>
+  <div class="demo" id="demo" hidden>Demo data. Not a real signal. The "passed" label on this screen is made up; no real setup has passed.</div>
 
   <main class="wrap">
     <!-- DESK -->
     <section class="view" id="view-desk">
       <div class="timeline rise" id="timeline" aria-label="Your day, Denver time"></div>
       <p class="tl-key" id="tlKey"></p>
+      <p class="news-line" id="newsLine" hidden></p>
 
       <article class="answer rise" id="answer" data-tone="idle" aria-live="polite">
         <div class="a-head"><span id="aWindow">–</span><span class="mute" id="aSetup"></span></div>
@@ -55,10 +57,13 @@
           <div class="a-left">
             <div class="word" id="aWord">–</div>
             <p class="a-sub" id="aSub"></p>
+            <p class="a-caution" id="aCaution" hidden></p>
           </div>
           <div class="a-right" id="aRight"></div>
         </div>
+        <div class="a-score" id="aScore" hidden></div>
         <div class="a-checks" id="aChecks"></div>
+        <div class="a-others" id="aOthers" hidden></div>
         <p class="a-foot" id="aFoot">Signals are information, not instructions. You place every trade yourself on Tradovate.</p>
       </article>
 
@@ -132,6 +137,29 @@
           <p class="mute small">Full write-up: research/RESULTS.md and research/PREREGISTRATION.md in the app folder.</p>
         </section>
       </div>
+    </section>
+
+    <!-- NEWS -->
+    <section class="view" id="view-news" hidden>
+      <section class="panel">
+        <div class="p-head"><h2>News is context, not a signal</h2></div>
+        <p class="lead">This page shows what is scheduled, what was said, and what MNQ did afterwards. It cannot tell you how the market will react to the next headline: the same kind of news has sent it both ways. Use it to know when a fast move is likely and to step aside around it.</p>
+        <p class="msg err" id="nErr"></p>
+      </section>
+      <div class="grid two">
+        <section class="panel">
+          <div class="p-head"><h2>Scheduled US releases</h2><span class="mute small">Denver time, this week</span></div>
+          <div id="nCal" class="table-wrap"></div>
+        </section>
+        <section class="panel">
+          <div class="p-head"><h2>Big moves in the last day</h2><span class="mute small">15-minute bars 3 times the usual size</span></div>
+          <div id="nShocks"></div>
+        </section>
+      </div>
+      <section class="panel">
+        <div class="p-head"><h2>Headlines</h2><span class="mute small">Last 24 hours. Market-moving topics first. The number is what MNQ did after.</span></div>
+        <div id="nHeads"></div>
+      </section>
     </section>
 
     <!-- SETTINGS -->

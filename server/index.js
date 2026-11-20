@@ -9,9 +9,10 @@ import { BarStore } from './bars.js';
 import { buildState } from './desk.js';
 import { loadVerdicts } from './verdicts.js';
 import { computeGuard, checkTrade, defaultSettings, PLANS } from './guard.js';
-import { demoInput, SCENARIOS } from './demo.js';
+import { demoInput, demoNews, SCENARIOS } from './demo.js';
 import { WINDOWS } from './sessions.js';
 import { fetchYahoo, YAHOO_SYMBOL } from './yahoo.js';
+import { createNews, newsState } from './news.js';
 
 const BRIDGE_QUIET = 180000; // the chart tab has been silent this long: fetch prices ourselves
 
@@ -59,6 +60,8 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     store.ingest(got.rows, 5, clock()); noteChange();
   }
   let verdicts = loadVerdicts();
+  const news = createNews(fetchImpl);
+  const newsNow = () => newsState({ now: clock(), ctx: store.ctx(), ...news.data });
 
   const app = express();
   app.use(express.json({ limit: '8mb' }));
@@ -82,8 +85,14 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
 
   app.get('/api/state', (req, res) => {
     const demo = req.query.demo;
-    if (demo) return SCENARIOS.includes(demo) ? res.json(buildState(demoInput(demo))) : res.status(404).json({ error: `Unknown demo. Try one of: ${SCENARIOS.join(', ')}.` });
-    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts, problem: problem() }));
+    if (demo) return SCENARIOS.includes(demo) ? res.json(buildState({ ...demoInput(demo), news: newsState({ now: demoInput(demo).now, ctx: demoInput(demo).store.ctx(), ...demoNews(demoInput(demo).now) }) })) : res.status(404).json({ error: `Unknown demo. Try one of: ${SCENARIOS.join(', ')}.` });
+    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts, problem: problem(), news: newsNow() }));
+  });
+
+  // Scheduled releases, headlines and what price did around them.
+  app.get('/api/news', (req, res) => {
+    if (req.query.demo) return res.json(newsState({ now: demoInput(req.query.demo).now, ctx: demoInput(req.query.demo).store.ctx(), ...demoNews(demoInput(req.query.demo).now) }));
+    res.json(newsNow());
   });
 
   // Rules per session, checklist and backtest results for the Playbook tab.
@@ -154,12 +163,14 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   app.use(express.static(path.join(root, 'public')));
 
   const persistBars = () => { try { store.prune(); save('bars', store.toJSON()); } catch { /* disk hiccup: try again next minute */ } };
-  return { app, persistBars, pollPrices, store, journal, settings };
+  return { app, persistBars, pollPrices, news, store, journal, settings };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const PORT = Number(process.env.PORT) || 3000;
-  const { app, persistBars, pollPrices } = createApp();
+  const { app, persistBars, pollPrices, news } = createApp();
+  news.refreshCalendar(); news.refreshHeadlines();
+  setInterval(news.refreshCalendar, 30 * 60000).unref(); setInterval(news.refreshHeadlines, 3 * 60000).unref();
   setInterval(persistBars, 60000).unref();
   pollPrices(); setInterval(pollPrices, 15000).unref();
   app.listen(PORT, () => {

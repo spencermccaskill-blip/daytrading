@@ -11,14 +11,24 @@
 
 ## How to read this
 
-- **Nothing passed.** No setup met all six rules, so The Desk shows "stand down" in every window.
+- **Nothing passed all six rules.** Since 2026-11-20, at Spencer's instruction, The Desk shows the
+  setups anyway: the most active one in each window, with a score. The pass rules did not change.
+- **Score out of 10 = win rate.** It is the share of a setup's tested trades since 2024 that ended
+  in profit. It says nothing about how big the wins and losses were. N3 (initial balance breakout)
+  wins 60% of the time and still loses money on average, because its losses are bigger than its wins.
+  Read the average R beside the score.
+- **The seven popular setups added on 2026-11-20 mostly lost money in this test.** Only the 15-minute
+  Silver Bullet form was positive in both periods, and barely (+0.014R, t 0.31). All three London
+  setups were negative since 2024. These are 15-minute simplifications of setups usually traded on
+  1- to 5-minute charts with discretion, so this does not prove the originals fail; it shows these
+  mechanical versions had no edge here.
 - N1 reproduces the October numbers on the judge period exactly (383 trades, +0.111R, t 2.31,
   10.9R drawdown). The 2019-2023 count differs slightly (705 here, 713 then) because the two
   programs stitch a few roll-week days differently; the conclusion is the same.
 - N2 (opening range breakout) has the highest average but is not close to tradeable on this
   account: it wins rarely and big (10R target), so its losing runs are several times deeper
   than the $2,000 limit allows.
-- About 16 variants have now been tried on this data. One of them showing a t-stat near 2 is
+- About 23 variants have now been tried on this data. A few showing a small positive average is
   what luck alone would produce.
 - Coverage is about 85% of weekdays (roll weeks are missing) and the data ends 2026-10-21.
 - N2, M1 and M3 are 15-minute forms of studies done on 1- or 5-minute bars, and M1/M3 only use
@@ -45,4 +55,9 @@ changed after seeing results; they are listed so the record is complete.
 
 ## Changes after seeing results
 
-None. No rule or parameter in `PREREGISTRATION.md` was changed after the first run.
+No rule or parameter of any setup was changed after its first run.
+
+One change to how results are used: on 2026-11-20, after seeing that nothing passed, Spencer chose to
+show setups on The Desk regardless of the pass rules, each with its tested win rate as a score. That
+is a decision made after seeing results and is recorded here as one. The carried-over London table
+above is superseded for sweep + reclaim and breakout by L1 and L2, which are now tested here.
