@@ -146,11 +146,21 @@ The dot at the top right turns green (live) or amber (delayed). Your TradingView
 futures about 10 minutes late unless you buy their real-time CME add-on, and the desk says "Delayed"
 when that is the case. A delayed signal is that many minutes old.
 
-## The guard needs the Journal
+## The journal, without typing
 
-The desk cannot see Tradovate. After every trade, open **Journal** and type the profit or loss.
-Two losses, $500 down on the day, or too little room to the Lucid limit, and the desk locks and blocks signals.
-Check **Settings** once: plan, whether your account has a daily loss limit, and your own rules.
+The desk cannot see Tradovate, so the guard only knows about trades that are in the Journal.
+
+- **Green + next to a suggested trade** ("I took this"): adds it to the journal at the size the desk
+  suggested. When the trade reaches its target, stop or time exit, the desk fills in the result by
+  itself. Results are worked out from the rule exit, before commissions, and are marked "estimate".
+  If your real fill or exit was different, click "estimate · fix" in the Journal and type the real number.
+- **Suggested trades** (Journal tab): every trade the setups suggested, worked out from the price
+  history when The Desk starts, including days it was off. Finished ones are saved, so the list keeps
+  growing. Press + on any you took. "How the suggestions have done" keeps a running tally per setup.
+- You can still type a trade in by hand, and "Adjustment" is for fees, payouts and corrections.
+
+Two losses, $500 down on the day, or too little room to the Lucid limit, and the desk locks and blocks
+signals. Check **Settings** once: plan, whether your account has a daily loss limit, and your own rules.
 
 ## Other commands
 

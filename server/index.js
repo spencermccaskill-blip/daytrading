@@ -13,6 +13,8 @@ import { demoInput, demoNews, SCENARIOS } from './demo.js';
 import { WINDOWS } from './sessions.js';
 import { fetchYahoo, YAHOO_SYMBOL } from './yahoo.js';
 import { createNews, newsState } from './news.js';
+import { replaySignals, tally } from './replay.js';
+import { etKey, addDays } from './time.js';
 
 const BRIDGE_QUIET = 180000; // the chart tab has been silent this long: fetch prices ourselves
 
@@ -32,7 +34,7 @@ function mergeSettings(saved) {
 
 export function createApp({ dataDir = path.join(root, 'data'), clock = () => Date.now(), fetchImpl = fetch } = {}) {
   fs.mkdirSync(dataDir, { recursive: true });
-  const FILES = { settings: path.join(dataDir, 'settings.json'), bars: path.join(dataDir, 'bars.json'), journal: path.join(dataDir, 'journal.json') };
+  const FILES = { settings: path.join(dataDir, 'settings.json'), bars: path.join(dataDir, 'bars.json'), journal: path.join(dataDir, 'journal.json'), signals: path.join(dataDir, 'signals.json') };
   // Write to a side file first, then swap it in, so a crash mid-save cannot leave half a journal.
   const save = (name, value) => { const tmp = FILES[name] + '.tmp'; fs.writeFileSync(tmp, JSON.stringify(value, null, name === 'bars' ? 0 : 2)); fs.renameSync(tmp, FILES[name]); };
 
@@ -47,6 +49,39 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   const feed = { symbol: null, source: null, lastPost: 0, lastBridge: 0, lastChange: 0, lastSig: '', error: null, fetchError: null, nextTry: 0 };
   const noteChange = () => { const last = store.last(), sig = last ? [last.t, last.o, last.h, last.l, last.c, last.v].join() : ''; if (sig !== feed.lastSig) { feed.lastSig = sig; feed.lastChange = clock(); } };
 
+  // ── Replay log: suggested trades, kept in data/signals.json once finished so they outlive the bars ──
+  const saved = readSaved(FILES.signals).value;
+  const done = new Map(Object.entries(saved?.signals || {}));
+  const log = { open: [], sig: null, full: false };
+  function refreshLog() {
+    const sig = `${store.lastRawT}|${feed.lastSig}|${store.raw.size}`;
+    if (sig === log.sig) return;
+    log.sig = sig;
+    // The first pass replays everything on hand; after that only the last two days can still change.
+    const rows = replaySignals(store.ctx(), verdicts, log.full ? { fromKey: addDays(etKey(clock()), -2) } : {});
+    log.full = store.raw.size > 0;
+    let changed = false;
+    for (const r of rows) if (r.status !== 'open') { const old = done.get(r.id); if (!old || old.exitT !== r.exitT || old.status !== r.status) { done.set(r.id, r); changed = true; } }
+    log.open = rows.filter(r => r.status === 'open' && !done.has(r.id));
+    if (changed) { try { save('signals', { signals: Object.fromEntries(done) }); } catch { /* try again on the next change */ } }
+  }
+  const allSignals = () => { refreshLog(); return [...log.open, ...done.values()].sort((a, b) => b.signalT - a.signalT); };
+  const sizeFor = (s) => Math.min(Math.floor(settings.personal.riskPerTrade / (s.stopPoints * settings.instrument.pointValue)), computeGuard(settings, journal, clock()).maxContracts);
+  const dollars = (s, contracts) => Math.round(contracts * settings.instrument.pointValue * s.dir * (s.exitPx - s.entry) * 100) / 100;
+  /** One-click entries that were still open: fill in the result once the rule exit has happened. */
+  function settle() {
+    if (bad.journal) return;
+    const pending = journal.trades.filter(t => t.open && t.signalId);
+    if (!pending.length) return;
+    const byId2 = new Map(allSignals().map(s => [s.id, s])); let changed = false;
+    for (const t of pending) {
+      const s = byId2.get(t.signalId);
+      if (!s || s.status === 'open') continue;
+      Object.assign(t, { open: false, auto: true, pnl: dollars(s, t.contracts), exit: s.exitPx, ts: s.exitT, outcome: s.status }); changed = true;
+    }
+    if (changed) save('journal', journal);
+  }
+
   // No chart tab feeding us? Fetch delayed MNQ bars ourselves. An open chart tab always wins.
   async function pollPrices() {
     const now = clock();
@@ -55,7 +90,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const got = await fetchYahoo(first ? '1mo' : '1d', fetchImpl);
     if (clock() - feed.lastBridge < BRIDGE_QUIET) return; // the chart came back while we were fetching
     if (got.error) { feed.fetchError = got.error; feed.nextTry = clock() + 45000; return; }
-    if (feed.symbol !== YAHOO_SYMBOL) store.clear();       // never mix two sources in the levels
+    if (feed.symbol !== YAHOO_SYMBOL) { store.clear(); log.full = false; } // never mix two sources in the levels
     Object.assign(feed, { symbol: YAHOO_SYMBOL, source: 'yahoo', lastPost: clock(), error: null, fetchError: null });
     store.ingest(got.rows, 5, clock()); noteChange();
   }
@@ -72,7 +107,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const resMin = Number(resolution);
     if (!Array.isArray(bars)) return res.status(400).json({ error: 'Expected a bars array.' });
     const sym = String(symbol || '');
-    if (feed.symbol && sym !== feed.symbol) store.clear(); // another contract: its prices must not mix into the levels
+    if (feed.symbol && sym !== feed.symbol) { store.clear(); log.full = false; } // another contract: its prices must not mix into the levels
     feed.lastPost = feed.lastBridge = clock(); feed.symbol = sym; feed.source = 'chart'; feed.fetchError = null;
     if (!(resMin >= 1 && resMin <= 15 && 15 % resMin === 0)) feed.error = `Set the TradingView chart to 5 minutes (it is on "${resolution}").`;
     else if (!/NQ/i.test(feed.symbol)) feed.error = `The chart shows ${feed.symbol || 'another symbol'}. Switch it to MNQ1!.`;
@@ -86,6 +121,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   app.get('/api/state', (req, res) => {
     const demo = req.query.demo;
     if (demo) return SCENARIOS.includes(demo) ? res.json(buildState({ ...demoInput(demo), news: newsState({ now: demoInput(demo).now, ctx: demoInput(demo).store.ctx(), ...demoNews(demoInput(demo).now) }) })) : res.status(404).json({ error: `Unknown demo. Try one of: ${SCENARIOS.join(', ')}.` });
+    settle();
     res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts, problem: problem(), news: newsNow() }));
   });
 
@@ -127,7 +163,38 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   });
 
   // Manual journal: Spencer types in what Tradovate shows. This is what feeds the guard.
-  app.get('/api/journal', (_req, res) => res.json({ trades: [...journal.trades].sort((x, y) => y.ts - x.ts), guard: computeGuard(settings, journal, clock()) }));
+  app.get('/api/journal', (_req, res) => { settle(); res.json({ trades: [...journal.trades].sort((x, y) => y.ts - x.ts), guard: computeGuard(settings, journal, clock()) }); });
+
+  // The replay log: every suggested trade, with the size it would have had and whether it is in the journal.
+  app.get('/api/log', (_req, res) => {
+    settle();
+    const taken = new Set(journal.trades.map(t => t.signalId).filter(Boolean)), all = allSignals();
+    res.json({ signals: all.slice(0, 400).map(s => { const contracts = sizeFor(s); return { ...s, contracts, dollars: s.status === 'open' || contracts < 1 ? null : dollars(s, contracts), taken: taken.has(s.id) }; }), tally: tally(all), total: all.length, since: all.length ? all.at(-1).signalT : null });
+  });
+
+  // One click: "I took this". The size is the one the desk suggested; the result is filled in at the rule exit.
+  app.post('/api/journal/take', (req, res) => {
+    if (bad.journal) return refuse(res);
+    const s = allSignals().find(x => x.id === req.body?.id);
+    if (!s) return res.status(404).json({ error: 'That suggested trade is no longer in the log.' });
+    if (journal.trades.some(t => t.signalId === s.id)) return res.status(409).json({ error: 'That trade is already in your journal.' });
+    const contracts = sizeFor(s);
+    if (contracts < 1) return res.status(400).json({ error: `The stop is ${s.stopPoints.toFixed(1)} points, too wide for one contract at your risk. Log it by hand if you took it anyway.` });
+    const live = s.status === 'open';
+    const row = { id: crypto.randomUUID(), kind: 'trade', ts: live ? clock() : s.exitT, pnl: live ? null : dollars(s, contracts), open: live, auto: !live, signalId: s.id, side: s.side, contracts, entry: s.entry, stop: s.stop, target: s.target, exit: live ? null : s.exitPx, outcome: live ? null : s.status, setup: s.name, followedRules: true, note: '' };
+    journal.trades.push(row); save('journal', journal);
+    res.json({ trade: row, guard: computeGuard(settings, journal, clock()) });
+  });
+  // Correct a result (the real fill was different) or close an open entry by hand.
+  app.patch('/api/journal/:id', (req, res) => {
+    if (bad.journal) return refuse(res);
+    const t = journal.trades.find(x => x.id === req.params.id), pnl = num(req.body?.pnl);
+    if (!t) return res.status(404).json({ error: 'That entry is already gone.' });
+    if (!Number.isFinite(pnl)) return res.status(400).json({ error: 'Enter the profit or loss in dollars, like 180 or -240.' });
+    if (t.open) t.ts = clock();
+    Object.assign(t, { pnl, open: false, auto: false }); save('journal', journal);
+    res.json({ trade: t, guard: computeGuard(settings, journal, clock()) });
+  });
   app.post('/api/journal', (req, res) => {
     if (bad.journal) return refuse(res);
     const b = req.body || {}, pnl = num(b.pnl);

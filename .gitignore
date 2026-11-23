@@ -4,3 +4,5 @@ data/bars.json
 data/journal.json
 data/settings.json
 screenshots/tmp/
+data/signals.json
+data/*.tmp

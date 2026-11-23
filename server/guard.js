@@ -37,6 +37,8 @@ export function computeGuard(settings, journal, now) {
   const a = settings.account, me = settings.personal;
   const rows = [...(journal?.trades || [])].filter(r => Number.isFinite(r.pnl) && Number.isFinite(r.ts)).sort((x, y) => x.ts - y.ts);
   const today = tradingDay(now);
+  // Trades added with one click and not finished yet: they count as trades, but have no result to add.
+  const stillOpen = (journal?.trades || []).filter(r => r.open && r.pnl == null && Number.isFinite(r.ts));
   let balance = a.startBalance, peak = a.startBalance, highEod = a.startBalance, lastEod = a.startBalance, day = null;
   let dayPnl = 0, tradesToday = 0, lossesToday = 0, minDayPnl = 0, breachedEver = false;
   const floorOf = (hi) => (a.payoutRequested || hi > a.lockTrigger ? a.lockBalance : Math.min(hi - a.maxLossLimit, a.lockBalance));
@@ -82,7 +84,7 @@ export function computeGuard(settings, journal, now) {
   const tight = room < 2 * me.riskPerTrade || lossesToday === me.maxLossesPerDay - 1 || stopRoom < me.dailyStop;
   return { day: today, balance, floor, floorLocked, room, breached, trailing: a.trailing, maxLossLimit: a.maxLossLimit,
     dayPnl, dailyLossUsed: Math.max(0, -dayPnl), dailyStop: me.dailyStop, stopRoom, dllAmount, dllRoom,
-    tradesToday, lossesToday, maxLosses: me.maxLossesPerDay, maxContracts, consistency, lockout, status: lockout ? 'locked' : tight ? 'caution' : 'ok' };
+    tradesToday: tradesToday + stillOpen.filter(r => tradingDay(r.ts) === today).length, openTrades: stillOpen.length, lossesToday, maxLosses: me.maxLossesPerDay, maxContracts, consistency, lockout, status: lockout ? 'locked' : tight ? 'caution' : 'ok' };
 }
 
 const usd = (x) => '$' + Math.round(x).toLocaleString('en-US');

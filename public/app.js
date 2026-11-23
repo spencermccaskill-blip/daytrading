@@ -92,6 +92,7 @@ function drawAnswer(s) {
     else if (a.fresh === false && a.state !== 'Blocked') cells.push(['Now', signed(a.rNow, 2) + 'R', a.rNow >= 0 ? 'good' : 'bad'], ['Entry was', short(a.signalT), '']);
     else cells.push(['Size', a.contracts ? `${a.contracts} MNQ` : 'none', a.contracts ? '' : 'bad'], ['Risk', a.contracts ? usd(a.riskDollars) : usd(a.stopPoints * 2) + ' on 1', a.contracts ? '' : 'bad']);
     right = `<div class="nums">${cells.map(([l, v, c]) => `<div><span class="lbl">${l}</span><b class="${c}">${v}</b></div>`).join('')}</div>`;
+    right += takeButton(a);
     if (a.check) checks = checkList(a.check);
   } else if (a.pending?.length) {
     right = `<div class="pend">${a.pending.map(p => `<div class="pend-row"><p><span class="${p.side === 'LONG' ? 'good' : 'bad'}">${p.side}</span> if a 15m bar closes ${p.side === 'LONG' ? 'above' : 'below'} <span class="mono">${px(p.trigger)}</span> ${chip(p.check)}</p><div class="nums"><div><span class="lbl">Stop</span><b class="bad">${px(p.stop)}</b></div><div><span class="lbl">Target</span><b class="good">${px(p.target)}</b></div><div><span class="lbl">Size</span><b>${p.contracts ? p.contracts + ' MNQ' : 'none'}</b></div><div><span class="lbl">Risk</span><b>${p.contracts ? usd(p.riskDollars) : 'too wide'}</b></div></div></div>`).join('')}</div>`;
@@ -104,6 +105,19 @@ function drawAnswer(s) {
   $('aFoot').textContent = 'Signals are information, not instructions. You place every trade yourself on Tradovate.' + when + late;
   tick();
 }
+
+// The green "+": put the suggested trade in the journal. The desk fills in the result at the rule exit.
+function takeButton(a) {
+  if (!a.signalId || demo) return '';
+  if (a.taken) return '<div class="take"><span class="took">In your journal</span><span class="mute small">The result fills in by itself at the target, stop or time exit. Fix it in Journal if your fill was different.</span></div>';
+  if (!a.contracts) return '<div class="take"><span class="mute small">Too wide for one contract at your risk, so it cannot be added with one click.</span></div>';
+  return `<div class="take"><button class="plus" type="button" data-take="${esc(a.signalId)}" aria-label="I took this trade: add it to the journal">+</button><span><b>I took this</b> <span class="mute small">Adds ${a.side} ${a.contracts} MNQ to your journal. No typing.</span></span></div>`;
+}
+async function take(id, after) {
+  try { await api('POST', '/api/journal/take', { id }); } catch (err) { alert(err.message); }
+  await refresh(); after?.();
+}
+document.addEventListener('click', (e) => { const id = e.target.closest?.('[data-take]')?.dataset.take; if (id) { e.target.closest('[data-take]').disabled = true; take(id, () => { if (!$('view-journal').hidden) loadJournal(); }); } });
 
 // Score, evidence, the caution line and the other setups in this window.
 function drawScore(a) {
@@ -226,11 +240,31 @@ const say = (id, text, ok) => { const n = $(id); n.textContent = text; n.classNa
 function stampNow() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); $('jForm').elements.when.value = d.toISOString().slice(0, 16); }
 async function loadJournal() {
   if (!$('jForm').elements.when.value) stampNow();
-  const j = await api('GET', '/api/journal');
-  $('jBalance').textContent = `Balance ${usd(j.guard.balance)} · limit at ${usd(j.guard.floor)}`;
-  $('jList').innerHTML = j.trades.length ? `<table><thead><tr><th>When (Denver)</th><th>Side</th><th class="n">Size</th><th>Setup</th><th>Rules</th><th class="n">Result</th><th></th></tr></thead><tbody>${j.trades.map(t => `<tr><td>${tzDate.format(t.ts)}</td><td>${t.kind === 'adjustment' ? 'Adjustment' : esc(t.side || '')}</td><td class="n">${t.contracts ?? ''}</td><td>${esc(t.setup)}${t.note ? ` <span class="mute">${esc(t.note)}</span>` : ''}</td><td>${t.followedRules == null ? '' : t.followedRules ? 'Followed' : '<span class="warn">Broke</span>'}</td><td class="n ${t.pnl < 0 ? 'bad' : 'good'}">${usd(t.pnl, true)}</td><td><button class="btn ghost" data-del="${esc(t.id)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<p class="empty">Nothing logged yet. After each trade, type the result from Tradovate above. The guard counts from here.</p>';
+  const [j, log] = await Promise.all([api('GET', '/api/journal'), api('GET', '/api/log')]);
+  $('jBalance').textContent = `Balance ${usd(j.guard.balance)} · limit at ${usd(j.guard.floor)}${j.guard.openTrades ? ` · ${j.guard.openTrades} open` : ''}`;
+  const result = (t) => t.open ? `<span class="warn">Open</span> <button class="btn ghost" data-fix="${esc(t.id)}">Close by hand</button>`
+    : `<span class="${t.pnl < 0 ? 'bad' : 'good'}">${usd(t.pnl, true)}</span>${t.auto ? ` <button class="btn ghost" data-fix="${esc(t.id)}" title="Worked out from the rule exit, before commissions. Click if your real result was different.">estimate · fix</button>` : ''}`;
+  $('jList').innerHTML = j.trades.length ? `<table><thead><tr><th>When (Denver)</th><th>Side</th><th class="n">Size</th><th>Setup</th><th>Rules</th><th class="n">Result</th><th></th></tr></thead><tbody>${j.trades.map(t => `<tr><td>${tzDate.format(t.ts)}</td><td>${t.kind === 'adjustment' ? 'Adjustment' : esc(t.side || '')}</td><td class="n">${t.contracts ?? ''}</td><td>${esc(t.setup)}${t.note ? ` <span class="mute">${esc(t.note)}</span>` : ''}</td><td>${t.followedRules == null ? '' : t.followedRules ? 'Followed' : '<span class="warn">Broke</span>'}</td><td class="n">${result(t)}</td><td><button class="btn ghost" data-del="${esc(t.id)}">Remove</button></td></tr>`).join('')}</tbody></table>` : '<p class="empty">Nothing logged yet. Press the green + on a suggested trade, or type a result above. The guard counts from here.</p>';
+  drawLog(log);
 }
-$('jList').addEventListener('click', async (e) => { const id = e.target.dataset?.del; if (!id || !confirm('Remove this entry from the journal?')) return; await api('DELETE', '/api/journal/' + id); loadJournal(); refresh(); });
+let logAll = false, lastLog = null;
+function drawLog(log) {
+  lastLog = log;
+  const rows = logAll ? log.signals : log.signals.slice(0, 25);
+  const res = (s) => s.status === 'open' ? '<span class="warn">Running</span>' : `<span class="${s.r > 0 ? 'good' : 'bad'}">${signed(s.r, 2)}R</span>${s.dollars != null ? ` <span class="mute">${usd(s.dollars, true)}</span>` : ''}`;
+  const out = (s) => ({ target: 'Target', stopped: 'Stop', time: 'Time', rule: 'Rule exit', open: '' }[s.status]);
+  const add = (s) => s.taken ? '<span class="took">In journal</span>' : s.contracts < 1 ? '<span class="mute small">too wide</span>' : `<button class="plus small" type="button" data-take="${esc(s.id)}" aria-label="Add this trade to the journal">+</button>`;
+  $('logSince').textContent = log.total ? `${log.total} suggested trades since ${tzDate.format(log.since)}` : '';
+  $('logList').innerHTML = rows.length ? `<table><thead><tr><th>Signal (Denver)</th><th>Setup</th><th>Side</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Target</th><th class="n">Size</th><th>Out</th><th class="n">Result</th><th>Took it?</th></tr></thead><tbody>${rows.map(s => `<tr><td>${tzDate.format(s.signalT)}</td><td>${esc(s.name)}${s.score != null ? ` <span class="mute small">${s.score.toFixed(1)}</span>` : ''}</td><td class="${s.side === 'LONG' ? 'good' : 'bad'}">${s.side}</td><td class="n">${px(s.entry)}</td><td class="n">${px(s.stop)}</td><td class="n">${s.target != null ? px(s.target) : ''}</td><td class="n">${s.contracts >= 1 ? s.contracts : '<span class="mute">0</span>'}</td><td>${out(s)}</td><td class="n">${res(s)}</td><td>${add(s)}</td></tr>`).join('')}</tbody></table>${!logAll && log.signals.length > 25 ? `<p><button class="btn ghost" id="logMore" type="button">Show all ${log.signals.length}</button></p>` : ''}` : '<p class="empty">No suggested trades yet. They appear here once prices have loaded, including any from days The Desk was off.</p>';
+  $('logTally').innerHTML = log.tally.length ? `<table><thead><tr><th>Setup</th><th class="n">Finished</th><th class="n">Won</th><th class="n">Avg R</th><th class="n">Total R</th></tr></thead><tbody>${log.tally.map(t => `<tr><td>${esc(t.name)}</td><td class="n">${t.closed}</td><td class="n">${t.winPct}%</td><td class="n ${t.avgR > 0 ? 'good' : 'bad'}">${signed(t.avgR, 2)}</td><td class="n ${t.totalR > 0 ? 'good' : 'bad'}">${signed(t.totalR, 1)}</td></tr>`).join('')}</tbody></table>` : '';
+}
+$('logList').addEventListener('click', (e) => { if (e.target.id === 'logMore') { logAll = true; drawLog(lastLog); } });
+$('jList').addEventListener('click', async (e) => {
+  const fix = e.target.dataset?.fix, del = e.target.dataset?.del;
+  if (fix) { const v = prompt('Your real profit or loss on this trade, in dollars (for example 180 or -240):'); if (v == null || v.trim() === '') return; try { await api('PATCH', '/api/journal/' + fix, { pnl: v }); } catch (err) { alert(err.message); } loadJournal(); refresh(); return; }
+  if (!del || !confirm('Remove this entry from the journal?')) return;
+  await api('DELETE', '/api/journal/' + del); loadJournal(); refresh();
+});
 $('jForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = new FormData(e.target), body = Object.fromEntries(f); body.followedRules = f.has('followedRules');
   body.ts = new Date(body.when).getTime(); delete body.when;

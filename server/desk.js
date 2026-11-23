@@ -126,6 +126,8 @@ export function buildState({ now, store, feed, settings, journal, verdicts, demo
   const formingRaw = ctx.raw.between(lastClosedEnd, Infinity);
   const forming = formingRaw.length ? [Math.floor(formingRaw[0].t / BAR) * BAR, formingRaw[0].o, Math.max(...formingRaw.map(r => r.h)), Math.min(...formingRaw.map(r => r.l)), formingRaw.at(-1).c] : null;
 
+  // The suggested trade on screen can be added to the journal with one click.
+  if (answer.kind === 'signal' && answer.entry != null) { answer.signalId = `${answer.setup.id}:${key}`; answer.taken = (journal.trades || []).some(t => t.signalId === answer.signalId); }
   // A scheduled release right now is shown on the answer itself.
   if (news?.caution) answer.caution = news.caution;
   const top = news?.headlines.find(h => h.topic) || null;

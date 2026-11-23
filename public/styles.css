@@ -120,6 +120,13 @@ main { padding-top: 20px; }
 @keyframes flashUp { 0% { color: var(--long); } 100% { color: inherit; } }
 @keyframes flashDown { 0% { color: var(--short); } 100% { color: inherit; } }
 
+/* One-click journal */
+.take { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.plus { width: 44px; height: 44px; min-width: 44px; border-radius: 50%; border: 1px solid var(--long); background: none; color: var(--long); font: 500 1.75rem/1 var(--ui); display: inline-grid; place-items: center; padding: 0 0 3px; transition: background var(--fast), color var(--fast); }
+.plus:hover { background: var(--long); color: var(--ground); } .plus:disabled { opacity: .4; }
+.plus.small { width: 32px; height: 32px; min-width: 32px; font-size: 1.25rem; padding-bottom: 2px; }
+.took { color: var(--long); font-weight: 600; white-space: nowrap; }
+
 /* Score, caution, other setups */
 .a-caution { margin: 10px 0 0; color: var(--armed); font-weight: 500; }
 .a-score { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 24px; align-items: start; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
