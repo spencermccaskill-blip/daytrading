@@ -67,7 +67,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   }
   const allSignals = () => { refreshLog(); return [...log.open, ...done.values()].sort((a, b) => b.signalT - a.signalT); };
   const sizeFor = (s) => Math.min(Math.floor(settings.personal.riskPerTrade / (s.stopPoints * settings.instrument.pointValue)), computeGuard(settings, journal, clock()).maxContracts);
-  const dollars = (s, contracts) => Math.round(contracts * settings.instrument.pointValue * s.dir * (s.exitPx - s.entry) * 100) / 100;
+  const dollars = (s, contracts, entry = s.entry) => Math.round(contracts * settings.instrument.pointValue * s.dir * (s.exitPx - entry) * 100) / 100;
   /** One-click entries that were still open: fill in the result once the rule exit has happened. */
   function settle() {
     if (bad.journal) return;
@@ -77,7 +77,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     for (const t of pending) {
       const s = byId2.get(t.signalId);
       if (!s || s.status === 'open') continue;
-      Object.assign(t, { open: false, auto: true, pnl: dollars(s, t.contracts), exit: s.exitPx, ts: s.exitT, outcome: s.status }); changed = true;
+      Object.assign(t, { open: false, auto: true, pnl: dollars(s, t.contracts, t.entry ?? s.entry), exit: s.exitPx, ts: s.exitT, outcome: s.status }); changed = true;
     }
     if (changed) save('journal', journal);
   }
@@ -154,6 +154,15 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     if (a.useScaling != null) next.account.scaling = a.useScaling ? PLANS.flex.scaling : null;
     if (a.consistencyPct !== undefined) { const v = a.consistencyPct === null || a.consistencyPct === '' ? null : num(a.consistencyPct); if (v !== null && !(v > 0 && v <= 100)) return res.status(400).json({ error: 'Consistency must be a percent from 1 to 100, or empty for none.' }); next.account.consistencyPct = v; }
     if (a.payoutRequested != null) next.account.payoutRequested = !!a.payoutRequested;
+    // Balance and minimum balance copied from the Lucid dashboard; the guard counts from this moment.
+    if (a.anchor === null) next.account.anchor = null;
+    else if (a.anchor !== undefined) {
+      const bal = num(a.anchor.balance), fl = num(a.anchor.floor);
+      if (!(bal > 0) || !(fl > 0)) return res.status(400).json({ error: 'Enter both numbers from your Lucid dashboard: the current balance and the minimum balance.' });
+      if (fl >= bal) return res.status(400).json({ error: 'The minimum balance must be below the current balance. If it is not, the account is already at its limit.' });
+      next.account.anchor = { balance: bal, floor: fl, at: clock() };
+    }
+    if (p.thinCushion != null) next.personal.thinCushion = !!p.thinCushion;
     if (a.cycleStart !== undefined) next.account.cycleStart = /^\d{4}-\d{2}-\d{2}$/.test(a.cycleStart || '') ? a.cycleStart : null;
     if (b.feed?.auto != null) next.feed.auto = !!b.feed.auto;
     for (const [k, label] of [['riskPerTrade', 'Risk per trade'], ['dailyStop', 'Daily stop']]) if (p[k] != null) { const v = num(p[k]); if (!(v > 0)) return res.status(400).json({ error: `${label} must be a dollar amount above zero.` }); next.personal[k] = v; }
@@ -178,10 +187,22 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const s = allSignals().find(x => x.id === req.body?.id);
     if (!s) return res.status(404).json({ error: 'That suggested trade is no longer in the log.' });
     if (journal.trades.some(t => t.signalId === s.id)) return res.status(409).json({ error: 'That trade is already in your journal.' });
-    const contracts = sizeFor(s);
+    const b = req.body || {}, cap = computeGuard(settings, journal, clock()).maxContracts;
+    // The exact price paid and the size actually traded, if given; otherwise the rule entry and the suggested size.
+    let entry = s.entry;
+    if (b.entry != null && b.entry !== '') {
+      entry = num(b.entry);
+      if (!Number.isFinite(entry) || entry <= 0) return res.status(400).json({ error: 'Enter your entry price as a number, like 25073.25.' });
+      if (Math.abs(entry - s.entry) > 0.03 * s.entry) return res.status(400).json({ error: 'That entry is a long way from where this trade was (' + s.entry + '). Check the number.' });
+    }
+    let contracts = sizeFor(s);
+    if (b.contracts != null && b.contracts !== '') {
+      contracts = num(b.contracts);
+      if (!Number.isInteger(contracts) || contracts < 1 || contracts > cap) return res.status(400).json({ error: 'Contracts must be a whole number from 1 to ' + cap + ' (what your plan allows right now).' });
+    }
     if (contracts < 1) return res.status(400).json({ error: `The stop is ${s.stopPoints.toFixed(1)} points, too wide for one contract at your risk. Log it by hand if you took it anyway.` });
     const live = s.status === 'open';
-    const row = { id: crypto.randomUUID(), kind: 'trade', ts: live ? clock() : s.exitT, pnl: live ? null : dollars(s, contracts), open: live, auto: !live, signalId: s.id, side: s.side, contracts, entry: s.entry, stop: s.stop, target: s.target, exit: live ? null : s.exitPx, outcome: live ? null : s.status, setup: s.name, followedRules: true, note: '' };
+    const row = { id: crypto.randomUUID(), kind: 'trade', ts: live ? clock() : s.exitT, pnl: live ? null : dollars(s, contracts, entry), open: live, auto: !live, signalId: s.id, side: s.side, contracts, entry, stop: s.stop, target: s.target, exit: live ? null : s.exitPx, outcome: live ? null : s.status, setup: s.name, followedRules: true, note: '' };
     journal.trades.push(row); save('journal', journal);
     res.json({ trade: row, guard: computeGuard(settings, journal, clock()) });
   });

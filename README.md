@@ -159,6 +159,19 @@ The desk cannot see Tradovate, so the guard only knows about trades that are in 
   growing. Press + on any you took. "How the suggestions have done" keeps a running tally per setup.
 - You can still type a trade in by hand, and "Adjustment" is for fees, payouts and corrections.
 
+- **The + asks for your entry price first.** It is filled in with the rule's entry; change it to the
+  price you actually got (and the contracts, if different) so the result is exact.
+
+### Setting your real balance
+
+If the account was traded before The Desk, open **Settings** and enter two numbers from your Lucid
+dashboard under "Set it from your Lucid dashboard": the current balance and the minimum balance.
+The guard counts from there. Do this again any time the guard and Lucid disagree.
+
+With less than $1,000 of room to the limit, the guard switches to **one loss and done for the day**.
+It does not shrink your risk per trade, so trades are not blocked for their size. You can turn this
+off in Settings.
+
 Two losses, $500 down on the day, or too little room to the Lucid limit, and the desk locks and blocks
 signals. Check **Settings** once: plan, whether your account has a daily loss limit, and your own rules.
 

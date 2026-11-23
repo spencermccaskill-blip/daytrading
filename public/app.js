@@ -48,7 +48,7 @@ function drawGuard(g) {
   $('gTrades').textContent = g.tradesToday;
   $('gLosses').innerHTML = `${g.lossesToday} <small>of ${g.maxLosses}</small>`;
   $('gLosses').className = 'mono ' + (g.lossesToday >= g.maxLosses ? 'bad' : g.lossesToday ? 'warn' : '');
-  $('gStatus').textContent = g.lockout ? (g.breached ? 'Limit reached' : 'Locked out') : g.status === 'caution' ? 'Careful' : 'Clear to trade';
+  $('gStatus').textContent = g.lockout ? (g.breached ? 'Limit reached' : 'Locked out') : g.thin ? 'Thin cushion: one loss and done' : g.status === 'caution' ? 'Careful' : 'Clear to trade';
   $('gStatus').title = g.lockout?.reason || `Balance ${usd(g.balance)}. Limit at ${usd(g.floor)}${g.floorLocked ? ' (locked)' : ''}. Up to ${g.maxContracts} MNQ.`;
 }
 
@@ -109,15 +109,45 @@ function drawAnswer(s) {
 // The green "+": put the suggested trade in the journal. The desk fills in the result at the rule exit.
 function takeButton(a) {
   if (!a.signalId || demo) return '';
+  takeInfo.set(a.signalId, { name: a.setup.name, side: a.side, entry: a.entry, stop: a.stop, target: a.target, contracts: a.contracts });
   if (a.taken) return '<div class="take"><span class="took">In your journal</span><span class="mute small">The result fills in by itself at the target, stop or time exit. Fix it in Journal if your fill was different.</span></div>';
   if (!a.contracts) return '<div class="take"><span class="mute small">Too wide for one contract at your risk, so it cannot be added with one click.</span></div>';
-  return `<div class="take"><button class="plus" type="button" data-take="${esc(a.signalId)}" aria-label="I took this trade: add it to the journal">+</button><span><b>I took this</b> <span class="mute small">Adds ${a.side} ${a.contracts} MNQ to your journal. No typing.</span></span></div>`;
+  return `<div class="take"><button class="plus" type="button" data-take="${esc(a.signalId)}" aria-label="I took this trade: add it to the journal">+</button><span><b>I took this</b> <span class="mute small">Adds ${a.side} ${a.contracts} MNQ to your journal. You confirm your entry price first.</span></span></div>`;
 }
 async function take(id, after) {
   try { await api('POST', '/api/journal/take', { id }); } catch (err) { alert(err.message); }
   await refresh(); after?.();
 }
-document.addEventListener('click', (e) => { const id = e.target.closest?.('[data-take]')?.dataset.take; if (id) { e.target.closest('[data-take]').disabled = true; take(id, () => { if (!$('view-journal').hidden) loadJournal(); }); } });
+// What the + needs to know about each suggested trade on screen.
+const takeInfo = new Map();
+let takeId = null;
+function openTake(id) {
+  const s = takeInfo.get(id); if (!s) return;
+  takeId = id;
+  $('takeWhat').textContent = `${s.name}: ${s.side}. Rule entry ${px(s.entry)}, stop ${px(s.stop)}${s.target != null ? ', target ' + px(s.target) : ''}. Type the price you actually got so the result is exact.`;
+  $('takeEntry').value = s.entry; $('takeContracts').value = s.contracts; $('takeErr').textContent = '';
+  takeRisk(); $('takeDlg').showModal(); $('takeEntry').select();
+}
+function takeRisk() {
+  const s = takeInfo.get(takeId), e = Number($('takeEntry').value), c = Number($('takeContracts').value), el = $('takeRisk');
+  if (!s || !(e > 0) || !(c > 0)) { el.textContent = ''; return; }
+  const pts = Math.abs(e - s.stop), risk = pts * 2 * c;
+  const over = lastRisk != null && risk > lastRisk;
+  el.innerHTML = `Stop is ${pts.toFixed(2)} points from your entry: <b class="${over ? 'bad' : ''}">${usd(risk)} at risk</b>${over ? ` (over your ${usd(lastRisk)} per trade)` : ''}.`;
+}
+let lastRisk = null;
+api('GET', '/api/settings').then(r => { lastRisk = r.settings.personal.riskPerTrade; }).catch(() => {});
+$('takeEntry').addEventListener('input', takeRisk); $('takeContracts').addEventListener('input', takeRisk);
+$('takeCancel').addEventListener('click', () => $('takeDlg').close());
+$('takeForm').addEventListener('submit', async (e) => {
+  e.preventDefault(); $('takeOk').disabled = true;
+  try {
+    await api('POST', '/api/journal/take', { id: takeId, entry: $('takeEntry').value, contracts: $('takeContracts').value });
+    $('takeDlg').close(); await refresh(); if (!$('view-journal').hidden) loadJournal();
+  } catch (err) { $('takeErr').textContent = err.message; }
+  $('takeOk').disabled = false;
+});
+document.addEventListener('click', (e) => { const id = e.target.closest?.('[data-take]')?.dataset.take; if (id) openTake(id); });
 
 // Score, evidence, the caution line and the other setups in this window.
 function drawScore(a) {
@@ -250,6 +280,7 @@ async function loadJournal() {
 let logAll = false, lastLog = null;
 function drawLog(log) {
   lastLog = log;
+  for (const s of log.signals) takeInfo.set(s.id, s);
   const rows = logAll ? log.signals : log.signals.slice(0, 25);
   const res = (s) => s.status === 'open' ? '<span class="warn">Running</span>' : `<span class="${s.r > 0 ? 'good' : 'bad'}">${signed(s.r, 2)}R</span>${s.dollars != null ? ` <span class="mute">${usd(s.dollars, true)}</span>` : ''}`;
   const out = (s) => ({ target: 'Target', stopped: 'Stop', time: 'Time', rule: 'Rule exit', open: '' }[s.status]);
@@ -344,11 +375,17 @@ function fillSettings({ settings: s, plans: p }) {
   f.useScaling.checked = !!a.scaling; f.payoutRequested.checked = !!a.payoutRequested;
   for (const k of ['riskPerTrade', 'dailyStop', 'maxLossesPerDay']) f[k].value = s.personal[k];
   f.feedAuto.checked = s.feed?.auto !== false;
+  f.thinCushion.checked = s.personal.thinCushion !== false;
+  const an = a.anchor;
+  f.anchorBalance.value = ''; f.anchorFloor.value = '';
+  $('anchorNote').textContent = an ? `Counting from ${usd(an.balance)} with the limit at ${usd(an.floor)}, set ${tzDate.format(an.at)} Denver. Journal entries before that are ignored. Update these any time your Lucid dashboard disagrees with the guard.` : 'Not set: the guard counts from the $50,000 starting balance and your journal. If you traded this account before using The Desk, enter both numbers from your Lucid dashboard.';
 }
+$('anchorSet').addEventListener('click', async () => { const f = $('sForm').elements; try { fillSettings(await api('POST', '/api/settings', { account: { anchor: { balance: f.anchorBalance.value, floor: f.anchorFloor.value } } })); say('aMsg', 'Set.', true); refresh(); } catch (err) { say('aMsg', err.message, false); } });
+$('anchorClear').addEventListener('click', async () => { try { fillSettings(await api('POST', '/api/settings', { account: { anchor: null } })); say('aMsg', 'Cleared.', true); refresh(); } catch (err) { say('aMsg', err.message, false); } });
 async function loadSettings() { fillSettings(await api('GET', '/api/settings')); }
 $('sForm').elements.plan.addEventListener('change', async (e) => { try { fillSettings(await api('POST', '/api/settings', { account: { plan: e.target.value } })); say('sMsg', `Switched to ${plans[e.target.value].name} defaults.`, true); refresh(); } catch (err) { say('sMsg', err.message, false); } });
 $('sForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = e.target.elements;
-  const body = { account: { startBalance: f.startBalance.value, maxLossLimit: f.maxLossLimit.value, lockBalance: f.lockBalance.value, lockTrigger: f.lockTrigger.value, maxMicros: f.maxMicros.value, trailing: f.trailing.value, dll: { on: f.dllOn.checked, amount: f.dllAmount.value }, consistencyPct: f.consistencyPct.value === '' ? null : f.consistencyPct.value, useScaling: f.useScaling.checked, payoutRequested: f.payoutRequested.checked }, personal: { riskPerTrade: f.riskPerTrade.value, dailyStop: f.dailyStop.value, maxLossesPerDay: f.maxLossesPerDay.value }, feed: { auto: f.feedAuto.checked } };
+  const body = { account: { startBalance: f.startBalance.value, maxLossLimit: f.maxLossLimit.value, lockBalance: f.lockBalance.value, lockTrigger: f.lockTrigger.value, maxMicros: f.maxMicros.value, trailing: f.trailing.value, dll: { on: f.dllOn.checked, amount: f.dllAmount.value }, consistencyPct: f.consistencyPct.value === '' ? null : f.consistencyPct.value, useScaling: f.useScaling.checked, payoutRequested: f.payoutRequested.checked }, personal: { riskPerTrade: f.riskPerTrade.value, dailyStop: f.dailyStop.value, maxLossesPerDay: f.maxLossesPerDay.value, thinCushion: f.thinCushion.checked }, feed: { auto: f.feedAuto.checked } };
   try { fillSettings(await api('POST', '/api/settings', body)); say('sMsg', 'Saved.', true); refresh(); } catch (err) { say('sMsg', err.message, false); }
 });

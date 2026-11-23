@@ -47,7 +47,7 @@ button, select, input[type="checkbox"], label.check { cursor: pointer; }
 .g:first-child { border-left: 0; padding-left: 0; }
 .g b { font-size: 1.25rem; font-weight: 500; line-height: 1.25; white-space: nowrap; }
 .g b small { font-size: .8125rem; color: var(--mute); font-weight: 400; }
-.g-status b { font-family: var(--ui); font-weight: 600; font-size: 1.0625rem; white-space: normal; }
+.g-status b { font-family: var(--ui); font-weight: 600; font-size: 1.0625rem; white-space: normal; line-height: 1.25; }
 .meter { display: block; height: 1px; background: var(--line-2); margin-top: 6px; }
 .meter i { display: block; height: 1px; width: 0; background: var(--long); transition: width var(--base) var(--ease), background var(--base); }
 .guard[data-status="ok"] #gStatus { color: var(--long); }
@@ -119,6 +119,12 @@ main { padding-top: 20px; }
 .flash-up { animation: flashUp 700ms ease-out; } .flash-down { animation: flashDown 700ms ease-out; }
 @keyframes flashUp { 0% { color: var(--long); } 100% { color: inherit; } }
 @keyframes flashDown { 0% { color: var(--short); } 100% { color: inherit; } }
+
+/* Pop-up for the + button */
+dialog { background: var(--ground); color: var(--ink); border: 1px solid var(--line-2); border-radius: var(--r); padding: 22px 24px; width: min(460px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(5, 6, 10, .8); }
+dialog h2 { font-size: 1.25rem; }
+.form.anchor { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
 
 /* One-click journal */
 .take { display: flex; align-items: center; gap: 12px; margin-top: 14px; }

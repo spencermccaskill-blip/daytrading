@@ -175,6 +175,13 @@
         <div class="grid two">
           <section class="panel">
             <div class="p-head"><h2>Lucid account</h2><span class="mute small">$50K funded</span></div>
+            <div class="form anchor">
+              <p class="wide"><b>Set it from your Lucid dashboard</b></p>
+              <label>Current balance<input name="anchorBalance" inputmode="decimal" placeholder="50046"></label>
+              <label>Minimum balance (max loss limit)<input name="anchorFloor" inputmode="decimal" placeholder="49363"></label>
+              <div class="wide row"><button class="btn" type="button" id="anchorSet">Use these numbers</button><button class="btn ghost" type="button" id="anchorClear">Go back to counting from $50,000</button><span class="msg" id="aMsg" role="status"></span></div>
+              <p class="wide note" id="anchorNote"></p>
+            </div>
             <div class="form">
               <label class="wide">Plan<select name="plan"><option value="flex">LucidFlex</option><option value="pro">LucidPro</option><option value="direct">LucidDirect</option><option value="daily">LucidDaily</option></select></label>
               <p class="wide note" id="planNote"></p>
@@ -197,6 +204,8 @@
               <label>Risk per trade<input name="riskPerTrade" inputmode="decimal"></label>
               <label>Daily stop<input name="dailyStop" inputmode="decimal"></label>
               <label>Losses and done<input name="maxLossesPerDay" inputmode="numeric"></label>
+              <label class="check wide"><input type="checkbox" name="thinCushion"> When room to the limit is under $1,000: one loss and done for the day</label>
+              <p class="wide note">This protects a small cushion without blocking trades for their size. Your risk per trade stays the same.</p>
               <label class="check wide"><input type="checkbox" name="feedAuto"> Fetch prices automatically when no chart tab is open</label>
               <p class="wide note">Free and about 10 minutes delayed, from Yahoo Finance. It is an unofficial service and can stop working without notice. An open TradingView chart with the bridge extension is always used instead when there is one.</p>
               <p class="wide note">Never shrink a stop to fit. If the stop is too wide for one contract at your risk, the desk says skip.</p>
@@ -213,6 +222,19 @@
       </form>
     </section>
   </main>
+
+  <!-- Pops up when + is pressed: confirm the exact entry price and size before it goes in the journal. -->
+  <dialog id="takeDlg" aria-labelledby="takeTitle">
+    <form id="takeForm" method="dialog" class="form">
+      <h2 class="wide" id="takeTitle">Add this trade to your journal</h2>
+      <p class="wide note" id="takeWhat"></p>
+      <label>Your entry price<input name="entry" id="takeEntry" inputmode="decimal" autocomplete="off" required></label>
+      <label>Contracts (MNQ)<input name="contracts" id="takeContracts" inputmode="numeric" autocomplete="off" required></label>
+      <p class="wide note" id="takeRisk"></p>
+      <p class="wide msg err" id="takeErr" role="alert"></p>
+      <div class="wide row"><button class="btn" type="submit" id="takeOk">Add to journal</button><button class="btn ghost" type="button" id="takeCancel">Cancel</button></div>
+    </form>
+  </dialog>
 
   <script type="module" src="/app.js"></script>
 </body>
