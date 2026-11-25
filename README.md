@@ -44,6 +44,16 @@ so. CME confirms holiday hours about two weeks ahead; rows not yet confirmed are
 severity, topic and source, scheduled US releases, and unusually large moves. It is context: it
 cannot predict how the market will react to a headline.
 
+## Start and update on the Mac, without typing
+
+In Finder, open `Projects/daytrading-claude-stoic-darwin-br4ivc` and double-click:
+
+- **Start The Desk.command** to start it (it stops any copy already running, then opens the page).
+- **Update The Desk.command** to download the newest version and start it. Your journal and settings are kept.
+
+Each opens its own Terminal window; leave that window open while you trade. The first time, macOS may
+ask whether to open it: choose Open. To keep them handy, drag either file to the right side of the Dock.
+
 ## Start it (Windows, PowerShell)
 
 Stop the old NQ Desk first if it is running (click its PowerShell window, press Ctrl+C).
