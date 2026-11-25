@@ -24,7 +24,7 @@ test('real verdicts: nothing is proven, but every window shows its setups with a
   assert.equal(s.answer.kind, 'signal');
   assert.equal(s.answer.proven, false);
   assert.ok(s.answer.score > 0 && s.answer.score < 10);
-  assert.match(s.answer.evidence, /Won \d+% of \d+ tested trades since 2024.*Not proven\./);
+  assert.match(s.answer.evidence, /Since 2024: won \d+% of \d+ tested trades.*Not proven\./);
   assert.ok(s.answer.others.length >= 3);
   assert.ok(s.session.timeline.every(w => w.live === false && w.setups >= 3));
 });
@@ -113,7 +113,7 @@ test('a signal too wide to take does not hide a setup that can still be traded',
   const s = buildState({ ...demoInput('late'), verdicts: v, settings: tight }); // 10:41 ET: the first hour is set, so the breakout setup is armed
   assert.equal(s.answer.setup.id, 'ny_ib');
   assert.equal(s.answer.state, 'Armed');
-  assert.ok(s.answer.others.some(o => o.name === 'NY sweep + shift' && o.state === 'LONG'));
+  assert.ok(s.answer.others.some(o => o.setup.name === 'NY sweep + shift' && o.state === 'Blocked'));
   const normal = buildState({ ...demoInput('late'), verdicts: v });
   assert.equal(normal.answer.setup.id, 'ny_sweep_shift');                    // at $250 it fits, so the live signal leads
 });

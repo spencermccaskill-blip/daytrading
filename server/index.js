@@ -14,6 +14,7 @@ import { WINDOWS } from './sessions.js';
 import { fetchYahoo, YAHOO_SYMBOL } from './yahoo.js';
 import { createNews, newsState } from './news.js';
 import { replaySignals, tally } from './replay.js';
+import { byId } from './strategies/index.js';
 import { etKey, addDays } from './time.js';
 
 const BRIDGE_QUIET = 180000; // the chart tab has been silent this long: fetch prices ourselves
@@ -29,7 +30,8 @@ const num = (v) => (v === '' || v == null ? NaN : Number(v));
 /** Settings on disk merged over the defaults, so a new field never breaks an old file. */
 function mergeSettings(saved) {
   const d = defaultSettings(), s = saved || {};
-  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument, feed: { auto: s.feed?.auto !== false } };
+  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument, feed: { auto: s.feed?.auto !== false },
+    setups: { focus: Array.isArray(s.setups?.focus) ? s.setups.focus : [], off: Array.isArray(s.setups?.off) ? s.setups.off : [] } };
 }
 
 export function createApp({ dataDir = path.join(root, 'data'), clock = () => Date.now(), fetchImpl = fetch } = {}) {
@@ -66,6 +68,13 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     if (changed) { try { save('signals', { signals: Object.fromEntries(done) }); } catch { /* try again on the next change */ } }
   }
   const allSignals = () => { refreshLog(); return [...log.open, ...done.values()].sort((a, b) => b.signalT - a.signalT); };
+  const RECENT_DAYS = 28;
+  /** How each setup's suggestions have done over the last four weeks. */
+  function recentStats() {
+    const since = clock() - RECENT_DAYS * 864e5, out = {};
+    for (const t of tally(allSignals().filter(s => s.signalT >= since))) out[t.setupId] = { ...t, days: RECENT_DAYS };
+    return out;
+  }
   const sizeFor = (s) => Math.min(Math.floor(settings.personal.riskPerTrade / (s.stopPoints * settings.instrument.pointValue)), computeGuard(settings, journal, clock()).maxContracts);
   const dollars = (s, contracts, entry = s.entry) => Math.round(contracts * settings.instrument.pointValue * s.dir * (s.exitPx - entry) * 100) / 100;
   /** One-click entries that were still open: fill in the result once the rule exit has happened. */
@@ -76,7 +85,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const byId2 = new Map(allSignals().map(s => [s.id, s])); let changed = false;
     for (const t of pending) {
       const s = byId2.get(t.signalId);
-      if (!s || s.status === 'open') continue;
+      if (!s || s.status === 'open' || (t.side && s.side !== t.side)) continue; // the setup went the other way: left open to close by hand
       Object.assign(t, { open: false, auto: true, pnl: dollars(s, t.contracts, t.entry ?? s.entry), exit: s.exitPx, ts: s.exitT, outcome: s.status }); changed = true;
     }
     if (changed) save('journal', journal);
@@ -122,7 +131,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const demo = req.query.demo;
     if (demo) return SCENARIOS.includes(demo) ? res.json(buildState({ ...demoInput(demo), news: newsState({ now: demoInput(demo).now, ctx: demoInput(demo).store.ctx(), ...demoNews(demoInput(demo).now) }) })) : res.status(404).json({ error: `Unknown demo. Try one of: ${SCENARIOS.join(', ')}.` });
     settle();
-    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts, problem: problem(), news: newsNow() }));
+    res.json(buildState({ now: clock(), store, feed, settings, journal, verdicts, problem: problem(), news: newsNow(), recent: recentStats() }));
   });
 
   // Scheduled releases, headlines and what price did around them.
@@ -132,7 +141,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   });
 
   // Rules per session, checklist and backtest results for the Playbook tab.
-  app.get('/api/playbook', (_req, res) => { verdicts = loadVerdicts(); res.json({ ...verdicts, windows: WINDOWS.map(w => ({ id: w.id, name: w.name })) }); });
+  app.get('/api/playbook', (_req, res) => { verdicts = loadVerdicts(); const all = allSignals(); res.json({ ...verdicts, windows: WINDOWS.map(w => ({ id: w.id, name: w.name })), prefs: settings.setups, recent: recentStats(), tally: tally(all), tallySince: all.length ? all.at(-1).signalT : null }); });
 
   app.get('/api/settings', (_req, res) => res.json({ settings, plans: PLANS }));
   app.post('/api/settings', (req, res) => {
@@ -165,6 +174,15 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     if (p.thinCushion != null) next.personal.thinCushion = !!p.thinCushion;
     if (a.cycleStart !== undefined) next.account.cycleStart = /^\d{4}-\d{2}-\d{2}$/.test(a.cycleStart || '') ? a.cycleStart : null;
     if (b.feed?.auto != null) next.feed.auto = !!b.feed.auto;
+    // Which setups to lead with (focus) and which to leave out (off).
+    if (b.setups) {
+      const known = new Set(verdicts.setups.filter(x => !x.carried).map(x => x.id));
+      for (const k of ['focus', 'off']) if (b.setups[k] !== undefined) {
+        if (!Array.isArray(b.setups[k]) || b.setups[k].some(id => !known.has(id))) return res.status(400).json({ error: 'That is not a setup The Desk knows.' });
+        next.setups[k] = [...new Set(b.setups[k])];
+      }
+      next.setups.focus = next.setups.focus.filter(id => !next.setups.off.includes(id)); // hiding a setup also un-focuses it
+    }
     for (const [k, label] of [['riskPerTrade', 'Risk per trade'], ['dailyStop', 'Daily stop']]) if (p[k] != null) { const v = num(p[k]); if (!(v > 0)) return res.status(400).json({ error: `${label} must be a dollar amount above zero.` }); next.personal[k] = v; }
     if (p.maxLossesPerDay != null) { const v = num(p.maxLossesPerDay); if (!(Number.isInteger(v) && v >= 1)) return res.status(400).json({ error: 'Losses per day must be a whole number, 1 or more.' }); next.personal.maxLossesPerDay = v; }
     Object.assign(settings, next); save('settings', settings);
@@ -184,7 +202,16 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
   // One click: "I took this". The size is the one the desk suggested; the result is filled in at the rule exit.
   app.post('/api/journal/take', (req, res) => {
     if (bad.journal) return refuse(res);
-    const s = allSignals().find(x => x.id === req.body?.id);
+    let s = allSignals().find(x => x.id === req.body?.id);
+    // Not triggered yet by the desk's (delayed) bars: an armed trade can still be added, from its trigger, stop and target.
+    if (!s && req.body?.side) {
+      const [setupId, key] = String(req.body.id || '').split(':'), meta = verdicts.setups.find(x => x.id === setupId && !x.carried);
+      if (meta && key === etKey(clock())) {
+        const p = (byId(setupId).evaluate(store.ctx(), key).pending || []).find(x => x.side === req.body.side);
+        if (!p) return res.status(400).json({ error: `That setup is not armed for a ${req.body.side} right now.` });
+        s = { id: req.body.id, name: meta.name, side: p.side, dir: p.dir, entry: p.trigger, stop: p.stop, target: p.target, stopPoints: p.risk, status: 'open', exitPx: null, exitT: null };
+      }
+    }
     if (!s) return res.status(404).json({ error: 'That suggested trade is no longer in the log.' });
     if (journal.trades.some(t => t.signalId === s.id)) return res.status(409).json({ error: 'That trade is already in your journal.' });
     const b = req.body || {}, cap = computeGuard(settings, journal, clock()).maxContracts;
@@ -202,7 +229,8 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     }
     if (contracts < 1) return res.status(400).json({ error: `The stop is ${s.stopPoints.toFixed(1)} points, too wide for one contract at your risk. Log it by hand if you took it anyway.` });
     const live = s.status === 'open';
-    const row = { id: crypto.randomUUID(), kind: 'trade', ts: live ? clock() : s.exitT, pnl: live ? null : dollars(s, contracts, entry), open: live, auto: !live, signalId: s.id, side: s.side, contracts, entry, stop: s.stop, target: s.target, exit: live ? null : s.exitPx, outcome: live ? null : s.status, setup: s.name, followedRules: true, note: '' };
+    const overRisk = contracts * Math.abs(entry - s.stop) * settings.instrument.pointValue > settings.personal.riskPerTrade * 1.02;
+    const row = { id: crypto.randomUUID(), kind: 'trade', ts: live ? clock() : s.exitT, pnl: live ? null : dollars(s, contracts, entry), open: live, auto: !live, signalId: s.id, side: s.side, contracts, entry, stop: s.stop, target: s.target, exit: live ? null : s.exitPx, outcome: live ? null : s.status, setup: s.name, followedRules: !overRisk, note: overRisk ? 'Over your risk per trade.' : '' };
     journal.trades.push(row); save('journal', journal);
     res.json({ trade: row, guard: computeGuard(settings, journal, clock()) });
   });

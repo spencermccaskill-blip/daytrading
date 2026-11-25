@@ -1,6 +1,7 @@
 // News: scheduled US releases, headlines, and what price did around them.
 // This is context, not a signal. Nothing here predicts a reaction; it shows what happened.
 import { zoned, DENVER, BAR, MIN, HOUR, DAY } from './time.js';
+import { holidayNotice } from './holidays.js';
 
 export const CALENDAR_URL = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
 export const HEADLINE_FEEDS = [
@@ -23,12 +24,19 @@ const decode = (s) => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const tag = (block, name) => { const m = block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)</${name}>`)); return m ? decode(m[1]) : ''; };
 
+/** The article picture, if the feed gives one: media:content, media:thumbnail or an image enclosure. Web addresses only. */
+function imageOf(block) {
+  const m = block.match(/<media:(?:content|thumbnail)\b[^>]*\burl="([^"]+)"/i) || block.match(/<enclosure\b[^>]*\burl="([^"]+)"[^>]*\btype="image\//i) || block.match(/<enclosure\b[^>]*\btype="image\/[^"]*"[^>]*\burl="([^"]+)"/i);
+  const url = m ? decode(m[1]) : '';
+  return /^https:\/\//.test(url) ? url : null;
+}
+
 /** Headlines from one RSS feed. Items without a title or link are dropped. */
 export function parseRss(xml, src) {
   const out = [];
   for (const m of String(xml || '').matchAll(/<item[\s>][\s\S]*?<\/item>/g)) {
     const title = tag(m[0], 'title'), link = tag(m[0], 'link'), t = Date.parse(tag(m[0], 'pubDate'));
-    if (title && /^https?:\/\//.test(link)) out.push({ src, title, link, t: Number.isFinite(t) ? t : null });
+    if (title && /^https?:\/\//.test(link)) out.push({ src, title, link, t: Number.isFinite(t) ? t : null, image: imageOf(m[0]) });
   }
   return out;
 }
@@ -43,6 +51,17 @@ const TOPICS = [
   ['Big tech', /\b(nvidia|apple|microsoft|alphabet|google|amazon|meta|tesla|broadcom|amd|chip(maker)?s?|semiconductors?|nasdaq)\b/i],
 ];
 export const topicOf = (title) => TOPICS.find(([, re]) => re.test(title))?.[0] ?? null;
+
+const TOPIC_LEVEL = { 'War and geopolitics': 'High', 'Tariffs and trade': 'High', 'Fed and rates': 'High', 'Inflation and jobs data': 'Medium', 'White House': 'Medium', 'Big tech': 'Low' };
+/** Did MNQ move a lot after it? 40+ points in 15 minutes or 80+ in an hour. */
+export const movedAfter = (r) => !!r && (Math.abs(r.m15 ?? 0) >= 40 || Math.abs(r.m60 ?? 0) >= 80);
+/** High / Medium / Low: the topic's usual weight, raised one step (to High) when price really did move. */
+export function severityOf(topic, r) {
+  const base = TOPIC_LEVEL[topic] || 'Low';
+  if (movedAfter(r)) return 'High';
+  if (r && (Math.abs(r.m15 ?? 0) >= 20 || Math.abs(r.m60 ?? 0) >= 40) && base === 'Low') return 'Medium';
+  return base;
+}
 
 const near = (series, x, within = 20 * MIN) => { const i = series.lower(x + 1) - 1, b = series.bars[i]; return b && x - b.t <= within ? b : null; };
 
@@ -73,16 +92,18 @@ export function newsState({ now, ctx, calendar, headlines, errors = {}, updated 
   const today = zoned(now, DENVER).key;
   const high = calendar.filter(e => e.impact === 'High');
   const next = high.find(e => e.t > now) || null, last = [...high].reverse().find(e => e.t <= now) || null;
+  const holiday = holidayNotice(now);
   let caution = null;
   if (next && next.t - now <= 10 * MIN) caution = `${next.title} in ${Math.max(1, Math.round((next.t - now) / MIN))} min. Expect a fast move: stops can slip and spreads widen.`;
   else if (last && now - last.t <= 5 * MIN) caution = `${last.title} was released ${Math.max(1, Math.round((now - last.t) / MIN))} min ago. The first minutes after a release are the wildest.`;
+  if (!caution && holiday?.caution) caution = holiday.caution;
   const recent = headlines.filter(h => h.t && h.t <= now && now - h.t <= DAY)
-    .map(h => ({ ...h, topic: topicOf(h.title), reaction: reaction(ctx, h.t) }))
-    .sort((a, b) => (a.topic ? 0 : 1) - (b.topic ? 0 : 1) || b.t - a.t).slice(0, 30);
+    .map(h => { const topic = topicOf(h.title), rx = reaction(ctx, h.t); return { ...h, image: h.image ?? null, topic, reaction: rx, severity: severityOf(topic, rx), moved: movedAfter(rx) }; })
+    .sort((a, b) => b.t - a.t).slice(0, 60);
   return {
     next: next && { ...next, inMin: Math.round((next.t - now) / MIN) }, caution,
     today: calendar.filter(e => zoned(e.t, DENVER).key === today), week: calendar.filter(e => e.t > now).slice(0, 12),
-    headlines: recent, shocks: shocks(ctx, now, headlines), errors, updated,
+    headlines: recent, sources: [...new Set(recent.map(h => h.src))].sort(), holiday, shocks: shocks(ctx, now, headlines), errors, updated,
   };
 }
 

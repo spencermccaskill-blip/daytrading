@@ -30,4 +30,4 @@ export function loadVerdicts(file = RESULTS_FILE) {
 export const liveSetups = (verdicts, windowId) => verdicts.setups.filter(s => s.window === windowId && s.label === 'Passed' && !s.carried);
 
 /** Every setup with a live engine for a window, best tested average first. All are shown; only "Passed" ones are proven. */
-export const windowSetups = (verdicts, windowId) => verdicts.setups.filter(s => s.window === windowId && !s.carried).sort((a, b) => (b.avgR ?? -9) - (a.avgR ?? -9));
+export const windowSetups = (verdicts, windowId, prefs = {}) => verdicts.setups.filter(s => s.window === windowId && !s.carried && !(prefs.off || []).includes(s.id)).sort((a, b) => (b.avgR ?? -9) - (a.avgR ?? -9));

@@ -5,6 +5,7 @@
 //   NY open       9:30 AM-12 PM New York    (7:30-10 AM Denver, always)
 //   NY midday     12-4 PM New York          (10 AM-2 PM Denver, always)
 import { zoned, zonedToUtc, DENVER, NY, LONDON, DAY } from './time.js';
+import { clipToOpenHours } from './holidays.js';
 
 export const WINDOWS = [
   { id: 'asia', name: 'Asia evening', tz: DENVER, start: [16, 0], end: [22, 0], days: [0, 1, 2, 3, 4] },
@@ -25,7 +26,7 @@ export function occurrences(from, to) {
       if (end > from && start < to) out.push({ id: w.id, name: w.name, start, end });
     }
   }
-  return out.sort((a, b) => a.start - b.start);
+  return clipToOpenHours(out).filter(o => o.end > from && o.start < to).sort((a, b) => a.start - b.start);
 }
 
 /** Where `now` is: the open window (or null), the next one, and today's Denver-day timeline. */
