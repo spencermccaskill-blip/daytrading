@@ -15,20 +15,34 @@ What the page shows, top to bottom:
 
 Journal, Playbook (rules, checklist, backtest results) and Settings are behind tabs.
 
-## What the setups and scores mean
+## What the Desk shows
 
-Each of the four windows has three or four setups (fourteen in all). The Desk shows the most active
-one, with the others one click away. **None has passed every test rule**, so every one is marked
-"Not proven".
+Each of the four windows has three or four setups (fourteen in all). The Desk leads with one and
+lists the rest under "Also in this window"; each of those opens on its own to show its full numbers
+and its own green +. The setup's name is always above the big status word.
 
-The **score out of 10** is that setup's win rate in testing since 2024 (51% of trades = 5.1). It is
-the same for every signal from that setup and is not a forecast. A setup can win often and still lose
-money, so the average result per trade is shown next to it, and the line says plainly when a setup
-lost money in testing. Rules are in `research/PREREGISTRATION.md`, results in `research/RESULTS.md`.
+Two win rates sit under every suggestion:
 
-The **News** tab shows scheduled US releases, headlines sorted by market-moving topic, what MNQ did
-in the 15 and 60 minutes after each, and any unusually large 15-minute moves in the last day. It is
-context: it cannot predict how the market will react to a headline.
+- **Last 4 weeks** (the big one): what that setup's suggestions actually did recently, from the
+  replay log, with the number of trades beside it. It is usually 10 to 20 trades, so it swings a lot.
+- **Since 2024** (smaller): the long test, a few hundred trades. It says whether the setup has shown
+  an edge over time. None has passed every test rule, so each is marked "not proven".
+
+A setup can win often and still lose money, so the average result per trade (in R) is next to each.
+
+**Focus and hide.** In Playbook, open a strategy and press "Focus on this" to make it lead the Desk
+whenever its window is open, or "Hide from the Desk" to leave it out.
+
+**Too-wide stops.** When a stop is wider than your risk allows, the trade is marked Block and shows
+what one micro would cost. You can still log it with +; it is recorded as over your risk.
+
+**Holidays.** The clock knows Thanksgiving, Black Friday, Christmas and New Year hours through
+1 January 2027 (`server/holidays.js`). Windows are shortened or removed, and the Desk and News tab say
+so. CME confirms holiday hours about two weeks ahead; rows not yet confirmed are labelled.
+
+**News** shows headlines as tiles with the article picture where the feed has one, filters for time,
+severity, topic and source, scheduled US releases, and unusually large moves. It is context: it
+cannot predict how the market will react to a headline.
 
 ## Start it (Windows, PowerShell)
 

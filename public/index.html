@@ -48,22 +48,18 @@
     <!-- DESK -->
     <section class="view" id="view-desk">
       <div class="timeline rise" id="timeline" aria-label="Your day, Denver time"></div>
-      <p class="tl-key" id="tlKey"></p>
       <p class="news-line" id="newsLine" hidden></p>
 
       <article class="answer rise" id="answer" data-tone="idle" aria-live="polite">
-        <div class="a-head"><span id="aWindow">–</span><span class="mute" id="aSetup"></span></div>
-        <div class="a-main">
-          <div class="a-left">
-            <div class="word" id="aWord">–</div>
-            <p class="a-sub" id="aSub"></p>
-            <p class="a-caution" id="aCaution" hidden></p>
-          </div>
-          <div class="a-right" id="aRight"></div>
-        </div>
-        <div class="a-score" id="aScore" hidden></div>
+        <div class="a-head"><span id="aWindow">–</span><span id="aFocus"></span></div>
+        <h1 class="a-name" id="aName"></h1>
+        <div class="word" id="aWord">–</div>
+        <p class="a-sub" id="aSub"></p>
+        <p class="a-caution" id="aCaution" hidden></p>
+        <div class="a-trade" id="aTrade"></div>
+        <div class="a-record" id="aRecord" hidden></div>
         <div class="a-checks" id="aChecks"></div>
-        <div class="a-others" id="aOthers" hidden></div>
+        <section class="a-others" id="aOthers" hidden></section>
         <p class="a-foot" id="aFoot">Signals are information, not instructions. You place every trade yourself on Tradovate.</p>
       </article>
 
@@ -81,9 +77,22 @@
 
     <!-- JOURNAL -->
     <section class="view" id="view-journal" hidden>
-      <div class="grid two">
+      <div class="sub-head">
+        <div class="seg" role="tablist" aria-label="Journal sections" data-seg="journal">
+          <button role="tab" data-pane="j-trades" aria-selected="true">My trades</button>
+          <button role="tab" data-pane="j-suggested">Suggested trades</button>
+          <button role="tab" data-pane="j-before">Before a trade</button>
+        </div>
+        <span class="mono mute" id="jBalance"></span>
+      </div>
+
+      <div class="pane" id="j-trades">
         <section class="panel">
-          <div class="p-head"><h2>Log a trade</h2><span class="mute small">Copy the result from Tradovate. This is what feeds the guard. Set the time the trade closed, not the time you are typing.</span></div>
+          <div class="p-head"><h2>My trades</h2><span class="mute small">This list is what the guard counts from.</span></div>
+          <div id="jList" class="table-wrap"></div>
+        </section>
+        <details class="panel fold" data-key="j-add">
+          <summary><h2>Add a trade by hand</h2><span class="mute small">For trades the desk did not suggest, fees and payouts</span></summary>
           <form id="jForm" class="form">
             <label>Profit or loss, dollars<input name="pnl" inputmode="decimal" placeholder="-240 or 180" required></label>
             <label>When the trade closed<input name="when" type="datetime-local" required></label>
@@ -95,78 +104,125 @@
             <label class="check wide"><input type="checkbox" name="followedRules" checked> I followed my rules on this trade</label>
             <div class="wide row"><button class="btn" type="submit">Add to journal</button><span class="msg" id="jMsg" role="status"></span></div>
           </form>
-        </section>
+        </details>
+      </div>
+
+      <div class="pane" id="j-suggested" hidden>
         <section class="panel">
-          <div class="p-head"><h2>Rules check</h2><span class="mute small">Before you click in Tradovate: does this trade fit?</span></div>
-          <form id="cForm" class="form">
-            <label>Entry price<input name="entry" inputmode="decimal" placeholder="25000" required></label>
-            <label>Stop price<input name="stop" inputmode="decimal" placeholder="24960" required></label>
-            <div class="wide row"><button class="btn" type="submit">Check</button></div>
-          </form>
-          <div id="cOut" class="check-out" aria-live="polite"></div>
+          <div class="p-head"><h2>Suggested trades</h2><span class="mute small" id="logSince"></span></div>
+          <p class="note gap">Every trade the setups suggested, worked out from the price history, including days The Desk was off. Press + on the ones you took. Results are the rule exits before commissions, sized at your risk. These are suggestions the desk made, not trades you made.</p>
+          <div id="logList" class="table-wrap"></div>
         </section>
       </div>
-      <section class="panel">
-        <div class="p-head"><h2>Journal</h2><span class="mono mute" id="jBalance"></span></div>
-        <div id="jList" class="table-wrap"></div>
-      </section>
-      <section class="panel">
-        <div class="p-head"><h2>Suggested trades</h2><span class="mute small" id="logSince"></span></div>
-        <p class="note" style="margin-bottom:12px">Every trade the setups suggested, worked out from the price history, including days The Desk was off. Press + on the ones you took. Results are the rule exits before commissions, sized at your risk. These are suggestions the desk made, not trades you made.</p>
-        <div id="logList" class="table-wrap"></div>
-        <div class="p-head sub"><h2>How the suggestions have done</h2><span class="mute small">Finished suggestions since tracking began. A few weeks is too little to judge a setup.</span></div>
-        <div id="logTally" class="table-wrap"></div>
-      </section>
+
+      <div class="pane" id="j-before" hidden>
+        <div class="grid two">
+          <section class="panel">
+            <div class="p-head"><h2>Before any trade</h2><span class="mute small">Resets each day</span></div>
+            <div id="checklist" class="checklist"></div>
+          </section>
+          <section class="panel">
+            <div class="p-head"><h2>Rules check</h2><span class="mute small">Does a trade you have in mind fit?</span></div>
+            <form id="cForm" class="form">
+              <label>Entry price<input name="entry" inputmode="decimal" placeholder="25000" required></label>
+              <label>Stop price<input name="stop" inputmode="decimal" placeholder="24960" required></label>
+              <div class="wide row"><button class="btn" type="submit">Check</button></div>
+            </form>
+            <div id="cOut" class="check-out" aria-live="polite"></div>
+          </section>
+        </div>
+      </div>
     </section>
 
     <!-- PLAYBOOK -->
     <section class="view" id="view-playbook" hidden>
-      <section class="panel">
-        <div class="p-head"><h2>What the tests say</h2><span class="mute small" id="pbData"></span></div>
-        <p class="lead" id="pbLead"></p>
-        <div class="pills" id="pbTabs" role="tablist" aria-label="Session"></div>
-        <div id="pbBody"></div>
-      </section>
-      <div class="grid two">
+      <div class="sub-head">
+        <div class="seg" role="tablist" aria-label="Playbook sections" data-seg="playbook">
+          <button role="tab" data-pane="p-strategies" aria-selected="true">Strategies</button>
+          <button role="tab" data-pane="p-results">Results so far</button>
+          <button role="tab" data-pane="p-how">How scoring works</button>
+        </div>
+        <span class="mute small" id="pbData"></span>
+      </div>
+
+      <div class="pane" id="p-strategies">
         <section class="panel">
-          <div class="p-head"><h2>Before any trade</h2><span class="mute small">Resets each day</span></div>
-          <div id="checklist" class="checklist"></div>
+          <div class="p-head"><h2>Strategies by window</h2><span class="mute small">Open one to see its rules and full test</span></div>
+          <div class="pills" id="pbTabs" role="tablist" aria-label="Session"></div>
+          <div id="pbBody" class="acc"></div>
         </section>
+      </div>
+
+      <div class="pane" id="p-results" hidden>
         <section class="panel">
-          <div class="p-head"><h2>How a setup earns a signal</h2></div>
-          <ul class="plain">
-            <li>Rules and the pass bar are written down before the test is run. No changes after.</li>
-            <li>Average at least +0.10R after a 1 point cost, t-stat at least 2.</li>
-            <li>Positive in each of 2024, 2025 and 2026, and over the last 12 months.</li>
-            <li>Worst drawdown no deeper than 10R, and under $2,000 on MNQ at $250 risk.</li>
-            <li>Passed setups signal. Everything else is a stand-down. A weak setup is never shown to fill the space.</li>
-          </ul>
-          <p class="mute small">Full write-up: research/RESULTS.md and research/PREREGISTRATION.md in the app folder.</p>
+          <div class="p-head"><h2>How the suggestions have done</h2><span class="mute small" id="tallySince"></span></div>
+          <p class="note gap">Finished suggestions from the replay log, at the rule exits, before commissions. This covers weeks, not years: a setup with a handful of trades can look great or awful by luck alone. The count is beside every number for that reason.</p>
+          <div id="logTally" class="table-wrap"></div>
         </section>
+      </div>
+
+      <div class="pane" id="p-how" hidden>
+        <div class="grid two">
+          <section class="panel">
+            <div class="p-head"><h2>The two win rates</h2></div>
+            <ul class="plain">
+              <li><b>Last 4 weeks</b> is the big number on the Desk. It comes from the replay log: what each setup's suggestions actually did recently. It is usually only a few trades.</li>
+              <li><b>Since 2024</b> is the long test on about three years of history, a few hundred trades per setup. It moves slowly and is the better guide to whether a setup has an edge.</li>
+              <li>A setup can win often and still lose money if its losses are bigger than its wins, so the average result per trade (in R) is shown next to each win rate.</li>
+            </ul>
+          </section>
+          <section class="panel">
+            <div class="p-head"><h2>What "Not proven" means</h2></div>
+            <p class="lead" id="pbLead"></p>
+            <ul class="plain">
+              <li>Rules and the pass bar were written down before each test was run.</li>
+              <li>To pass: average at least +0.10R after a 1 point cost, t-stat at least 2, positive in 2024, 2025, 2026 and the last 12 months, drawdown no deeper than 10R and under $2,000 on MNQ at $250 risk.</li>
+              <li>Full write-up: research/RESULTS.md and research/PREREGISTRATION.md in the app folder.</li>
+            </ul>
+          </section>
+        </div>
       </div>
     </section>
 
     <!-- NEWS -->
     <section class="view" id="view-news" hidden>
-      <section class="panel">
-        <div class="p-head"><h2>News is context, not a signal</h2></div>
-        <p class="lead">This page shows what is scheduled, what was said, and what MNQ did afterwards. It cannot tell you how the market will react to the next headline: the same kind of news has sent it both ways. Use it to know when a fast move is likely and to step aside around it.</p>
-        <p class="msg err" id="nErr"></p>
-      </section>
-      <div class="grid two">
+      <section class="panel notice" id="nHoliday" hidden></section>
+      <div class="sub-head">
+        <div class="seg" role="tablist" aria-label="News sections" data-seg="news">
+          <button role="tab" data-pane="n-headlines" aria-selected="true">Headlines</button>
+          <button role="tab" data-pane="n-calendar">Scheduled releases</button>
+          <button role="tab" data-pane="n-moves">Big moves</button>
+        </div>
+        <span class="msg err" id="nErr"></span>
+      </div>
+
+      <div class="pane" id="n-headlines">
+        <form class="filters" id="nFilters" aria-label="Filter headlines">
+          <label>Time<select name="time"><option value="1">Last hour</option><option value="6">Last 6 hours</option><option value="24" selected>Last 24 hours</option></select></label>
+          <label>Severity<select name="severity"><option value="">Any</option><option>High</option><option>Medium</option><option>Low</option></select></label>
+          <label>Topic<select name="topic" id="nTopic"><option value="">Any</option></select></label>
+          <label>Source<select name="source" id="nSource"><option value="">Any</option></select></label>
+          <label>Sort<select name="sort"><option value="new">Newest first</option><option value="move">Biggest move first</option></select></label>
+          <label class="check"><input type="checkbox" name="moved"> Only ones MNQ moved after</label>
+        </form>
+        <p class="note gap" id="nCount"></p>
+        <div class="tiles" id="nTiles"></div>
+        <p class="note">News is context, not a signal. Severity is the topic's usual weight, raised when MNQ really did move afterwards. The same kind of headline has sent the market both ways.</p>
+      </div>
+
+      <div class="pane" id="n-calendar" hidden>
         <section class="panel">
           <div class="p-head"><h2>Scheduled US releases</h2><span class="mute small">Denver time, this week</span></div>
           <div id="nCal" class="table-wrap"></div>
         </section>
+      </div>
+
+      <div class="pane" id="n-moves" hidden>
         <section class="panel">
           <div class="p-head"><h2>Big moves in the last day</h2><span class="mute small">15-minute bars 3 times the usual size</span></div>
           <div id="nShocks"></div>
         </section>
       </div>
-      <section class="panel">
-        <div class="p-head"><h2>Headlines</h2><span class="mute small">Last 24 hours. Market-moving topics first. The number is what MNQ did after.</span></div>
-        <div id="nHeads"></div>
-      </section>
     </section>
 
     <!-- SETTINGS -->
@@ -208,14 +264,14 @@
               <p class="wide note">This protects a small cushion without blocking trades for their size. Your risk per trade stays the same.</p>
               <label class="check wide"><input type="checkbox" name="feedAuto"> Fetch prices automatically when no chart tab is open</label>
               <p class="wide note">Free and about 10 minutes delayed, from Yahoo Finance. It is an unofficial service and can stop working without notice. An open TradingView chart with the bridge extension is always used instead when there is one.</p>
-              <p class="wide note">Never shrink a stop to fit. If the stop is too wide for one contract at your risk, the desk says skip.</p>
+              <p class="wide note">A stop too wide for your risk is marked Block and shows what one micro would cost. Never shrink a stop to make a trade fit.</p>
               <div class="wide row"><button class="btn" type="submit">Save settings</button><span class="msg" id="sMsg" role="status"></span></div>
             </div>
             <div class="p-head sub"><h2>Where these numbers come from</h2></div>
             <ul class="plain small">
               <li>Checked against support.lucidtrading.com on Nov 19, 2026. Details in docs/LUCID-RULES.md.</li>
               <li>Lucid closes any open position at 2:45 PM Denver. Trading reopens 4:00 PM Denver.</li>
-              <li>The guard only knows what you type into the Journal. Tradovate is the real record.</li>
+              <li>The guard only knows what is in the Journal. Tradovate is the real record.</li>
             </ul>
           </section>
         </div>

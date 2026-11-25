@@ -70,7 +70,7 @@ export function demoNews(now) {
   return {
     calendar: [{ title: 'CPI m/m', impact: 'High', t: now - 51 * m, forecast: '0.3%', previous: '0.2%' }, { title: 'Crude Oil Inventories', impact: 'Medium', t: now + 129 * m, forecast: '', previous: '' }, { title: 'FOMC Meeting Minutes', impact: 'High', t: now + 339 * m, forecast: '', previous: '' }],
     headlines: [
-      { src: 'Demo', title: 'Demo headline: White House weighs response as talks stall', link: 'https://example.com/demo-1', t: now - 47 * m },
+      { src: 'Demo', title: 'Demo headline: White House weighs response as talks stall', link: 'https://example.com/demo-1', t: now - 47 * m, image: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 180'%3E%3Crect width='320' height='180' fill='%231b2333'/%3E%3Cpath d='M0 140 L60 110 L110 125 L170 70 L230 95 L320 40 V180 H0Z' fill='%232a3650'/%3E%3C/svg%3E" },
       { src: 'Demo', title: 'Demo headline: Fed officials split on the next rate cut', link: 'https://example.com/demo-2', t: now - 190 * m },
       { src: 'Demo', title: 'Demo headline: Retailers report a slow start to the season', link: 'https://example.com/demo-3', t: now - 260 * m },
     ],
