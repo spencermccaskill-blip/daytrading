@@ -69,7 +69,7 @@ Summary: A check-in with no chart content and no trading rules. He asks for feed
 
 - No trading rules. Two statements about the method's priorities:
   - [0:03:02] "understanding liquidity sweeps is ... probably one of the biggest things ... in terms of the way that I trade"
-  - Preview of day 12: [0:02:01] "how to actually confirm that ... the liquidity was valid that you spotted"
+  - Preview of day 12: [0:02:32] "how to actually confirm that ... the liquidity was valid that you spotted"
 - Expectation he states: [0:04:35] "after the two months ... you definitely won't be profitable"
 
 ### Behaviour and process rules
@@ -197,12 +197,12 @@ Summary: The wrap-up on liquidity. He marks "prominent" highs and lows on the S&
 - Touching the level is not an entry. [0:06:13] "it doesn't mean when this High gets hit we press sell"
 - What must happen after the level is hit. [0:06:13] "we wait for these areas of liquidity to get hit and then we wait for confirmation through break[er] structure through other confluences"
 - No reaction, no trade. [0:07:13] "price doesn't react perfect no trade if price does react perfect act on it take a trade"
-- In a market he judges bearish, he waits for highs to be taken. [0:08:15] "then we're waiting for highs to get taken out"
+- In a market he judges bearish, he waits for highs to be taken. [0:07:43] "then we're waiting for highs to get taken out"
 - Short sequence. [0:09:47] "we take out a high we get a break[er] structure to the downside perfect ... we can go short"
 - Target for shorts. [0:09:47] "where are we targeting the lows right because that's where they can exit their position"
 - Break of structure in the example is a close below the most recent low. [0:10:48] "this was the most recent low we got a closure below"
 - Entry choices after that break. [0:10:48] "you can either enter off that enter off of ... some sort of fair value gap on the four hour"
-- Standard pairing. [0:11:18] "we get a liquidity sweep then a break of structure those are pretty standard"
+- Standard pairing. [0:10:48] "we get a liquidity sweep then a break of structure those are pretty standard"
 - Next target. [0:11:18] "target next previous prominent lows price draws to it just like a ... magnet"
 - A high that is passed without a reaction is skipped and the next one is watched. [0:11:49] "we push past this one don't give up much of a reaction we push pass take out this one we do get a reaction"
 - Same idea. [0:12:49] "none of these highs have caused a reaction yet so now this is the one that we're looking for"
@@ -210,7 +210,7 @@ Summary: The wrap-up on liquidity. He marks "prominent" highs and lows on the S&
 - A sweep in an example is a wick. [0:13:50] "we have highs right here barely gets Wicked"
 - Which low counts for the break. [0:14:21] "none of these lows got broken this low gets broken you can scale into the five minute"
 - Lower-timeframe step after the break. [0:14:21] "you can scale into the five minute boom imbalance gets filled ... find some sort of confirmation ... go short"
-- Long example on gold: lows swept, then a close back above. [0:15:21] "quick regain up closure above right here"
+- Long example on gold: lows swept, then a close back above. [0:14:51] "quick regain up closure above right here"
 - Where the long would have been filled. [0:15:21] "some dip down into this imbalance this is probably where you would have wanted to get your orders filled"
 - Liquidity used for both ends of a trade. [0:14:51] "use the draw on liquidity for taking profits and then also for entering positions"
 - Full chain stated in the homework. [0:17:57] "after the break of structure it filled an imbalance and reacted off of it that's where I'm entering"
@@ -236,8 +236,8 @@ Summary: The wrap-up on liquidity. He marks "prominent" highs and lows on the S&
 ### Unclear or contradictory
 
 - Prominence is not defined beyond "just look at the chart" [0:04:09], and he concedes it is arguable: [0:05:10] "you c[an] argue that these are prominent Highs but you know whatever"; [0:12:19] "you could argue that this is a prominent low".
-- Is sweep plus break of structure enough to enter? [0:10:48] "you can either enter off that" (the break) and [0:11:18] "those are pretty standard" suggest yes. [0:09:47] adds "and then like any other Confluence", and day 10 [0:13:40] says "you need to know a lot more than just liquidity and break of structure".
-- Wick versus close: break of structure is described as a "closure below" [0:10:48] and "closure above" [0:15:21]; a sweep is described once as "barely gets Wicked" [0:13:50]. My inference: he treats a sweep as a wick through the level and a break of structure as a candle close beyond it, but he never states this as a rule in these lessons.
+- Is sweep plus break of structure enough to enter? [0:10:48] "you can either enter off that" (the break) and [0:10:48] "those are pretty standard" suggest yes. [0:09:47] adds "and then like any other Confluence", and day 10 [0:13:40] says "you need to know a lot more than just liquidity and break of structure".
+- Wick versus close: break of structure is described as a "closure below" [0:10:48] and "closure above" [0:14:51]; a sweep is described once as "barely gets Wicked" [0:13:50]. My inference: he treats a sweep as a wick through the level and a break of structure as a candle close beyond it, but he never states this as a rule in these lessons.
 - [0:04:39] "making a new prominent [h]igh and then what does Market do rally even lower": "rally" used for a fall.
 - [0:11:18] to [0:11:49]: "we see price move up past it ... pretty far past it but then we get a break[er] structure". How far past a level price may go and still count as a sweep is not stated.
 
@@ -285,7 +285,7 @@ Summary: A talk-only lesson defining risk management as how much to risk and how
 ### Unclear or contradictory
 
 - The central rule is stated two ways: one to three percent "per trade" [0:03:36] and [0:10:49] ("what am I risking one to three percent per trade"), then one to three percent "per day" [0:10:49], with the combinations (three trades at one percent) confirming the daily cap. Three trades at three percent each would satisfy the first wording and break the second.
-- Trades per day: "one or two setups" [0:11:20] and up to "three trades with one percent risk" [0:11:20] here; day 17 [0:11:08] "I take one trade a day"; day 15 [0:06:09] uses "I should only take one" in an example.
+- Trades per day: "one or two setups" [0:11:20] and up to "three trades with one percent risk" [0:11:20] here; day 17 [0:10:37] "I take one trade a day"; day 15 [0:05:37] uses "I should only take one" in an example.
 - [0:11:20] "go heavier on the [risk]" when "all the biases are aligning": how much heavier, and what the biases are, is not stated here ("we'll cover that in this course").
 - [0:05:40] "if you're losing 80 of the time if you're only risking one percent then ... you'll still have 20 of that account left": he gives no number of trades or reward size, so the statement cannot be checked from the captions.
 - [0:07:42] "I lost like 27k like two weeks ago in one trade": account size is not given, so it cannot be compared with the one to three percent rule.
@@ -344,7 +344,7 @@ Summary: A discipline lesson with no chart work. He gives a root-cause exercise:
 
 - No chart rules. Statements that touch trade handling:
   - On a second trade after a first loss. [0:03:37] "if it's your second trade of the day and you lost your first one you won't hit take profit"
-  - On trade count, as an example of a problem. [0:06:09] "I take ... five trades a day and ... I say I should only take one"
+  - On trade count, as an example of a problem. [0:05:37] "I take ... five trades a day and ... I say I should only take one"
   - On risk, as an example of a problem. [0:02:04] "you risk like 10 of trade instead of one percent"
   - On holding to the planned exit. [0:16:54] "I can close right here but I have a take profit somewhere"
   - On exiting early, as a problem. [0:07:42] "I get out of Trades before I hit stop loss or before it gets take profit"
@@ -354,11 +354,11 @@ Summary: A discipline lesson with no chart work. He gives a root-cause exercise:
 - The exercise. [0:01:33] "write down the three biggest issues you have with trading"
 - They must not be strategy problems. [0:02:04] "do something related to risk management do something related to emotions"
 - Step two. [0:04:07] "what emotion is causing you to press that button again"
-- The full chain. [0:13:51] "what's my problem why is it a problem why am I doing this and then what is leading me to do that"
+- The full chain. [0:13:20] "what's my problem why is it a problem why am I doing this and then what is leading me to do that"
 - Keep a running page. [0:10:16] "keep this page empty in your notebook right my biggest problems with trading"
 - If you over-trade because you need money. [0:06:09] "I have no money go get a ... job"
 - If you cut trades from fear. [0:08:44] "risk less or go to demo"
-- Do not rely on trading income while unprofitable. [0:06:40] "you are pretty much relying on inconsistent income"
+- Do not rely on trading income while unprofitable. [0:06:09] "you are pretty much relying on inconsistent income"
 - Own every loss. [0:05:07] "every time you lose money in these markets it's your fault and your fault only"
 - Do not act on greed while in profit. [0:16:23] "the difference between me and you I don't act"
 - Get a notebook. [0:01:02] "go drive to the store and get a notebook"
@@ -369,8 +369,8 @@ Summary: A discipline lesson with no chart work. He gives a root-cause exercise:
 
 ### Unclear or contradictory
 
-- [0:06:09] "I say I should only take one" (trade a day) is an example of a self-set rule, not an instruction; compare day 13's "one or two setups" and up to three trades.
-- [0:03:37] "you'll probably lose on it especially if it's a Revenge trade especially if it's your second trade of the day and you lost your first one" discourages a second trade after a loss, while day 13 [0:10:49] to [0:11:20] allows two or three trades inside the daily risk cap without saying whether that holds after a loss.
+- [0:05:37] "I say I should only take one" (trade a day) is an example of a self-set rule, not an instruction; compare day 13's "one or two setups" and up to three trades.
+- [0:03:37] "especially if it's your second trade of the day and you lost your first one" discourages a second trade after a loss, while day 13 [0:10:49] to [0:11:20] allows two or three trades inside the daily risk cap without saying whether that holds after a loss.
 
 ---
 
@@ -385,7 +385,7 @@ Summary: How to identify a fair value gap on a chart. This is the lesson with th
 - Recap definition. [0:01:41] "there are no resting orders in the opposite ... direction of wherever price wants to go"
 - A retracement tool. [0:02:41] to [0:03:13] "makes fair value gaps a retracement ... tool"
 - Not for reversals. [0:03:13] "fair value gaps are not used for reversals"
-- Direction filter. [0:03:13] to [0:03:43] "we see market [trending higher] we are looking for bullish fair value gaps" (captions: "we see market doing that we are looking for fair value yet we are looking for bullish fair value gaps")
+- Direction filter. [0:03:13] to [0:03:43] "we see market doing that we are looking for fair value yet we are looking for bullish fair value gaps" (said of a market "going higher higher higher higher")
 - What is not wanted in an uptrend. [0:03:43] "we're not looking for bear[ish] f[air] Value gaps to turn price around"
 - Purpose. [0:03:43] "retracements into these bullish f[air] Value gaps for reactions okay and continuations"
 - Three candles. [0:04:13] "fair value gaps ... or imbalances are essentially a three candle pattern"
@@ -394,7 +394,7 @@ Summary: How to identify a fair value gap on a chart. This is the lesson with th
 - What to do with it. [0:05:17] "wait for price to fill wait for price to react"
 - Bearish gap boundaries. [0:06:20] to [0:06:52] "from the bottom of the first candle[']s Wick[s] to the top of the third candle's Wick"
 - Bearish boundaries restated. [0:11:28] "we take it from the bottom Wick ... down to the third candle's top Wick"
-- Bullish boundaries restated. [0:10:28] to [0:10:58] "the top Wick of the first candle okay to the bottom Wick of the third candle"
+- Bullish boundaries restated. [0:10:28] to [0:10:58] "the top Wick of the first candle okay to the bottom Wick of ... the third candle"
 - Visual test. [0:06:20] "look for ... areas that do not have ... Wicks covering"
 - When it is not a gap. [0:09:26] to [0:09:57] "the first and third candles Wicks do not fill the second candle's body"
 - Why overlapping wicks cancel it. [0:09:57] "this is not a fair value [g]ap why because price already came within here filled the liquidity void"
@@ -403,7 +403,7 @@ Summary: How to identify a fair value gap on a chart. This is the lesson with th
 - Confirmation options. [0:07:55] "wait for a reaction or scale down to a lower time frame see a break[er] structure"
 - A reaction can be a single candle. [0:07:55] "just a reaction like with a bullish candle or a bearish candle whatever Direction you're trying to see it go"
 - Not all gaps work. [0:08:26] "not all of them are going to work and that's why we have to wait for confirmation"
-- A worked short, with stop and target. [0:09:26] "we see price fill close bearish right here okay perfect now we can enter a stop above the previous High Target previous lows"
+- A worked short, with stop and target. [0:08:56] "we see price fill close bearish right here okay perfect now we can enter a stop above the previous High Target previous lows"
 - Lower-timeframe version. [0:11:28] to [0:12:01] "scale down to the lower time frame boom you see break[ing] structure"
 - Gaps are common and so less valuable alone. [0:07:24] "it isn't necessarily as valuable as you may think"
 - Timeframes: no specific timeframe is named in this lesson, only "lower" and "smaller" timeframe. Instruments: none named ("whatever pair you choose" [0:08:26]). Risk, news: not stated.
@@ -426,11 +426,11 @@ Summary: How to identify a fair value gap on a chart. This is the lesson with th
 
 ### Unclear or contradictory
 
-- The non-gap test is worded in terms of the second candle's body: [0:09:26] "the first candle[']s Wicks do not match or do not fill the second candle's body and the first and third candles Wicks do not fill the second candle's body". The zone itself is defined wick to wick ([0:05:17]). My inference: he means the first and third candles' wicks must not overlap each other across the middle candle, which is how he applies it on day 18 [0:02:04] ("this Wick overlaps with this one"). The captions do not say this outright.
+- The non-gap test is worded in terms of the second candle's body: [0:09:26] "the first candle[']s Wicks do not match or do not fill the second candle's body", then the same for "the first and third candles Wicks". The zone itself is defined wick to wick ([0:05:17]). My inference: he means the first and third candles' wicks must not overlap each other across the middle candle, which is how he applies it on day 18 [0:02:04] ("this Wick overlaps with this one"). The captions do not say this outright.
 - "Filled" is used for two different things: the gap being entered by a later retracement ("wait for price to fill" [0:05:17]) and the gap never existing because the neighbouring wicks covered it ("price already came within here filled the liquidity void" [0:09:57]). How much of the gap must be entered to count as a fill is not stated.
 - Two confirmation standards are offered as alternatives at [0:07:55]: a lower-timeframe break of structure, "or just a reaction" of one candle in the wanted direction. He does not say when each is enough.
 - [0:10:58] he says "bullish order blo[ck]" and corrects himself to fair value gap.
-- Stop placement in the worked short is "above the previous High" [0:09:26]; which high is shown, not described.
+- Stop placement in the worked short is "above the previous High" [0:08:56]; which high is shown, not described.
 
 ---
 
@@ -448,8 +448,8 @@ Summary: A discipline lesson on waiting for a full setup. It contains the cleare
 - News overrides a complete checklist. [0:06:05] "if there's news in the market you shouldn't even trade be open to not trading"
 - A trade to refuse. [0:07:36] "it's against the daily bias and it's off a retracement no bro ... you should not be taking that"
 - Waiting extra candles. [0:08:06] "waiting an extra one or two candlesticks isn't going to hurt you that much"
-- Extra checks before entry. [0:08:36] "see if you get the volume see if you get the volatility and then enter"
-- His trade count. [0:11:08] "I take one trade a day and I call it good"
+- Extra checks before entry. [0:08:06] "see if you get the volume see if you get the volatility and then enter"
+- His trade count. [0:10:37] "I take one trade a day and I call it good"
 - Timeframe named: "daily bias" [0:07:36] only. Instruments, risk percent, clock times: not stated.
 
 ### Behaviour and process rules
@@ -473,8 +473,8 @@ Summary: A discipline lesson on waiting for a full setup. It contains the cleare
 
 - [0:03:33] "if none of those things apply you don't trade". Taken literally this only bars a trade when none apply; the context ("a step-by-step list") suggests all steps are needed. My inference: he means all; the captions say "none".
 - [0:07:36] lists "it's off a retracement" among reasons not to take a trade, while days 14, 16 and 18 describe fair value gaps as a retracement entry tool. In context the refused trade also has a missing step and is "against the daily bias", so it may be the combination he objects to; unclear.
-- [0:08:36] "see if you get the volume see if you get the volatility": no volume or volatility measure is defined anywhere in days 8-19.
-- "I take one trade a day" [0:11:08] against day 13's "one or two setups" and three-trade combination. Also [0:02:31] to [0:03:02] "most the time I can find a trade to take".
+- [0:08:06] "see if you get the volume see if you get the volatility": no volume or volatility measure is defined anywhere in days 8-19.
+- "I take one trade a day" [0:10:37] against day 13's "one or two setups" and three-trade combination. Also [0:02:31] to [0:03:02] "most the time I can find a trade to take".
 - [0:04:34] to [0:05:05]: he says to come in not wanting to trade, and in the same passage "obviously you want to get reps in and that's how you can get practice".
 
 ---
@@ -508,12 +508,12 @@ Summary: Putting fair value gaps together with trend, sweep and break of structu
 - Why. [0:06:38] "the 15 minute broke structure the one hour broke structure we're showing bearish confirmation on higher time frames"
 - The trigger. [0:06:38] to [0:07:09] "we see the first imbalance get filled what happens after that boom break of structure off the five minute"
 - Entry, stop, target. [0:07:09] "short position off of here stop above these highs"; [0:07:09] "where can we target previous areas of liquidity"
-- The chain in his words. [0:07:39] "liquidity s[w]eep br[e]ak[ of] structure imbalance fill break of structure"
+- The chain in his words. [0:07:39] "liquidity s[w]eep [break] structure imbalance fill break of structure"
 - Example 3 (4-hour; instrument unclear, see below): [0:09:12] "four hour we get a break of structure okay we see an imbalance right here"
 - After a break, expect a retracement first. [0:09:12] "we broke structure so that means at least we're going to have some sort of ... move down okay we're looking for a retracement"
 - When a gap stops counting. [0:09:43] "the second we push past this no longer considering it"
 - Gap lined up with liquidity. [0:09:43] "what else do we have in line with this imbalance right here we have liquidity"
-- Trigger on the lower timeframe. [0:10:13] "Spike up into the liquidity area boom we get a break of structure on the 15 minute"
+- Trigger on the lower timeframe. [0:09:43] "Spike up into the liquidity area boom we get a break of structure on the 15 minute"
 - Target choices. [0:10:13] "Target the imbalance the start of the imbalance right here the 50 of the imbalance the end of the imbalance"
 - Other targets. [0:10:13] "Target previous areas of liquidity down here maybe the accumulation that caused the rally up"
 - Example 4 (1-hour, instrument not named): bias from the daily. [0:11:16] "we're bullish because we got that daily break of structure [to] the upside"
@@ -526,14 +526,14 @@ Summary: Putting fair value gaps together with trend, sweep and break of structu
 - A gap can be entered more than once. [0:14:19] "dips down one more time into this fair value Gap filling the imbalance once again price rips"
 - His overall stance on gaps. [0:15:51] "I don't even really like taking a lot of Trades off of imbalances"
 - And. [0:15:51] "I use it as more of a confirmation rather than an entry"
-- Timeframes named, by step: daily (bias) [0:11:16]; 4-hour and 1-hour (structure break and gap) [0:09:12], [0:11:16]; 15-minute (structure break, gap, or trigger) [0:02:04], [0:06:08], [0:10:13]; 5-minute (gap or trigger) [0:04:06], [0:06:38]; 1-minute (entry) [0:03:36].
+- Timeframes named, by step: daily (bias) [0:11:16]; 4-hour and 1-hour (structure break and gap) [0:09:12], [0:11:16]; 15-minute (structure break, gap, or trigger) [0:02:04], [0:06:08], [0:09:43]; 5-minute (gap or trigger) [0:04:06], [0:06:38]; 1-minute (entry) [0:03:36].
 - Instruments named: S&P 500 [0:01:31], "GJ" [0:05:36], GBP/USD [0:08:10], gold [0:09:43].
 - Risk, news: not stated. Clock time of the open is not given here (see day 19).
 
 ### Behaviour and process rules
 
 - Mark every gap and wait. [0:06:08] "Mark out both"
-- Practise live because hindsight is easier. [0:15:20] "obviously it's easier to do in hindsight which is why we got to practice"
+- Practise live because hindsight is easier. [0:14:49] "obviously it's easier to do in hindsight which is why we got to practice"
 - Go back over earlier lessons if a concept is unclear. [0:01:31] "that's up to you to go back re-watch the other videos"
 
 ### Refers to the chart without saying it
@@ -547,11 +547,11 @@ Summary: Putting fair value gaps together with trend, sweep and break of structu
 
 ### Unclear or contradictory
 
-- Timeframes in his own trade are stated inconsistently. The gap is first "this 15 minute imbalance" [0:03:05]; then he "scaled down onto the one minute" [0:03:36]; then says "scale down to a lower time frame boom we see a break of structure okay now what are we doing scaling down to an even lower time frame" [0:04:06]; then "we mark off that five minute imbalance" [0:04:06]. Whether the entry gap was on the 15-minute or the 5-minute, and whether the entry close was on the 5-minute or 1-minute chart, is unclear in captions.
+- Timeframes in his own trade are stated inconsistently. The gap is first "this 15 minute imbalance" [0:03:05]; then he "scaled down onto the one minute" [0:03:36]; then says "scale down to a lower time frame boom we see a break of structure" and then "scaling down to an even lower time frame" [0:04:06]; then "we mark off that five minute imbalance" [0:04:06]. Whether the entry gap was on the 15-minute or the 5-minute, and whether the entry close was on the 5-minute or 1-minute chart, is unclear in captions.
 - Entry or confirmation: [0:05:06] "I really like to use these as like my patient entry" against [0:15:51] "I use it as more of a confirmation rather than an entry" and day 14 [0:03:36] "I don't use fair value ga[p]s for like entries necessarily".
 - [0:05:06] "if we entered just off of ... break of structure off of ... this thing we would have got stopped out": a break of structure alone failed in this example, while day 12 [0:10:48] and day 14 [0:06:38] present sweep plus break as an entry.
 - Instrument in example 3: [0:08:10] "let's go into GBP USD", then [0:09:43] "what does gold do". Unclear in captions which chart is on screen.
-- [0:13:48] to [0:14:19]: "that's when the hourly broke structure as well ... or actually [b]ro[k]e structure ... with this Candlestick so I guess you would have gotten in a bit earlier". He revises the trigger candle while talking; the final trigger is unclear.
+- [0:13:48] to [0:14:19]: "that's when the hourly broke structure as well", then "with this Candlestick so I guess you would have gotten in a bit earlier". He revises the trigger candle while talking; the final trigger is unclear.
 - "Filled" again covers two cases: price entering the gap on a retracement (a signal to look for a trigger, and it may happen "once again" [0:14:19]) and a wick covering the range so that it "isn't even an imbalance" [0:11:47]. The first keeps the gap usable; the second removes it. He does not give a rule for telling them apart, other than "push past" [0:09:43].
 - Break-even stop and partial exits are described as what happened [0:04:36], not given as a rule.
 
@@ -588,7 +588,7 @@ When not to trade:
 - Absolute. [0:07:14] "those four I will not I do not trade whatsoever"
 - Restated at the end. [0:22:55] "if it's CPI PPI fomc or NFP just call it quits"
 - Red-folder days are allowed, depending. [0:05:11] "I'm okay with trading on red folder days it just depends on which ones"
-- Many red folders, none of the four. [0:08:19] "this is a lot of red folders so low probability d[e]-risk see what happens in the market if it makes a big move we're done"
+- Many red folders, none of the four. [0:08:19] "a lot of red folders so low probability d[e]-risk see what happens in the market if it makes a big move we're done"
 - News on USD only: look at the non-USD pair. [0:07:46] "I'll probably only be looking at like GJ on Thursday"
 
 How long to wait, and clock times:
@@ -598,7 +598,7 @@ How long to wait, and clock times:
 - Release time implied. [0:08:19] "I'll look at the market after 8 30 right and see how price develops"
 - Market open. [0:08:49] "Market opens at 9 30 for me boom news comes out at 10"
 - News after the open. [0:08:49] "I will not trade until 10 a.m hits and ... I still won't trade until like 10 30 hits"
-- Restated wait. [0:10:23] "we wait for like ... 15 20 30 minutes okay let price develop and then we can look to take a trade"
+- Restated wait. [0:09:52] "we wait for like ... 15 20 30 minutes okay let price develop and then we can look to take a trade"
 - Time zone: not named. He says only "for me" [0:08:49]. My inference: 8:30 releases and a 9:30 open match US Eastern time, but he does not say it.
 
 Reading the data:
@@ -613,10 +613,10 @@ Reading the data:
 - Index. [0:14:07] "good for the dollar bad for SPX"
 - Pair logic, first-named currency. [0:19:25] to [0:19:57] "if we get good news for what's on top that means up up"
 - Pair logic, second-named currency. [0:19:57] "if we get good news for what's on the bottom that means down down"
-- Summary. [0:21:53] "whatever's on top it's positive correlation whatever's on bottom it's just invers[e]"
+- Summary. [0:21:53] "whatever's on top it's positive correlation whatever's on bottom it's just inversed"
 - USD/JPY case. [0:22:24] "if we get US[D] good for currency price is going to go up"
 - Not all releases read the same way: for a GBP release he reads [0:17:49] "less than forecasts is good for currency" (the release is not named).
-- News direction is not reliable. [0:15:43] "we can't necessarily trust news bias because price action is ... superior"
+- News direction is not reliable. [0:15:12] "we can't necessarily trust news bias because price action is ... superior"
 - And. [0:22:24] "is news bias [end] all be all no it just helps us understand ... news data"
 
 Instruments named: GBP/USD, GBP/JPY, gold, S&P 500, DXY, USD/JPY (as a contrast example), plus EUR/USD, AUD/USD and BTC/USD in the dollar list.
@@ -642,15 +642,15 @@ Instruments named: GBP/USD, GBP/JPY, gold, S&P 500, DXY, USD/JPY (as a contrast 
 
 ### Unclear or contradictory
 
-- CPI: [0:07:14] "those four I will not I do not trade whatsoever" against [0:05:41] "at like 8 45 or like at 8 50 if news didn't affect the market I would have been okay to trade but knowing CPI CPI always affects the market". The second reads as a general rule illustrated with that day's clock times, then set aside for CPI; unclear in captions.
-- Wait time is given as "15 or 20 minutes" [0:05:41], "15 20 30 minutes" [0:10:23], and 30 minutes in the worked example (10:00 release, no trade until "like 10 30") [0:08:49].
+- CPI: [0:07:14] "those four I will not I do not trade whatsoever" against [0:05:41] "at like 8 45 or like at 8 50 if news didn't affect the market I would have been okay to trade", followed by "knowing CPI CPI always affects the market". The second reads as a general rule illustrated with that day's clock times, then set aside for CPI; unclear in captions.
+- Wait time is given as "15 or 20 minutes" [0:05:41], "15 20 30 minutes" [0:09:52], and 30 minutes in the worked example (10:00 release, no trade until "like 10 30") [0:08:49].
 - Which folders: red only [0:03:37], then "red and orange" [0:06:13].
 - Trading before the open: [0:05:41] says he "would have been okay to trade" at 8:45 or 8:50, while [0:08:49] says the market opens at 9:30 "for me" and day 18 [0:03:05] says no trades before market open. He does not say whether the earlier time applies to the currency pairs or gold only.
 - [0:04:39] "why do we want to wait until afternoons on red folder days": likely "after news" misheard; unclear in captions.
 - The CPI example is described two ways. [0:14:07] to [0:14:38] "it was less than forecasts okay we see the dxy rally ... we see the ... s p fall". Then [0:15:43] "right when news comes out with this candle it dumps" (DXY) and "what happened to the S P 500 ... rallied", with the dollar rallying later in the day [0:16:13]. He uses the reversal to argue for waiting; the first description is unclear in captions.
-- [0:12:59] to [0:13:30] "the s p will follow down" when the dollar rises is stated as a rule; his own same-day example then shows the first move reversing.
+- [0:12:59] to [0:13:30] "the s p will follow down" when the dollar rises is stated as a rule. In his same-day example the DXY move on the news candle later reversed [0:16:13], and he does not say what the S&P 500 did after its first rally.
 - Caption or speech slips: "Chinese yen" [0:02:32]; "NCD" [0:03:05] (my inference: NZD); "USC" for USD throughout; "what side of the parentheses ... what side of the slash" [0:18:53].
-- [0:18:20] "if we see if we have news for GBP ... if it's the pound against the dollar in the pound gets good news ... that pair is going to go up": consistent with his rule, but the sentence before it ("it's different than against the US dollar") is hard to follow; unclear in captions.
+- [0:18:20] "the pound against the dollar in the pound gets good news good for that currency then that pair is going to go up": consistent with his rule, but the sentence before it ("it's different than against the US dollar") is hard to follow; unclear in captions.
 - He says he told his group he would trade and then did not: [0:23:25] "I told them I was going to trade and I did a zoom call just so I could tell them not to trade". Not a rule.
 
 ---
@@ -658,12 +658,12 @@ Instruments named: GBP/USD, GBP/JPY, gold, S&P 500, DXY, USD/JPY (as a contrast 
 ## Contradictions across days 8-19 (collected)
 
 1. Risk: one to three percent "per trade" (day 13 [0:03:36]) and one to three percent "per day" (day 13 [0:10:49]).
-2. Trades per day: "one or two setups", up to three trades inside the daily cap (day 13 [0:11:20]); "I take one trade a day" (day 17 [0:11:08]); a second trade after a first loss "won't hit take profit" (day 15 [0:03:37]).
+2. Trades per day: "one or two setups", up to three trades inside the daily cap (day 13 [0:11:20]); "I take one trade a day" (day 17 [0:10:37]); a second trade after a first loss "won't hit take profit" (day 15 [0:03:37]).
 3. Is sweep plus break of structure enough? Yes: day 12 [0:10:48], day 14 [0:06:38]. No: day 10 [0:13:40]; and day 18 [0:05:06] shows a break-of-structure entry that "would have got stopped out".
 4. Fair value gap as entry or not: "I don't use fair value ga[p]s for like entries necessarily" (day 14 [0:03:36]); "that's where I'm entering" (day 12 [0:17:57]); "my patient entry" (day 18 [0:05:06]); "more of a confirmation rather than an entry" (day 18 [0:15:51]).
 5. Confirmation after a gap is entered: a lower-timeframe break of structure, "or just a reaction" candle (day 16 [0:07:55]); the day 17 checklist says "a reaction" [0:03:33]; day 18 examples all use a lower-timeframe break of structure.
 6. Where trades sit: at the top or bottom, "not already in a trend" (day 8 [0:10:12]); continuation entries on retracements within a trend (days 14, 16, 18).
-7. News wait: 15 to 20 minutes, 15 to 30 minutes, or 30 minutes (day 19 [0:05:41], [0:10:23], [0:08:49]).
+7. News wait: 15 to 20 minutes, 15 to 30 minutes, or 30 minutes (day 19 [0:05:41], [0:09:52], [0:08:49]).
 8. CPI day: never trade (day 19 [0:07:14]) and a conditional "would have been okay to trade" at 8:45 or 8:50 (day 19 [0:05:41]).
 9. Trading before the open: not allowed (day 18 [0:03:05]); an 8:45 or 8:50 trade described as acceptable on a quiet news day (day 19 [0:05:41]) with a 9:30 open (day 19 [0:08:49]).
 10. Reviewing a loss: do not ask "why did I take this trade" (day 11 [0:04:05]); "figure out what you did wrong" (day 11 [0:08:13]).
@@ -683,18 +683,18 @@ Each rule is what he states. Where a detail had to be added to make it codable, 
 6. Discard a gap once price trades all the way through and past it. Day 18 [0:09:43].
 7. Price entering a gap is never an entry by itself. Day 16 [0:07:55]; day 18 [0:04:36].
 8. Gap entry trigger: after price enters a higher-timeframe gap, enter on a lower-timeframe break of structure in the trend direction. Day 14 [0:06:08]; day 16 [0:11:28]; day 18 [0:05:36].
-9. Break of structure is a candle close beyond the most recent swing low (bearish) or high (bullish). Day 12 [0:10:48], [0:15:21]; day 18 [0:04:06]. (Stated in examples, not as a definition.)
+9. Break of structure is a candle close beyond the most recent swing low (bearish) or high (bullish). Day 12 [0:10:48], [0:14:51]; day 18 [0:04:06]. (Stated in examples, not as a definition.)
 10. Liquidity levels are swing highs (orders resting above) and swing lows (orders resting below). Day 10 [0:05:04], [0:06:34]; day 12 [0:03:38].
 11. Price reaching a liquidity level is never an entry by itself; a break of structure against the sweep direction must follow. Day 8 [0:08:40]; day 12 [0:06:13], [0:07:13].
-12. Short sequence: a high is taken out, then a close below the most recent low, then short; target prior lows. Long is the mirror. Day 12 [0:09:47], [0:10:48], [0:15:21].
+12. Short sequence: a high is taken out, then a close below the most recent low, then short; target prior lows. Long is the mirror. Day 12 [0:09:47], [0:10:48], [0:14:51].
 13. Full checklist: liquidity sweep, then break of structure, then price enters a fair value gap, then a reaction, then enter. Day 17 [0:03:33]; day 12 [0:17:57].
-14. Stop for a short goes above the previous high(s); targets are previous lows / previous areas of liquidity. Day 16 [0:09:26]; day 18 [0:07:09].
+14. Stop for a short goes above the previous high(s); targets are previous lows / previous areas of liquidity. Day 16 [0:08:56]; day 18 [0:07:09].
 15. A lower-timeframe break of structure against a higher-timeframe break is treated as a retracement, not a reversal. Day 18 [0:06:38].
-16. Timeframe ladders used in examples: 4-hour to 15-minute; 1-hour to 15-minute; 15-minute to 5-minute (and 1-minute for entry). Day 18 [0:10:13], [0:12:18], [0:06:38], [0:03:36].
+16. Timeframe ladders used in examples: 4-hour to 15-minute; 1-hour to 15-minute; 15-minute to 5-minute (and 1-minute for entry). Day 18 [0:09:43], [0:12:18], [0:06:38], [0:03:36].
 17. Risk per trade one to three percent of the account, with total risk per day capped at one to three percent (for example 1 x 3%, 2 x 1.5%, 3 x 1%). Day 13 [0:03:36], [0:10:49], [0:11:20].
 18. No trades before the market open; open is 9:30 (time zone not stated). Day 18 [0:03:05]; day 19 [0:08:49].
 19. No trading at all on CPI, PPI, FOMC or NFP days. Day 19 [0:06:43], [0:07:14], [0:22:55].
-20. On other red or orange folder releases for a traded currency: no trade before the release; wait 15 to 30 minutes after it. Day 19 [0:03:37], [0:06:13], [0:10:23].
+20. On other red or orange folder releases for a traded currency: no trade before the release; wait 15 to 30 minutes after it. Day 19 [0:03:37], [0:06:13], [0:09:52].
 21. If a release lands after the open (example 10:00), no trade until about 30 minutes after it (10:30). Day 19 [0:08:49].
 22. Calendar filter: Forex Factory, yellow folders off, only currencies of traded instruments on; S&P 500 uses USD events. Day 19 [0:02:32], [0:03:05].
 23. News direction mapping: good for the first-named currency means the pair rises; good for the second-named currency means it falls; good for USD means down for gold, S&P 500 and any pair quoted against USD. He says not to trade on this alone. Day 19 [0:13:30], [0:19:57], [0:21:53], [0:22:24].
@@ -716,7 +716,7 @@ Each rule is what he states. Where a detail had to be added to make it codable, 
 - How many trades per day (one, two or three), and whether to trade again after a loss (day 13, day 15, day 17).
 - Whether a release "drastically affected the market" ("large Wicks large moves"), and how much to cut risk on news days (day 19 [0:06:13], [0:06:43]).
 - What counts as "a lot of red folders" or a week "flooded with news" (day 19 [0:08:19], [0:09:19]).
-- The exact wait after news inside the 15 to 30 minute range, and "let price develop" (day 19 [0:10:23]).
-- "Wait one or two more candles" and "see if you get the volume ... the volatility" before entry (day 17 [0:08:06], [0:08:36]). No measure given.
+- The exact wait after news inside the 15 to 30 minute range, and "let price develop" (day 19 [0:09:52]).
+- "Wait one or two more candles" and "see if you get the volume ... the volatility" before entry (day 17 [0:08:06]). No measure given.
 - Days to skip for personal reasons: up late, emotionally upset (day 11 [0:13:51]).
 - Applying any of this to NQ or MNQ: he names only the S&P 500, GBP/USD, GBP/JPY and gold in these lessons.
