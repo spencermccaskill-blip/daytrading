@@ -6,3 +6,5 @@ data/settings.json
 screenshots/tmp/
 data/signals.json
 data/*.tmp
+# Raw course captions are someone else's work: kept on disk for study, not published
+research_notes/*/tjr_transcripts/
