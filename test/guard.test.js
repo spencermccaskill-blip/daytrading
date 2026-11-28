@@ -117,7 +117,7 @@ test('a signal is blocked when locked out, or when its risk does not fit what is
   const c = checkTrade(oneLoss, s, { stopPoints: 40 });
   assert.equal(c.verdict, 'BLOCK');
   assert.match(c.reason, /daily stop/i);
-  const s2 = S(); s2.personal.dailyStop = 99999; s2.personal.maxLossesPerDay = 99;
+  const s2 = S(); s2.personal.dailyStop = 99999; s2.personal.maxLossesPerDay = 99; s2.personal.smallCushion = false; s2.personal.thinCushion = false;
   const thin = g([tr('2026-07-13T15:00', -1800)], s2); // $200 of room to the limit
   assert.match(checkTrade(thin, s2, { stopPoints: 40 }).reason, /max loss limit/i);
 });

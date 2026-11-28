@@ -18,7 +18,8 @@ test('account set from the Lucid dashboard: balance and minimum balance are take
   const g = computeGuard(anchored(), { trades: [] }, NOW);
   assert.deepEqual([g.balance, g.floor, g.room], [50046, 49363, 683]);
   assert.equal(g.breached, false);
-  assert.equal(g.maxContracts, 20);                               // $46 of profit: bottom of the Flex scaling plan
+  assert.equal(g.maxContracts, 1);                                // small cushion: one micro until the room is back above $1,500
+  assert.deepEqual([g.small, g.riskPerTrade, g.lossesLeft], [true, 100, 6]); // six full $100 losses fit in $683; the seventh reaches the limit
 });
 
 test('anchor: only trades after it count, and the limit keeps trailing from there', () => {
@@ -32,18 +33,35 @@ test('anchor: only trades after it count, and the limit keeps trailing from ther
   assert.deepEqual([computeGuard(locked, { trades: [] }, NOW).floor, computeGuard(locked, { trades: [] }, NOW).floorLocked], [50100, true]);
 });
 
-test('thin cushion: under $1,000 of room it is one loss and done, but a normal trade is not blocked', () => {
+test('small cushion: under $1,500 of room it is one micro at $100 risk, and one loss and done under $1,000', () => {
   const s = anchored(), g = computeGuard(s, { trades: [] }, NOW);
-  assert.deepEqual([g.thin, g.maxLosses, g.dailyStop], [true, 1, 250]);
+  assert.deepEqual([g.thin, g.maxLosses, g.dailyStop], [true, 1, 100]);
   assert.equal(g.lockout, null);
-  assert.equal(checkTrade(g, s, { stopPoints: 100 }).verdict, 'PASS'); // 1 MNQ, $200 at risk, with $683 of room
-  assert.equal(checkTrade(g, s, { stopPoints: 40 }).verdict, 'PASS');  // 3 MNQ, $240
-  const after = computeGuard(s, { trades: [tr('2026-07-15T14:00', -200)] }, NOW);
+  const wide = checkTrade(g, s, { stopPoints: 100 });
+  assert.equal(wide.verdict, 'BLOCK');                                // $200 on one micro is over the $100 cap: marked too wide, never shrunk
+  assert.match(wide.reason, /over your \$100/);
+  const ok = checkTrade(g, s, { stopPoints: 40 });
+  assert.deepEqual([ok.verdict, ok.contracts, ok.riskDollars], ['PASS', 1, 80]); // one micro, not three
+  const after = computeGuard(s, { trades: [tr('2026-07-15T14:00', -80)] }, NOW);
   assert.match(after.lockout.reason, /one loss/i);
+  assert.match(computeGuard(s, { trades: [tr('2026-07-15T14:00', -200)] }, NOW).lockout.reason, /daily stop of \$100/); // a loss bigger than the cap
   assert.equal(after.lockout.until, Z('2026-07-15T22:00'));
   const win = computeGuard(s, { trades: [tr('2026-07-15T14:00', 300)] }, NOW);
   assert.equal(win.lockout, null);                                  // a win does not end the day
   assert.equal(win.thin, true);                                     // judged on the room at the start of the day
+});
+
+test('small cushion can be turned off or changed, and does not apply with a normal cushion', () => {
+  const off = anchored(); off.personal.smallCushion = false;
+  const g = computeGuard(off, { trades: [] }, NOW);
+  assert.deepEqual([g.small, g.riskPerTrade, g.maxContracts, g.lossesLeft, g.dailyStop], [false, 250, 20, 2, 250]);
+  assert.deepEqual([checkTrade(g, off, { stopPoints: 40 }).contracts, checkTrade(g, off, { stopPoints: 100 }).verdict], [3, 'PASS']);
+  const own = anchored(); own.personal.smallRisk = 68; own.personal.smallUnder = 2000;
+  assert.equal(computeGuard(own, { trades: [] }, NOW).riskPerTrade, 68);
+  const rebuilt = anchored(); rebuilt.account.anchor = { balance: 50900, floor: 49363, at: 0 };
+  assert.deepEqual([computeGuard(rebuilt, { trades: [] }, NOW).small, computeGuard(rebuilt, { trades: [] }, NOW).riskPerTrade], [false, 250]); // $1,537 of room
+  const fresh0 = computeGuard(defaultSettings(), { trades: [] }, NOW);
+  assert.deepEqual([fresh0.small, fresh0.riskPerTrade, fresh0.maxContracts, fresh0.lossesLeft], [false, 250, 20, 7]);
 });
 
 test('thin cushion can be turned off, and does not apply with a normal cushion', () => {
@@ -92,6 +110,6 @@ test('one click with an exact entry: the result is worked out from the price act
   const b = await boot('won', dir);
   try {
     const row = (await b.call('GET', '/api/journal')).json.trades.find(t => t.signalId === N1), sig = (await b.call('GET', '/api/log')).json.signals.find(x => x.id === N1);
-    assert.equal(row.pnl, 1 * 2 * (sig.target - (sig.entry + 6.5)));   // 6.5 points worse than the rule entry: $13 less
+    assert.equal(row.pnl, 1 * (2 * (sig.target - (sig.entry + 6.5)) - 1.5)); // 6.5 points worse than the rule entry: $13 less; then $1.50 of fees
   } finally { b.close(); }
 });

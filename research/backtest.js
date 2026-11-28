@@ -7,6 +7,8 @@ import { STRATEGIES } from '../server/strategies/index.js';
 import { manage, COST_POINTS } from '../server/strategies/common.js';
 import { loadHistory, tradingDates } from './history.js';
 import { summary, inPeriod, dollars, benchmark, judge, label } from './stats.js';
+import { loadFive, reportFive, tjrStrategies, MIN_TRADES } from './tjr-test.js';
+import { recencyCheck, biasCheck, afterLossCheck } from './checks.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const PERIODS = { tune: ['2019-01-01', '2023-12-31'], judge: ['2024-01-01', '2026-12-31'], last12: ['2025-10-22', '2026-10-21'] };
@@ -20,7 +22,7 @@ export function runStrategy(hist, strat) {
     if (!t || t.status === 'open') continue;
     // Same entry bar, same stop distance, same exits, both directions: feeds the random-direction benchmark.
     const flip = (dir) => manage(contract.ctx, { ...t, dir, stop: t.entry - dir * t.risk, target: t.target != null ? t.entry + dir * Math.abs(t.target - t.entry) : null }, res.times.flat).r;
-    trades.push({ key, contract: contract.code, dir: t.dir, signalT: t.signalT, entry: t.entry, stop: t.stop, risk: t.risk, target: t.target, status: t.status, exitPx: t.exitPx, exitT: t.exitT, r: t.r, long: flip(1), short: flip(-1) });
+    trades.push({ key, ctx: contract.ctx, contract: contract.code, dir: t.dir, signalT: t.signalT, entry: t.entry, stop: t.stop, risk: t.risk, target: t.target, status: t.status, exitPx: t.exitPx, exitT: t.exitT, r: t.r, long: flip(1), short: flip(-1) });
   }
   return trades;
 }
@@ -60,11 +62,47 @@ export function markdown(reports, hist) {
   return L.join('\n');
 }
 
+/** The fifteen-minute setups (everything that is not one of the 5-minute research setups). */
+export const classic = () => STRATEGIES.filter(s => !s.research);
+
+const pct = (x) => (x == null ? 'n/a' : Math.round(x) + '%');
+export function researchMarkdown(five, tjr, checks) {
+  const L = [];
+  L.push('## TJR setups on 5-minute bars (research of November 2026)', '', `Tested on ${five.bars.toLocaleString('en-US')} MNQ 5-minute bars from Yahoo, ${five.first} to ${five.last} (${five.dropped} bad tick dropped). Rules fixed first in the 2026-11-28 addendum. 1.5 NQ points cost per trade.`, '',
+    `**This is about ${Math.round((Date.parse(five.last) - Date.parse(five.first)) / 864e5 * 5 / 7)} trading days. No setup can pass or fail on it.** Under ${MIN_TRADES} trades the label is "Too early to judge" whatever the numbers. "Shown" means it is suggested on The Desk; "On trial" means it is only tracked.`, '',
+    '| Setup | Window | Trades | Win % | Avg R | t-stat | Worst drawdown | Median stop | Fits $100 | Control mean | Control 95th | On The Desk |', '|---|---|---|---|---|---|---|---|---|---|---|---|');
+  for (const r of tjr) L.push(`| ${r.code} ${r.name} | ${r.window}${r.outside ? ' (outside what he teaches)' : ''} | ${r.judge.trades} | ${n(r.judge.win)} | ${f(r.judge.avgR, 3)} | ${n(r.judge.t, 2)} | ${n(r.judge.maxDD)}R | ${n(r.medianStop, 0)} pts | ${pct(r.fit100)} | ${f(r.control.mean, 3)} | ${f(r.control.p95, 3)} | ${r.shown ? 'Shown' : 'On trial'} |`);
+  L.push('', 'Control: the same trades moved to a random other day at the same clock time, random direction, same stop and target distances (500 runs). A setup at or below its control mean is doing no better than the time of day.', '');
+  const c = checks.recency;
+  L.push('## Do the last 4 weeks predict the next 4? (recency check)', '', `Every trade of the 14 fifteen-minute setups, in 28-day blocks from 2019 (a block counts with ${c.minTrades}+ trades).`, '',
+    `- Persistence: correlation between one block and the next (after removing each setup's own average) is ${f(c.persistence.r, 3)} over ${c.persistence.pairs} block pairs, permutation p = ${c.persistence.p.toFixed(3)}. For win rate: ${f(c.persistenceWinRate.r, 3)}, p = ${c.persistenceWinRate.p.toFixed(3)}.`,
+    `- Follow the leader: the setup with the best win rate last block averaged ${f(c.leader.leaderNext, 3)}R in the next block, against ${f(c.leader.averageNext, 3)}R for the plain average of all setups (difference ${f(c.leader.diff, 3)}R, t ${n(c.leader.t, 2)}, ${c.leader.boundaries} block boundaries).`,
+    `- Reading fixed in advance: **recent results ${c.carries ? 'carry over' : 'do not carry over'}**. ${c.carries ? 'The Desk keeps leading with the last-4-weeks win rate.' : 'The Desk leads with a blend of recent and long-run results and shows the last 4 weeks with its range.'}`, '');
+  const b = checks.bias, w = (x) => `${f(x.diff, 3)}R (t ${n(x.t, 2)}; ${x.nA} with, ${x.nB} without)`;
+  L.push('## Does trading with the daily bias help? (check C1)', '', `${b.trades.toLocaleString('en-US')} trades of the 14 fifteen-minute setups with a known daily bias.`, '',
+    `- With the daily bias minus against it: whole history ${w(b.daily.whole)}; 2024 on ${w(b.daily.judge)}. **${b.daily.helps ? 'Helps' : 'Does not help'}.**`,
+    `- Daily, 4-hour and 1-hour all agree minus the rest: whole history ${w(b.allAgree.whole)}; 2024 on ${w(b.allAgree.judge)}. **${b.allAgree.helps ? 'Helps' : 'Does not help'}.**`,
+    '- By setup (with minus against): ' + b.bySetup.map(x => `${x.id} ${f(x.diff, 2)}`).join(', ') + '.', '');
+  const a = checks.afterLoss;
+  L.push('## Is the trade after a losing trade worse? (check C2)', '', `Trades that started after an earlier trade that day closed at a loss averaged ${f(a.meanA, 3)}R (${a.nA} trades); all others ${f(a.meanB, 3)}R (${a.nB}). Difference ${f(a.diff, 3)}R, t ${n(a.t, 2)}. **${a.supported ? 'Supported: the next trade is worse.' : 'Not supported: the next trade is no worse.'}** This is about the setups, not about how a person trades after a loss.`, '');
+  return L.join('\n');
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const hist = loadHistory();
-  const reports = STRATEGIES.map(s => report(s, runStrategy(hist, s)));
-  const out = { generated: new Date().toISOString(), data: { start: hist.start, end: hist.end, bars: hist.meta.bars }, cost: COST_POINTS, periods: PERIODS, strategies: reports };
+  const runs = classic().map(s => ({ strat: s, id: s.id, trades: runStrategy(hist, s) }));
+  const reports = runs.map(r => report(r.strat, r.trades));
+  const five = loadFive();
+  const tjr = tjrStrategies().map(s => reportFive(five, s));
+  const checks = { recency: recencyCheck(runs), bias: biasCheck(runs), afterLoss: afterLossCheck(runs) };
+  const strip = ({ trades, ...rest }) => rest;
+  const out = { generated: new Date().toISOString(), data: { start: hist.start, end: hist.end, bars: hist.meta.bars }, cost: COST_POINTS, periods: PERIODS, strategies: [...reports, ...tjr.map(strip)],
+    five: { first: five.first, last: five.last, bars: five.bars, dropped: five.dropped }, checks };
   fs.writeFileSync(path.join(here, 'results.json'), JSON.stringify(out, null, 1));
-  fs.writeFileSync(path.join(here, 'RESULTS.md'), markdown(reports, hist) + fs.readFileSync(path.join(here, 'NOTES.md'), 'utf8'));
+  fs.writeFileSync(path.join(here, 'RESULTS.md'), markdown(reports, hist) + '\n' + researchMarkdown(five, tjr, checks) + fs.readFileSync(path.join(here, 'NOTES.md'), 'utf8'));
   for (const r of reports) console.log(`${r.code} ${r.name.padEnd(26)} ${r.label.padEnd(22)} judge ${String(r.judge.trades).padStart(4)} trades  ${f(r.judge.avgR, 3)}R  t ${n(r.judge.t, 2)}  DD ${n(r.judge.maxDD)}R  | 2019-23 ${f(r.tune.avgR, 3)}R (${r.tune.trades})`);
+  for (const r of tjr) console.log(`${r.code.padEnd(3)} ${r.name.padEnd(28)} ${r.window.padEnd(7)} ${String(r.judge.trades).padStart(3)} trades  win ${n(r.judge.win)}  ${f(r.judge.avgR, 3)}R  t ${n(r.judge.t, 2)}  stop ${n(r.medianStop, 0)}  control ${f(r.control.mean, 3)}/${f(r.control.p95, 3)}  ${r.shown ? 'SHOWN' : 'trial'}`);
+  console.log('recency', JSON.stringify(checks.recency));
+  console.log('bias', JSON.stringify({ daily: checks.bias.daily, allAgree: checks.bias.allAgree }));
+  console.log('afterLoss', JSON.stringify(checks.afterLoss));
 }

@@ -4,7 +4,7 @@
 
 export const YAHOO_SYMBOL = 'YAHOO:MNQ=F';
 
-/** Address for 5-minute MNQ bars. range: '1mo' (history for the levels) or '1d' (keeping up). */
+/** Address for 5-minute MNQ bars. range: '60d' (all the history the service keeps) or '1d' (keeping up). */
 export const yahooUrl = (range) => `https://query1.finance.yahoo.com/v8/finance/chart/MNQ=F?interval=5m&range=${range}&includePrePost=true`;
 
 /** Turns a Yahoo chart reply into rows [tSec, o, h, l, c, v]. Empty slots and the trailing tick (not a whole bar) are dropped. */
@@ -18,7 +18,18 @@ export function parseYahoo(json) {
     if (![o, h, l, c].every(x => Number.isFinite(x) && x > 0)) continue;
     rows.push([t, o, h, l, c, Number(q.volume?.[i]) || 0]);
   }
-  return rows.sort((a, b) => a[0] - b[0]);
+  return dropBadTicks(rows.sort((a, b) => a[0] - b[0]));
+}
+
+/** A bar that opens more than 2% from the previous close and closes back within 0.5% of it is a bad print: dropped. */
+export function dropBadTicks(rows) {
+  const out = [];
+  for (const r of rows) {
+    const p = out.at(-1);
+    if (p && Math.abs(r[1] - p[4]) > 0.02 * p[4] && Math.abs(r[4] - p[4]) < 0.005 * p[4]) continue;
+    out.push(r);
+  }
+  return out;
 }
 
 /** One fetch. Returns { rows } or { error } in plain words; never throws. */

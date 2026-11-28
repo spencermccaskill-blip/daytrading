@@ -16,7 +16,7 @@ import { flat, closedCtx, Z } from './helpers.js';
 
 const NOW = Z('2026-07-15T15:00');
 const tr = (iso, pnl, kind = 'trade') => ({ id: iso, kind, ts: Z(iso), pnl });
-const loose = () => { const s = defaultSettings(); s.personal.dailyStop = 99999; s.personal.maxLossesPerDay = 99; return s; };
+const loose = () => { const s = defaultSettings(); s.personal.dailyStop = 99999; s.personal.maxLossesPerDay = 99; s.personal.smallCushion = false; return s; };
 
 test('a breach stays a breach even if a later entry lifts the balance', () => {
   const g = computeGuard(loose(), { trades: [tr('2026-07-15T14:00', -2000), tr('2026-07-15T14:30', 300)] }, NOW);
@@ -161,7 +161,7 @@ test('5-minute chart: same signals as the backtest when the bars arrive as three
   const dates = [...tradingDates(hist)].filter(d => d.contract.code === contract.code).slice(-42, -2);
   const split = (b) => { const s = b.t / 1000, v = b.v / 3; return [[s, b.o, b.h, b.o, b.h, v], [s + 300, b.h, b.h, b.l, b.l, v], [s + 600, b.l, Math.max(b.l, b.c), b.l, b.c, v]]; };
   let signals = 0;
-  for (const strat of STRATEGIES.filter(s => s.id !== 'nymid_vwap' && s.id !== 'nymid_noise')) { // VWAP differs when volume is split evenly
+  for (const strat of STRATEGIES.filter(s => !s.research && s.id !== 'nymid_vwap' && s.id !== 'nymid_noise')) { // VWAP differs when volume is split evenly; the research setups have their own 5-minute test
     const want = new Map(runStrategy(hist, strat).map(t => [t.key, t]));
     const store = new BarStore(); let fed = 0;
     for (const { key } of dates) {

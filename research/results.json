@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-20T16:36:45.409Z",
+ "generated": "2026-11-28T03:40:21.839Z",
  "data": {
   "start": "2018-12-02",
   "end": "2026-10-21",
@@ -2456,6 +2456,470 @@
     "totalR": -57.42210218755369,
     "maxDD": 70.26611298340731
    }
+  },
+  {
+   "id": "tjr1_nyopen",
+   "code": "NT1",
+   "name": "TJR sweep + break",
+   "window": "nyopen",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": false,
+   "label": "Too early to judge",
+   "shown": false,
+   "trial": true,
+   "judge": {
+    "trades": 16,
+    "win": 50,
+    "avgR": -0.027704074384393568,
+    "t": -0.10423443638404899,
+    "totalR": -0.4432651901502971,
+    "maxDD": 4.057929272518336
+   },
+   "control": {
+    "mean": 0.016864596089203477,
+    "p95": 0.48403231982947154
+   },
+   "medianStop": 182,
+   "fit100": 0,
+   "fit250": 31.25,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr2_nyopen",
+   "code": "NT2",
+   "name": "TJR sweep + break + pullback",
+   "window": "nyopen",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": false,
+   "label": "Too early to judge",
+   "shown": true,
+   "trial": false,
+   "judge": {
+    "trades": 5,
+    "win": 60,
+    "avgR": 0.12693730765758943,
+    "t": 0.24252310139274336,
+    "totalR": 0.6346865382879471,
+    "maxDD": 1.0301507537688441
+   },
+   "control": {
+    "mean": 0.029407264744473686,
+    "p95": 0.9885212219895994
+   },
+   "medianStop": 75.25,
+   "fit100": 20,
+   "fit250": 60,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr1_nymid",
+   "code": "MT1",
+   "name": "TJR sweep + break",
+   "window": "nymid",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": true,
+   "label": "Too early to judge",
+   "shown": false,
+   "trial": true,
+   "judge": {
+    "trades": 5,
+    "win": 20,
+    "avgR": -0.5262789808876465,
+    "t": -1.290237419798531,
+    "totalR": -2.631394904438232,
+    "maxDD": 2.693335823930639
+   },
+   "control": {
+    "mean": 0.007592250103105916,
+    "p95": 1.1231657384641767
+   },
+   "medianStop": 63.25,
+   "fit100": 20,
+   "fit250": 80,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr2_nymid",
+   "code": "MT2",
+   "name": "TJR sweep + break + pullback",
+   "window": "nymid",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": true,
+   "label": "Too early to judge",
+   "shown": true,
+   "trial": false,
+   "judge": {
+    "trades": 3,
+    "win": 33.333333333333336,
+    "avgR": 0.7792964353066657,
+    "t": 0.5767822894838849,
+    "totalR": 2.337889305919997,
+    "maxDD": 1.0738753999623563
+   },
+   "control": {
+    "mean": -0.036927141344020226,
+    "p95": 1.7952635599694424
+   },
+   "medianStop": 29.75,
+   "fit100": 66.66666666666667,
+   "fit250": 100,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr1_asia",
+   "code": "AT1",
+   "name": "TJR sweep + break",
+   "window": "asia",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": true,
+   "label": "Too early to judge",
+   "shown": false,
+   "trial": true,
+   "judge": {
+    "trades": 10,
+    "win": 50,
+    "avgR": -0.04349823936787804,
+    "t": -0.12931040830090268,
+    "totalR": -0.43498239367878044,
+    "maxDD": 3.5737656341332524
+   },
+   "control": {
+    "mean": 0.01626258541640132,
+    "p95": 0.6443335302822397
+   },
+   "medianStop": 55.75,
+   "fit100": 50,
+   "fit250": 70,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr2_asia",
+   "code": "AT2",
+   "name": "TJR sweep + break + pullback",
+   "window": "asia",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": true,
+   "label": "Too early to judge",
+   "shown": false,
+   "trial": true,
+   "judge": {
+    "trades": 3,
+    "win": 33.333333333333336,
+    "avgR": -0.32136114489946094,
+    "t": -0.43478087813277744,
+    "totalR": -0.9640834346983829,
+    "maxDD": 2.1208163265306124
+   },
+   "control": {
+    "mean": 0.028455172620924788,
+    "p95": 1.8369305161358145
+   },
+   "medianStop": 36.75,
+   "fit100": 66.66666666666667,
+   "fit250": 100,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr1_london",
+   "code": "LT1",
+   "name": "TJR sweep + break",
+   "window": "london",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": true,
+   "label": "Too early to judge",
+   "shown": false,
+   "trial": true,
+   "judge": {
+    "trades": 8,
+    "win": 25,
+    "avgR": -0.35754094198707104,
+    "t": -1.003861081984664,
+    "totalR": -2.8603275358965683,
+    "maxDD": 2.8603275358965683
+   },
+   "control": {
+    "mean": -0.008197683290804161,
+    "p95": 0.5264267467393726
+   },
+   "medianStop": 57.5,
+   "fit100": 50,
+   "fit250": 75,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
+  },
+  {
+   "id": "tjr2_london",
+   "code": "LT2",
+   "name": "TJR sweep + break + pullback",
+   "window": "london",
+   "source": "TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record",
+   "research": "tjr",
+   "outside": true,
+   "label": "Too early to judge",
+   "shown": false,
+   "trial": true,
+   "judge": {
+    "trades": 4,
+    "win": 50,
+    "avgR": -0.16674691287888166,
+    "t": -0.30513104403534336,
+    "totalR": -0.6669876515155266,
+    "maxDD": 1.0705882352941176
+   },
+   "control": {
+    "mean": -0.07108176575254156,
+    "p95": 1.1677514062683068
+   },
+   "medianStop": 39.25,
+   "fit100": 75,
+   "fit250": 100,
+   "cost": 1.5,
+   "period": {
+    "from": "2026-09-18",
+    "to": "2026-11-27"
+   }
   }
- ]
+ ],
+ "five": {
+  "first": "2026-09-18",
+  "last": "2026-11-27",
+  "bars": 13502,
+  "dropped": 1
+ },
+ "checks": {
+  "recency": {
+   "blockDays": 28,
+   "minTrades": 5,
+   "persistence": {
+    "r": 0.008619319566353598,
+    "p": 0.2945,
+    "pairs": 1096
+   },
+   "persistenceWinRate": {
+    "r": -0.012073158928906482,
+    "p": 0.503,
+    "pairs": 1096
+   },
+   "leader": {
+    "boundaries": 99,
+    "leaderNext": -0.013201975344188625,
+    "averageNext": -0.0027135315382197447,
+    "diff": -0.010488443805968873,
+    "t": -0.43585350783731497
+   },
+   "carries": false
+  },
+  "bias": {
+   "trades": 14906,
+   "daily": {
+    "whole": {
+     "diff": -0.0014994253232067638,
+     "t": -0.083863915160708,
+     "nA": 7604,
+     "nB": 7302,
+     "meanA": -0.011965350196776378,
+     "meanB": -0.010465924873569614
+    },
+    "judge": {
+     "diff": -0.021342693915574928,
+     "t": -0.6738221022063432,
+     "nA": 2516,
+     "nB": 2456,
+     "meanA": -0.02074373852435621,
+     "meanB": 0.0005989553912187197
+    },
+    "helps": false
+   },
+   "allAgree": {
+    "whole": {
+     "diff": -0.0185595602903749,
+     "t": -0.9042989394480965,
+     "nA": 3182,
+     "nB": 11724,
+     "meanA": -0.025828457746373778,
+     "meanB": -0.007268897455998877
+    },
+    "judge": {
+     "diff": 0.004355001158336454,
+     "t": 0.11669164955466611,
+     "nA": 1041,
+     "nB": 3931,
+     "meanA": -0.00675798514340838,
+     "meanB": -0.011112986301744834
+    },
+    "helps": false
+   },
+   "bySetup": [
+    {
+     "id": "ny_sweep_shift",
+     "diff": -0.08738162516344322,
+     "t": -1.448870852587525,
+     "nA": 520,
+     "nB": 501,
+     "meanA": 0.023429328164635825,
+     "meanB": 0.11081095332807905
+    },
+    {
+     "id": "ny_orb15",
+     "diff": -0.056915734018124955,
+     "t": -0.5829601728867638,
+     "nA": 835,
+     "nB": 738,
+     "meanA": 0.03237737917137094,
+     "meanB": 0.0892931131894959
+    },
+    {
+     "id": "nymid_noise",
+     "diff": 0.058037907065759564,
+     "t": 1.2396659536582744,
+     "nA": 335,
+     "nB": 321,
+     "meanA": 0.03916235419965976,
+     "meanB": -0.018875552866099803
+    },
+    {
+     "id": "nymid_last30",
+     "diff": 0.049681959178823856,
+     "t": 1.8671204662038139,
+     "nA": 698,
+     "nB": 684,
+     "meanA": 0.0034485601768151804,
+     "meanB": -0.04623339900200868
+    },
+    {
+     "id": "nymid_vwap",
+     "diff": 0.03289096756242668,
+     "t": 1.0784289531064402,
+     "nA": 764,
+     "nB": 711,
+     "meanA": 0.008541803497430936,
+     "meanB": -0.024349164064995748
+    },
+    {
+     "id": "asia_orb",
+     "diff": 0.024117508178389487,
+     "t": 0.4747844209405325,
+     "nA": 760,
+     "nB": 747,
+     "meanA": -0.03457162558786998,
+     "meanB": -0.05868913376625946
+    },
+    {
+     "id": "asia_sweep",
+     "diff": -0.09052663678952577,
+     "t": -0.9004402676696162,
+     "nA": 123,
+     "nB": 225,
+     "meanA": -0.10699979716977413,
+     "meanB": -0.016473160380248358
+    },
+    {
+     "id": "asia_fade",
+     "diff": 0.02651370182204367,
+     "t": 0.28058617776099654,
+     "nA": 561,
+     "nB": 512,
+     "meanA": -0.09549975873223304,
+     "meanB": -0.12201346055427671
+    },
+    {
+     "id": "london_sweep",
+     "diff": -0.061064845448473806,
+     "t": -0.7839973880856375,
+     "nA": 482,
+     "nB": 495,
+     "meanA": -0.10110398073293836,
+     "meanB": -0.04003913528446455
+    },
+    {
+     "id": "london_breakout",
+     "diff": -0.017608434989636105,
+     "t": -0.3332125435257175,
+     "nA": 530,
+     "nB": 536,
+     "meanA": -0.0437055601225487,
+     "meanB": -0.026097125132912593
+    },
+    {
+     "id": "london_orb",
+     "diff": -0.06776116778136683,
+     "t": -1.4295737092995002,
+     "nA": 699,
+     "nB": 676,
+     "meanA": -0.047475403956607466,
+     "meanB": 0.020285763824759367
+    },
+    {
+     "id": "ny_ib",
+     "diff": 0.03652934203319101,
+     "t": 0.8038307815520856,
+     "nA": 546,
+     "nB": 486,
+     "meanA": 0.04221895159413485,
+     "meanB": 0.005689609560943838
+    },
+    {
+     "id": "ny_silver_bullet",
+     "diff": -0.03778657857396766,
+     "t": -0.657797794741033,
+     "nA": 394,
+     "nB": 382,
+     "meanA": 0.025762288737708812,
+     "meanB": 0.06354886731167647
+    },
+    {
+     "id": "nymid_vwap_bounce",
+     "diff": 0.17348321219061225,
+     "t": 1.6049773312022277,
+     "nA": 357,
+     "nB": 288,
+     "meanA": 0.035392022621720864,
+     "meanB": -0.13809118956889138
+    }
+   ]
+  },
+  "afterLoss": {
+   "diff": 0.0651651498534392,
+   "t": 2.9248138742197276,
+   "nA": 12238,
+   "nB": 3740,
+   "meanA": 0.008645408737032281,
+   "meanB": -0.05651974111640692,
+   "supported": false
+  }
+ }
 }

@@ -61,3 +61,21 @@ One change to how results are used: on 2026-11-20, after seeing that nothing pas
 show setups on The Desk regardless of the pass rules, each with its tested win rate as a score. That
 is a decision made after seeing results and is recorded here as one. The carried-over London table
 above is superseded for sweep + reclaim and breakout by L1 and L2, which are now tested here.
+
+## Notes on the tests of 2026-11-28 (TJR setups and the three checks)
+
+- No rule was changed after the results were seen.
+- **The TJR setups have 3 to 16 trades each.** That is what about 48 days of 5-minute data gives. Two of the
+  eight are "shown" only because the rule fixed in advance says so (average above zero and above the control
+  mean); with this few trades that is not evidence they work. All eight stay "Too early to judge".
+- **Their stops were not tight at the New York open.** The report expected stops "just beyond the sweep" to be
+  small. In this (volatile, falling) stretch the median stop of the NY open sweep + break was 182 points, and
+  no signal fitted $100 on one micro. Stops were smaller in the other windows (30 to 63 points).
+- **Check C2 is confounded.** Most trades of the day come after some earlier losing trade from another setup,
+  and the later setups are different setups (the New York ones). The +0.065R difference therefore says
+  nothing about losses being followed by better trades. The reading stands as fixed: "worse after a loss" is
+  not supported, so no "one trade a day" switch was built; "one loss and done" stays as cushion protection.
+- **Check C1** used the same mechanical daily bias as the TJR setups. A discretionary read of the daily chart
+  could differ; this only shows that this definition did not separate better trades from worse ones.
+- The multi-year 1-minute source (Dukascopy) refused the download from the build machine, so the longer test
+  the report hoped for has not been run.

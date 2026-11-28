@@ -2,6 +2,7 @@
 // Rules here must match research/PREREGISTRATION.md.
 import { nySweepShift, asiaSweep } from './sweep.js';
 import { nyOrb15, nymidNoise, nymidLast30, nymidVwap, asiaOrb } from './momentum.js';
+import { tjr } from './tjr.js';
 import { asiaFade, londonSweep, londonBreakout, londonOrb, nyInitialBalance, nySilverBullet, nymidVwapBounce } from './popular.js';
 
 export const STRATEGIES = [
@@ -48,4 +49,17 @@ export const STRATEGIES = [
     source: 'Widely taught VWAP pullback, no audited source',
     rules: ['Price has closed on one side of VWAP for three bars.', 'From 12:00 ET a bar touches VWAP and closes back on that side: trade that way.', 'Stop 1 point past the bar. Target 2R. Flat at 16:00 ET.'] },
 ];
+// TJR Boot Camp setups (research of November 2026). One fixed reading of a discretionary method, on 5-minute bars.
+// Only the New York open is a session he trades for indices; the other windows are marked `outside`.
+const TJR_SOURCE = 'TJR Boot Camp (free course, 55 lessons), one mechanical reading; no audited record';
+const TJR_WINDOWS = [['nyopen', 'N', 'first 90 minutes after 9:30 ET', '16:00 ET', false], ['nymid', 'M', '12:00 to 3:00 PM ET', '16:00 ET', true], ['asia', 'A', '4:00 to 9:00 PM Denver', '10:00 PM Denver', true], ['london', 'L', 'first three hours after the London open', 'noon London', true]];
+for (const [window, letter, when, flat, outside] of TJR_WINDOWS) {
+  const common = ['Daily bias decides the side: longs only when the daily chart last broke structure up, shorts only when down.', `A marked high or low (the last four session ranges) is swept, ${when}.`];
+  STRATEGIES.push(
+    { id: `tjr1_${window}`, code: `${letter}T1`, window, name: 'TJR sweep + break', evaluate: tjr(1, window), targetR: null, research: 'tjr', outside, barMin: 5, cost: 1.5, source: TJR_SOURCE,
+      rules: [...common, 'Within an hour a 5-minute bar closes through the last swing point the other way: enter at that close.', `Stop 2 points beyond the sweep. Target the nearest untouched high or low at least 1R away. Flat at ${flat}. One trade a day.`] },
+    { id: `tjr2_${window}`, code: `${letter}T2`, window, name: 'TJR sweep + break + pullback', evaluate: tjr(2, window), targetR: null, research: 'tjr', outside, barMin: 5, cost: 1.5, source: TJR_SOURCE,
+      rules: [...common, 'Within an hour a 5-minute bar closes through the last swing point the other way.', 'Entry is a resting order at the fair value gap or order block left by that move, only in the favourable half of it. No pullback, no trade.', `Stop 2 points beyond the sweep. Target the nearest untouched high or low at least 1R away. Flat at ${flat}. One trade a day.`] },
+  );
+}
 export const byId = (id) => STRATEGIES.find(s => s.id === id);

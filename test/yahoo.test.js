@@ -22,7 +22,7 @@ test('parseYahoo keeps whole 5-minute bars and drops empty slots and the trailin
   assert.deepEqual(rows, BARS);
   assert.deepEqual(parseYahoo({ chart: { error: { code: 'Not Found' }, result: null } }), []);
   assert.deepEqual(parseYahoo(null), []);
-  assert.match(yahooUrl('1mo'), /^https:\/\/query1\.finance\.yahoo\.com\/v8\/finance\/chart\/MNQ=F\?interval=5m&range=1mo/);
+  assert.match(yahooUrl('60d'), /^https:\/\/query1\.finance\.yahoo\.com\/v8\/finance\/chart\/MNQ=F\?interval=5m&range=60d/);
 });
 
 async function boot(fetchImpl, now = { t: NOW }) {
@@ -45,7 +45,7 @@ test('with no chart tab, the desk fetches prices itself and says where they come
     assert.equal(st.feed.source, 'yahoo');
     assert.equal(st.feed.status, 'delayed');
     assert.match(st.feed.label, /delayed/i);
-    assert.match(urls[0], /range=1mo/);            // first fetch loads a month for the levels
+    assert.match(urls[0], /range=60d/);            // first fetch loads all the history the service keeps
     await s.pollPrices();
     assert.match(urls[1], /range=1d/);             // after that, just today
   } finally { s.close(); }

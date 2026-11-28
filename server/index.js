@@ -30,7 +30,7 @@ const num = (v) => (v === '' || v == null ? NaN : Number(v));
 /** Settings on disk merged over the defaults, so a new field never breaks an old file. */
 function mergeSettings(saved) {
   const d = defaultSettings(), s = saved || {};
-  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: d.instrument, feed: { auto: s.feed?.auto !== false },
+  return { account: { ...d.account, ...(s.account || {}), dll: { ...d.account.dll, ...(s.account?.dll || {}) } }, personal: { ...d.personal, ...(s.personal || {}) }, instrument: { ...d.instrument, commission: Number.isFinite(s.instrument?.commission) && s.instrument.commission >= 0 ? s.instrument.commission : d.instrument.commission }, feed: { auto: s.feed?.auto !== false },
     setups: { focus: Array.isArray(s.setups?.focus) ? s.setups.focus : [], off: Array.isArray(s.setups?.off) ? s.setups.off : [] } };
 }
 
@@ -75,8 +75,9 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     for (const t of tally(allSignals().filter(s => s.signalT >= since))) out[t.setupId] = { ...t, days: RECENT_DAYS };
     return out;
   }
-  const sizeFor = (s) => Math.min(Math.floor(settings.personal.riskPerTrade / (s.stopPoints * settings.instrument.pointValue)), computeGuard(settings, journal, clock()).maxContracts);
-  const dollars = (s, contracts, entry = s.entry) => Math.round(contracts * settings.instrument.pointValue * s.dir * (s.exitPx - entry) * 100) / 100;
+  const sizeFor = (s) => { const g = computeGuard(settings, journal, clock()); return Math.min(Math.floor(g.riskPerTrade / (s.stopPoints * settings.instrument.pointValue)), g.maxContracts); };
+  // Estimated result of a suggested trade: the rule exit, less the fees per micro for the round trip.
+  const dollars = (s, contracts, entry = s.entry) => Math.round(contracts * (settings.instrument.pointValue * s.dir * (s.exitPx - entry) - settings.instrument.commission) * 100) / 100;
   /** One-click entries that were still open: fill in the result once the rule exit has happened. */
   function settle() {
     if (bad.journal) return;
@@ -96,7 +97,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     const now = clock();
     if (!settings.feed.auto || now - feed.lastBridge < BRIDGE_QUIET || now < feed.nextTry) return;
     const first = feed.source !== 'yahoo';
-    const got = await fetchYahoo(first ? '1mo' : '1d', fetchImpl);
+    const got = await fetchYahoo(first ? '60d' : '1d', fetchImpl);
     if (clock() - feed.lastBridge < BRIDGE_QUIET) return; // the chart came back while we were fetching
     if (got.error) { feed.fetchError = got.error; feed.nextTry = clock() + 45000; return; }
     if (feed.symbol !== YAHOO_SYMBOL) { store.clear(); log.full = false; } // never mix two sources in the levels
@@ -172,6 +173,9 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
       next.account.anchor = { balance: bal, floor: fl, at: clock() };
     }
     if (p.thinCushion != null) next.personal.thinCushion = !!p.thinCushion;
+    if (p.smallCushion != null) next.personal.smallCushion = !!p.smallCushion;
+    for (const [k, label] of [['smallUnder', 'The small-cushion level'], ['smallRisk', 'Risk per trade while the cushion is small']]) if (p[k] != null) { const v = num(p[k]); if (!(v > 0)) return res.status(400).json({ error: `${label} must be a dollar amount above zero.` }); next.personal[k] = v; }
+    if (b.instrument?.commission != null) { const v = num(b.instrument.commission); if (!(v >= 0 && v <= 20)) return res.status(400).json({ error: 'Fees per micro must be a dollar amount from 0 to 20.' }); next.instrument.commission = v; }
     if (a.cycleStart !== undefined) next.account.cycleStart = /^\d{4}-\d{2}-\d{2}$/.test(a.cycleStart || '') ? a.cycleStart : null;
     if (b.feed?.auto != null) next.feed.auto = !!b.feed.auto;
     // Which setups to lead with (focus) and which to leave out (off).
@@ -214,7 +218,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     }
     if (!s) return res.status(404).json({ error: 'That suggested trade is no longer in the log.' });
     if (journal.trades.some(t => t.signalId === s.id)) return res.status(409).json({ error: 'That trade is already in your journal.' });
-    const b = req.body || {}, cap = computeGuard(settings, journal, clock()).maxContracts;
+    const b = req.body || {}, g0 = computeGuard(settings, journal, clock()), cap = g0.maxContracts;
     // The exact price paid and the size actually traded, if given; otherwise the rule entry and the suggested size.
     let entry = s.entry;
     if (b.entry != null && b.entry !== '') {
@@ -229,7 +233,7 @@ export function createApp({ dataDir = path.join(root, 'data'), clock = () => Dat
     }
     if (contracts < 1) return res.status(400).json({ error: `The stop is ${s.stopPoints.toFixed(1)} points, too wide for one contract at your risk. Log it by hand if you took it anyway.` });
     const live = s.status === 'open';
-    const overRisk = contracts * Math.abs(entry - s.stop) * settings.instrument.pointValue > settings.personal.riskPerTrade * 1.02;
+    const overRisk = contracts * Math.abs(entry - s.stop) * settings.instrument.pointValue > g0.riskPerTrade * 1.02;
     const row = { id: crypto.randomUUID(), kind: 'trade', ts: live ? clock() : s.exitT, pnl: live ? null : dollars(s, contracts, entry), open: live, auto: !live, signalId: s.id, side: s.side, contracts, entry, stop: s.stop, target: s.target, exit: live ? null : s.exitPx, outcome: live ? null : s.status, setup: s.name, followedRules: !overRisk, note: overRisk ? 'Over your risk per trade.' : '' };
     journal.trades.push(row); save('journal', journal);
     res.json({ trade: row, guard: computeGuard(settings, journal, clock()) });

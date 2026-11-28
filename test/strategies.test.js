@@ -9,8 +9,8 @@ const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} vs ${b}`);
 // July 2026: New York is UTC-4, so 9:30 ET = 13:30Z and 18:00 ET = 22:00Z. 2026-07-01 is a Wednesday.
 const D = '2026-07-01', FROM = '2026-06-10';
 
-test('registry: fourteen setups, each tied to one window', () => {
-  assert.deepEqual(STRATEGIES.map(s => s.id), ['ny_sweep_shift', 'ny_orb15', 'nymid_noise', 'nymid_last30', 'nymid_vwap', 'asia_orb', 'asia_sweep', 'asia_fade', 'london_sweep', 'london_breakout', 'london_orb', 'ny_ib', 'ny_silver_bullet', 'nymid_vwap_bounce']);
+test('registry: fourteen fifteen-minute setups, each tied to one window', () => {
+  assert.deepEqual(STRATEGIES.filter(s => !s.research).map(s => s.id), ['ny_sweep_shift', 'ny_orb15', 'nymid_noise', 'nymid_last30', 'nymid_vwap', 'asia_orb', 'asia_sweep', 'asia_fade', 'london_sweep', 'london_breakout', 'london_orb', 'ny_ib', 'ny_silver_bullet', 'nymid_vwap_bounce']);
   for (const s of STRATEGIES) assert.ok(['asia', 'london', 'nyopen', 'nymid'].includes(s.window) && s.rules.length && s.source);
   assert.equal(COST_POINTS, 1);
 });

@@ -2,7 +2,7 @@
 // Pure: same inputs, same output. The server calls it with the real clock; tests and demos pass their own.
 import { sessionAt } from './sessions.js';
 import { computeGuard, checkTrade } from './guard.js';
-import { liveSetups, windowSetups } from './verdicts.js';
+import { liveSetups, windowSetups, winRange } from './verdicts.js';
 import { byId } from './strategies/index.js';
 import { sessionRanges } from './strategies/sweep.js';
 import { rth, vwapMap } from './strategies/common.js';
@@ -52,17 +52,23 @@ const pts = (x) => Math.round(x * 4) / 4;
  * Everything the page shows about one setup right now: what it is, how it has done, its state,
  * and the numbers to act on. The leading setup and the "also in this window" ones are all cards.
  */
-function card(e, { guard, settings, dataNow, key, journal, prefs, recent }) {
+function card(e, { guard, settings, dataNow, key, journal, prefs, recent, carries }) {
   const { setup: s, res } = e, t = res.trade, pv = settings.instrument.pointValue;
   const sized = (stopPoints) => checkTrade(guard, settings, { stopPoints });
   const taken = (side) => (journal.trades || []).some(x => x.signalId === `${s.id}:${key}` && (!side || x.side === side));
   const rc = recent?.[s.id] || null;
-  const long = s.score == null ? 'Not tested.' : `Since 2024: won ${Math.round(s.winPct)}% of ${s.trades} tested trades, averaging ${s.avgR >= 0 ? '+' : ''}${s.avgR.toFixed(2)}R a trade${s.avgR <= 0 ? ' (it lost money in testing)' : ''}. ${s.proven ? 'Passed every test rule.' : 'Not proven.'}`;
+  const avg = s.avgR == null ? '' : `, averaging ${s.avgR >= 0 ? '+' : ''}${s.avgR.toFixed(2)}R a trade${s.avgR <= 0 ? ' (it lost money in testing)' : ''}`;
+  const long = s.score == null ? 'Not tested.'
+    : s.research ? `New research: won ${Math.round(s.winPct)}% of only ${s.trades} tested trades (${s.period?.from} to ${s.period?.to})${avg}. Too early to judge.`
+    : `Since 2024: won ${Math.round(s.winPct)}% of ${s.trades} tested trades${avg}. ${s.proven ? 'Passed every test rule.' : 'Not proven.'}`;
+  // Best estimate of the win rate. Recent weeks did not predict the next weeks in testing, so they are blended
+  // with the long test: (recent wins + 50 x long-run rate) / (recent trades + 50). New research setups have no long test.
+  const estimate = s.winPct == null ? null : s.research || !rc?.closed ? { pct: Math.round(s.winPct), blended: false } : { pct: Math.round((100 * (rc.wins + 50 * (s.winPct / 100))) / (rc.closed + 50)), blended: true };
   const base = {
-    setup: { id: s.id, name: s.name, code: s.code, window: s.window }, focus: (prefs.focus || []).includes(s.id),
-    score: s.score, winPct: s.winPct != null ? Math.round(s.winPct) : null, avgR: s.avgR, trades: s.trades, proven: !!s.proven, evidence: long,
-    // The last few weeks of suggestions from the replay log. Small counts are shown as such.
-    recent: rc && rc.closed ? { closed: rc.closed, wins: rc.wins, winPct: rc.winPct, avgR: rc.avgR, days: rc.days } : null,
+    setup: { id: s.id, name: s.name, code: s.code, window: s.window, research: !!s.research, outside: !!s.outside }, focus: (prefs.focus || []).includes(s.id),
+    score: s.score, winPct: s.winPct != null ? Math.round(s.winPct) : null, avgR: s.avgR, trades: s.trades, range: s.range, proven: !!s.proven, evidence: long, estimate, carries: !!carries, barMin: s.barMin || 15,
+    // The last few weeks of suggestions from the replay log, with the range a count this small allows.
+    recent: rc && rc.closed ? { closed: rc.closed, wins: rc.wins, winPct: rc.winPct, avgR: rc.avgR, days: rc.days, range: winRange(rc.wins, rc.closed) } : null,
   };
   if (t && t.status === 'open') {
     const check = sized(t.risk), blocked = check.verdict === 'BLOCK';
@@ -80,7 +86,7 @@ function card(e, { guard, settings, dataNow, key, journal, prefs, recent }) {
       entry: pts(t.entry), stop: pts(t.stop), target: t.target != null ? pts(t.target) : null, exit: pts(t.exitPx), r: t.r, signalId: `${s.id}:${key}`, taken: taken() };
   }
   if (res.phase === 'armed') {
-    const pending = (res.pending || []).map(p => { const check = sized(p.risk); return { side: p.side, trigger: pts(p.trigger), stop: pts(p.stop), target: pts(p.target), stopPoints: pts(p.risk), oneRisk: Math.round(pts(p.risk) * pv), contracts: check.contracts, riskDollars: check.riskDollars, check, signalId: `${s.id}:${key}`, taken: taken(p.side) }; });
+    const pending = (res.pending || []).map(p => { const check = sized(p.risk); return { side: p.side, kind: p.kind || 'close', zone: p.zone || null, trigger: pts(p.trigger), stop: pts(p.stop), target: pts(p.target), stopPoints: pts(p.risk), oneRisk: Math.round(pts(p.risk) * pv), contracts: check.contracts, riskDollars: check.riskDollars, check, signalId: `${s.id}:${key}`, taken: taken(p.side) }; });
     return { ...base, tone: 'armed', state: 'Armed', headline: 'Armed', sub: res.message, pending };
   }
   if (res.phase === 'done') return { ...base, tone: 'idle', state: 'Done', headline: 'No setup today', sub: res.message };
@@ -88,7 +94,7 @@ function card(e, { guard, settings, dataNow, key, journal, prefs, recent }) {
 }
 
 /** The one answer for right now. */
-function answerFor({ session, feed, guard, settings, live, evaluated, dataNow, key, journal, prefs, recent }) {
+function answerFor({ session, feed, guard, settings, live, evaluated, dataNow, key, journal, prefs, recent, carries }) {
   const next = session.next, countdown = next ? { countdownTo: next.start, countdownLabel: `${next.name} opens in` } : {};
   if (guard.lockout) return { kind: 'locked', tone: 'bad', headline: guard.breached ? 'Account limit reached' : 'Locked out', sub: guard.lockout.reason, countdownTo: guard.lockout.until, countdownLabel: 'Unlocks in' };
   if (!session.current && !live.length) return { kind: 'closed', tone: 'idle', headline: 'No trade right now', sub: next ? `Next window: ${next.name}.` : 'No window ahead.', ...countdown };
@@ -99,9 +105,9 @@ function answerFor({ session, feed, guard, settings, live, evaluated, dataNow, k
   // Your focus setup leads. After that, the most active (in a trade, then armed, then watching); ties go to the better tested average.
   // A signal whose stop is too wide to take at your risk sits below an armed setup: it must not hide something tradable.
   const focus = (e) => ((prefs.focus || []).includes(e.setup.id) ? 1 : 0);
-  const rank = (e) => (e.res.trade?.status === 'open' && Math.floor(settings.personal.riskPerTrade / (e.res.trade.risk * settings.instrument.pointValue)) < 1 ? 3.5 : RANK[e.res.phase]);
-  const order = [...evaluated].sort((a, b) => focus(b) - focus(a) || rank(b) - rank(a) || (b.setup.avgR ?? -9) - (a.setup.avgR ?? -9));
-  const ctx = { guard, settings, dataNow, key, journal, prefs, recent };
+  const rank = (e) => (e.res.trade?.status === 'open' && Math.floor(guard.riskPerTrade / (e.res.trade.risk * settings.instrument.pointValue)) < 1 ? 3.5 : RANK[e.res.phase]);
+  const order = [...evaluated].sort((a, b) => focus(b) - focus(a) || rank(b) - rank(a) || (b.setup.rankR ?? -9) - (a.setup.rankR ?? -9));
+  const ctx = { guard, settings, dataNow, key, journal, prefs, recent, carries };
   const cards = order.map(e => card(e, ctx));
   const disagree = !!cards[0].live && cards.slice(1).some(o => o.live && o.side !== cards[0].side);
   return { kind: 'signal', ...cards[0], others: cards.slice(1), disagree, windowEndsAt, delayed: feed.delayed };
@@ -124,8 +130,8 @@ export function buildState({ now, store, feed, settings, journal, verdicts, demo
   const live = session.current ? windowSetups(verdicts, session.current.id, prefs) : [];
   let evaluated = ctx.s.bars.length ? live.map(run) : [];
   // A setup from an earlier window whose trade is still open stays on the page until it is closed.
-  if (ctx.s.bars.length) for (const s of verdicts.setups.filter(s => !s.carried && !live.includes(s) && !(prefs.off || []).includes(s.id))) { const e = run(s); if (e.res.phase === 'in-trade') { evaluated.push(e); live.push(s); } }
-  const answer = answerFor({ dataNow: ctx.now, key, journal, prefs, recent, session, feed: evaluated.length || !live.length ? f : { ...f, status: f.status === 'live' || f.status === 'delayed' ? 'off' : f.status }, guard, settings, live, evaluated });
+  if (ctx.s.bars.length) for (const s of verdicts.setups.filter(s => !s.carried && !s.trial && !live.includes(s) && !(prefs.off || []).includes(s.id))) { const e = run(s); if (e.res.phase === 'in-trade') { evaluated.push(e); live.push(s); } }
+  const answer = answerFor({ dataNow: ctx.now, key, journal, prefs, recent, carries: verdicts.checks?.recency?.carries, session, feed: evaluated.length || !live.length ? f : { ...f, status: f.status === 'live' || f.status === 'delayed' ? 'off' : f.status }, guard, settings, live, evaluated });
 
   const shown = answer.kind === 'signal' ? evaluated.find(e => e.setup.id === answer.setup.id)?.res : null;
   const levels = ctx.s.bars.length ? standardLevels(ctx, key, price, shown?.levels, shown?.times?.open) : [];
@@ -137,7 +143,7 @@ export function buildState({ now, store, feed, settings, journal, verdicts, demo
     if (answer.target != null) projections.push({ kind: 'target', price: answer.target, label: 'Target' });
   } else if (answer.pending?.length) {
     const p = answer.pending[0];
-    projections.push({ kind: 'trigger', price: p.trigger, label: `${p.side} if a 15m bar closes ${p.side === 'LONG' ? 'above' : 'below'}` }, { kind: 'stop', price: p.stop, label: 'Stop' }, { kind: 'target', price: p.target, label: 'Target' });
+    projections.push({ kind: 'trigger', price: p.trigger, label: p.kind === 'limit' ? `Resting ${p.side === 'LONG' ? 'buy' : 'sell'}` : `${p.side} if a ${answer.barMin || 15}m bar closes ${p.side === 'LONG' ? 'above' : 'below'}` }, { kind: 'stop', price: p.stop, label: 'Stop' }, { kind: 'target', price: p.target, label: 'Target' });
   }
   const closed = ctx.s.bars.slice(-96).map(b => [b.t, b.o, b.h, b.l, b.c]);
   const lastClosedEnd = closed.length ? closed.at(-1)[0] + BAR : 0;

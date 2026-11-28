@@ -376,6 +376,45 @@ Pass rules:
 - **missed**: Last 12 months above zero
 - **missed**: On MNQ at $250 risk: net positive and worst drawdown under $2,000
 
+## TJR setups on 5-minute bars (research of November 2026)
+
+Tested on 13,502 MNQ 5-minute bars from Yahoo, 2026-09-18 to 2026-11-27 (1 bad tick dropped). Rules fixed first in the 2026-11-28 addendum. 1.5 NQ points cost per trade.
+
+**This is about 50 trading days. No setup can pass or fail on it.** Under 150 trades the label is "Too early to judge" whatever the numbers. "Shown" means it is suggested on The Desk; "On trial" means it is only tracked.
+
+| Setup | Window | Trades | Win % | Avg R | t-stat | Worst drawdown | Median stop | Fits $100 | Control mean | Control 95th | On The Desk |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| NT1 TJR sweep + break | nyopen | 16 | 50.0 | -0.028 | -0.10 | 4.1R | 182 pts | 0% | +0.017 | +0.484 | On trial |
+| NT2 TJR sweep + break + pullback | nyopen | 5 | 60.0 | +0.127 | 0.24 | 1.0R | 75 pts | 20% | +0.029 | +0.989 | Shown |
+| MT1 TJR sweep + break | nymid (outside what he teaches) | 5 | 20.0 | -0.526 | -1.29 | 2.7R | 63 pts | 20% | +0.008 | +1.123 | On trial |
+| MT2 TJR sweep + break + pullback | nymid (outside what he teaches) | 3 | 33.3 | +0.779 | 0.58 | 1.1R | 30 pts | 67% | -0.037 | +1.795 | Shown |
+| AT1 TJR sweep + break | asia (outside what he teaches) | 10 | 50.0 | -0.043 | -0.13 | 3.6R | 56 pts | 50% | +0.016 | +0.644 | On trial |
+| AT2 TJR sweep + break + pullback | asia (outside what he teaches) | 3 | 33.3 | -0.321 | -0.43 | 2.1R | 37 pts | 67% | +0.028 | +1.837 | On trial |
+| LT1 TJR sweep + break | london (outside what he teaches) | 8 | 25.0 | -0.358 | -1.00 | 2.9R | 58 pts | 50% | -0.008 | +0.526 | On trial |
+| LT2 TJR sweep + break + pullback | london (outside what he teaches) | 4 | 50.0 | -0.167 | -0.31 | 1.1R | 39 pts | 75% | -0.071 | +1.168 | On trial |
+
+Control: the same trades moved to a random other day at the same clock time, random direction, same stop and target distances (500 runs). A setup at or below its control mean is doing no better than the time of day.
+
+## Do the last 4 weeks predict the next 4? (recency check)
+
+Every trade of the 14 fifteen-minute setups, in 28-day blocks from 2019 (a block counts with 5+ trades).
+
+- Persistence: correlation between one block and the next (after removing each setup's own average) is +0.009 over 1096 block pairs, permutation p = 0.294. For win rate: -0.012, p = 0.503.
+- Follow the leader: the setup with the best win rate last block averaged -0.013R in the next block, against -0.003R for the plain average of all setups (difference -0.010R, t -0.44, 99 block boundaries).
+- Reading fixed in advance: **recent results do not carry over**. The Desk leads with a blend of recent and long-run results and shows the last 4 weeks with its range.
+
+## Does trading with the daily bias help? (check C1)
+
+14,906 trades of the 14 fifteen-minute setups with a known daily bias.
+
+- With the daily bias minus against it: whole history -0.001R (t -0.08; 7604 with, 7302 without); 2024 on -0.021R (t -0.67; 2516 with, 2456 without). **Does not help.**
+- Daily, 4-hour and 1-hour all agree minus the rest: whole history -0.019R (t -0.90; 3182 with, 11724 without); 2024 on +0.004R (t 0.12; 1041 with, 3931 without). **Does not help.**
+- By setup (with minus against): ny_sweep_shift -0.09, ny_orb15 -0.06, nymid_noise +0.06, nymid_last30 +0.05, nymid_vwap +0.03, asia_orb +0.02, asia_sweep -0.09, asia_fade +0.03, london_sweep -0.06, london_breakout -0.02, london_orb -0.07, ny_ib +0.04, ny_silver_bullet -0.04, nymid_vwap_bounce +0.17.
+
+## Is the trade after a losing trade worse? (check C2)
+
+Trades that started after an earlier trade that day closed at a loss averaged +0.009R (12238 trades); all others -0.057R (3740). Difference +0.065R, t 2.92. **Not supported: the next trade is no worse.** This is about the setups, not about how a person trades after a loss.
+
 ## Carried over from October 2026 (not re-run here)
 
 | Setup | Window | Verdict | What the earlier test found |
@@ -438,3 +477,21 @@ One change to how results are used: on 2026-11-20, after seeing that nothing pas
 show setups on The Desk regardless of the pass rules, each with its tested win rate as a score. That
 is a decision made after seeing results and is recorded here as one. The carried-over London table
 above is superseded for sweep + reclaim and breakout by L1 and L2, which are now tested here.
+
+## Notes on the tests of 2026-11-28 (TJR setups and the three checks)
+
+- No rule was changed after the results were seen.
+- **The TJR setups have 3 to 16 trades each.** That is what about 48 days of 5-minute data gives. Two of the
+  eight are "shown" only because the rule fixed in advance says so (average above zero and above the control
+  mean); with this few trades that is not evidence they work. All eight stay "Too early to judge".
+- **Their stops were not tight at the New York open.** The report expected stops "just beyond the sweep" to be
+  small. In this (volatile, falling) stretch the median stop of the NY open sweep + break was 182 points, and
+  no signal fitted $100 on one micro. Stops were smaller in the other windows (30 to 63 points).
+- **Check C2 is confounded.** Most trades of the day come after some earlier losing trade from another setup,
+  and the later setups are different setups (the New York ones). The +0.065R difference therefore says
+  nothing about losses being followed by better trades. The reading stands as fixed: "worse after a loss" is
+  not supported, so no "one trade a day" switch was built; "one loss and done" stays as cushion protection.
+- **Check C1** used the same mechanical daily bias as the TJR setups. A discretionary read of the daily chart
+  could differ; this only shows that this definition did not separate better trades from worse ones.
+- The multi-year 1-minute source (Dukascopy) refused the download from the build machine, so the longer test
+  the report hoped for has not been run.

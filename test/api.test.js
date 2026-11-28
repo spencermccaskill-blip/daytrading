@@ -70,7 +70,7 @@ test('bars from the bridge: wrong symbol or timeframe is reported, good bars rea
     assert.equal((await s.call('GET', '/api/state?demo=long')).json.answer.state, 'LONG');
     assert.equal((await s.call('GET', '/api/state?demo=nope')).status, 404);
     const pb = (await s.call('GET', '/api/playbook')).json;
-    assert.equal(pb.setups.length, 16);
+    assert.equal(pb.setups.length, 24); // 14 fifteen-minute setups, 8 from the course research, 2 carried over
     assert.equal((await fetch(s.base + '/')).status, 200);
   } finally { s.close(); }
 });

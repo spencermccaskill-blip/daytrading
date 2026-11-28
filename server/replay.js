@@ -14,7 +14,7 @@ export function replaySignals(ctx, verdicts, { fromKey } = {}) {
     for (const s of setups) {
       const res = byId(s.id).evaluate(ctx, key), t = res.trade;
       if (!t) continue;
-      out.push({ id: `${s.id}:${key}`, key, setupId: s.id, name: s.name, code: s.code, window: s.window, score: s.score, avgR: s.avgR,
+      out.push({ id: `${s.id}:${key}`, key, setupId: s.id, name: s.name, code: s.code, window: s.window, score: s.score, avgR: s.avgR, research: !!s.research, trial: !!s.trial,
         side: t.side, dir: t.dir, signalT: t.signalT + BAR, entry: t.entry, stop: t.stop, target: t.target, stopPoints: t.risk,
         status: t.status, exitPx: t.exitPx, exitT: t.exitT, r: t.r, flatAt: res.times.flat });
     }

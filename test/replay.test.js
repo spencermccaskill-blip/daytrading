@@ -78,7 +78,7 @@ test('one click: taking a live suggestion adds it to the journal, and the desk f
     const row = j.trades.find(t => t.signalId === N1), sig = (await b.call('GET', '/api/log')).json.signals.find(s => s.id === N1);
     assert.equal(row.open, false);
     assert.equal(row.auto, true);
-    assert.equal(row.pnl, 1 * 2 * (sig.target - sig.entry));                                      // 1 MNQ x $2 x points to the target
+    assert.equal(row.pnl, 1 * (2 * (sig.target - sig.entry) - 1.5));                              // 1 MNQ x $2 x points to the target, less $1.50 of fees
     assert.equal(row.ts, sig.exitT);
     assert.equal(j.guard.balance, 50000 + row.pnl);
     // His real fill was different: one edit fixes it and it stops being an estimate.

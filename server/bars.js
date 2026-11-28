@@ -42,7 +42,7 @@ export class BarStore {
     return this.cache;
   }
   /** Drop bars older than `days` so the saved file stays small. */
-  prune(days = 45) { const cut = this.lastRawT - days * 864e5; for (const t of this.raw.keys()) if (t < cut) this.raw.delete(t); for (const t of this.bars.keys()) if (t < cut) this.bars.delete(t); this.cache = null; }
+  prune(days = 62) { const cut = this.lastRawT - days * 864e5; for (const t of this.raw.keys()) if (t < cut) this.raw.delete(t); for (const t of this.bars.keys()) if (t < cut) this.bars.delete(t); this.cache = null; }
   toJSON() { return { resMin: this.resMin, raw: [...this.raw.values()] }; }
   load(j) { if (j?.raw?.length) this.ingest(j.raw.map(b => [b.t / 1000, b.o, b.h, b.l, b.c, b.v]), j.resMin); }
 }

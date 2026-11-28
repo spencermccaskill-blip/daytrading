@@ -158,7 +158,7 @@ test('an armed trade can be added before the desk sees it trigger, and settles l
   try {
     const row = (await b.call('GET', '/api/journal')).json.trades.find(t => t.signalId === N1), sig = (await b.call('GET', '/api/log')).json.signals.find(s => s.id === N1);
     assert.deepEqual([row.open, row.auto], [false, true]);
-    assert.equal(row.pnl, 2 * (sig.exitPx - entry));
+    assert.equal(row.pnl, 2 * (sig.exitPx - entry) - 1.5); // less the fees for one micro
   } finally { b.close(); }
 });
 

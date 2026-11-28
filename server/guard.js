@@ -20,8 +20,9 @@ export function defaultSettings() {
   return {
     account: { firm: 'Lucid Trading', size: '50K', plan: 'flex', startBalance: 50000, maxLossLimit: 2000, lockBalance: 50100, lockTrigger: 52100,
       trailing: p.trailing, dll: { ...p.dll }, scaling: p.scaling, maxMicros: p.maxMicros, consistencyPct: p.consistencyPct, payoutRequested: false, cycleStart: null, anchor: null },
-    personal: { riskPerTrade: 250, maxLossesPerDay: 2, dailyStop: 500, thinCushion: true, thinUnder: 1000 },
-    instrument: { symbol: 'MNQ', pointValue: 2 },
+    personal: { riskPerTrade: 250, maxLossesPerDay: 2, dailyStop: 500, thinCushion: true, thinUnder: 1000, smallCushion: true, smallUnder: 1500, smallRisk: 100 },
+    // commission: fees per micro for a round trip, taken off every estimate (check your Lucid statement).
+    instrument: { symbol: 'MNQ', pointValue: 2, commission: 1.5 },
   };
 }
 
@@ -72,13 +73,20 @@ export function computeGuard(settings, journal, now) {
   if (a.dll?.on) dllAmount = a.dll.scalePct && highEod > a.lockTrigger ? Math.max(a.dll.amount, (a.dll.scalePct / 100) * (highEod - a.startBalance)) : a.dll.amount;
   const dllRoom = dllAmount == null ? null : Math.max(0, dllAmount + dayPnl);
   // Thin cushion: with little room left at the start of the day, one loss ends the day. It never blocks a trade for its size.
-  const thinUnder = me.thinUnder ?? 1000;
-  const thin = me.thinCushion !== false && (balance - dayPnl) - floor < thinUnder;
-  const maxLosses = thin ? 1 : me.maxLossesPerDay, dailyStop = thin ? Math.min(me.dailyStop, me.riskPerTrade) : me.dailyStop;
+  const thinUnder = me.thinUnder ?? 1000, startRoom = (balance - dayPnl) - floor;
+  const thin = me.thinCushion !== false && startRoom < thinUnder;
+  // Small cushion: one micro and a lower risk cap until the room is rebuilt. Trades over the cap are still shown, marked as too wide.
+  const smallUnder = me.smallUnder ?? 1500;
+  const small = me.smallCushion !== false && startRoom < smallUnder;
+  const riskPerTrade = small ? Math.min(me.riskPerTrade, me.smallRisk ?? 100) : me.riskPerTrade;
+  const maxLosses = thin ? 1 : me.maxLossesPerDay, dailyStop = thin ? Math.min(me.dailyStop, riskPerTrade) : me.dailyStop;
   const stopRoom = Math.max(0, dailyStop + dayPnl);
 
   const closedProfit = lastEod - a.startBalance;
-  const maxContracts = a.scaling ? a.scaling.filter(([p]) => closedProfit >= p).at(-1)?.[1] ?? a.scaling[0][1] : a.maxMicros;
+  const planContracts = a.scaling ? a.scaling.filter(([p]) => closedProfit >= p).at(-1)?.[1] ?? a.scaling[0][1] : a.maxMicros;
+  const maxContracts = small ? 1 : planContracts;
+  // Full losses at the current risk that the room can take before the next one reaches the limit.
+  const lossesLeft = room > 0 ? Math.max(0, Math.ceil(room / riskPerTrade) - 1) : 0;
 
   let lockout = null; const until = dayEnd(now);
   if (breached) lockout = { reason: 'At or under the max loss limit. Stop trading and check the account in Tradovate.', until: null };
@@ -92,15 +100,15 @@ export function computeGuard(settings, journal, now) {
     const pct = total > 0 ? Math.round((100 * bestDay) / total) : null;
     consistency = { limitPct: a.consistencyPct, bestDay, total, pct, ok: pct != null && pct <= a.consistencyPct };
   }
-  const tight = thin || room < 2 * me.riskPerTrade || lossesToday === maxLosses - 1 || stopRoom < dailyStop;
+  const tight = thin || room < 2 * riskPerTrade || lossesToday === maxLosses - 1 || stopRoom < dailyStop;
   return { day: today, balance, floor, floorLocked, room, breached, trailing: a.trailing, maxLossLimit: a.maxLossLimit,
-    dayPnl, dailyLossUsed: Math.max(0, -dayPnl), dailyStop, stopRoom, thin, anchored: !!an, dllAmount, dllRoom,
+    dayPnl, dailyLossUsed: Math.max(0, -dayPnl), dailyStop, stopRoom, thin, small, smallUnder, riskPerTrade, lossesLeft, anchored: !!an, dllAmount, dllRoom,
     tradesToday: tradesToday + stillOpen.filter(r => tradingDay(r.ts) === today).length, openTrades: stillOpen.length, lossesToday, maxLosses, maxContracts, consistency, lockout, status: lockout ? 'locked' : tight ? 'caution' : 'ok' };
 }
 
 /** PASS or BLOCK for one trade idea. Size comes from the stop; the stop is never shrunk to fit. */
 export function checkTrade(guard, settings, { stopPoints }) {
-  const risk = settings.personal.riskPerTrade, pv = settings.instrument.pointValue, sym = settings.instrument.symbol;
+  const risk = guard.riskPerTrade ?? settings.personal.riskPerTrade, pv = settings.instrument.pointValue, sym = settings.instrument.symbol;
   const valid = Number.isFinite(stopPoints) && stopPoints > 0;
   const byRisk = valid ? Math.floor(risk / (stopPoints * pv)) : 0;
   const contracts = Math.min(byRisk, guard.maxContracts);
@@ -113,7 +121,7 @@ export function checkTrade(guard, settings, { stopPoints }) {
     ? `${stopPoints.toFixed(1)} points x ${contracts} ${sym} = ${usd(riskDollars)} at risk (limit ${usd(risk)}).`
     : `${stopPoints.toFixed(1)} points is ${usd(stopPoints * pv)} on 1 ${sym}, over your ${usd(risk)}. Skip it. Never shrink the stop to fit.`);
   if (!Number.isFinite(contracts)) add('Position size', false, 'The plan settings are incomplete, so the size cannot be worked out. Open Settings and save them again.');
-  if (valid && byRisk > guard.maxContracts) add('Position size', true, `Capped at the ${guard.maxContracts} ${sym} your plan allows right now.`);
+  if (valid && byRisk > guard.maxContracts) add('Position size', true, guard.small ? `One ${sym} only while the room to the limit is under ${usd(guard.smallUnder)}.` : `Capped at the ${guard.maxContracts} ${sym} your plan allows right now.`);
   if (contracts >= 1) {
     add('Room to the max loss limit', riskDollars < guard.room, riskDollars < guard.room ? `${usd(guard.room)} of room, ${usd(riskDollars)} at risk.` : `Only ${usd(guard.room)} of room to the max loss limit. A full loss would breach the account.`);
     add('Your daily stop', riskDollars <= guard.stopRoom, riskDollars <= guard.stopRoom ? `${usd(guard.stopRoom)} left before your ${usd(guard.dailyStop)} daily stop.` : `Only ${usd(guard.stopRoom)} left before your ${usd(guard.dailyStop)} daily stop. This trade risks ${usd(riskDollars)}.`);
