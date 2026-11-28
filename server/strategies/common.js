@@ -3,7 +3,8 @@
 //   s    closed 15-minute bars (never the bar still forming)
 //   raw  the finest bars available, used only to see a stop or target being touched
 //   now  the time the data has reached
-import { BAR, etTime, addDays, isWeekday } from '../time.js';
+import { BAR, MIN, etTime, addDays, isWeekday } from '../time.js';
+import { haltWithin } from '../holidays.js';
 
 export const COST_POINTS = 1;   // NQ points charged on every trade (commission + slippage)
 export const MIN_RISK = 5;      // signals with a stop closer than this are skipped
@@ -28,11 +29,27 @@ export function openTrade(dir, bar, stop, targetR, reason) {
 }
 
 /**
+ * A trade's flat time, brought forward to a holiday halt when the halt comes first, and whether the
+ * data has reached it. On a normal day that is simply now >= endT. Before a halt no bar opens at or
+ * after it, so the time exit is due once the last bar's close reaches the halt.
+ */
+export function flatTime(ctx, fromT, endT) {
+  const halt = haltWithin(fromT, endT);
+  if (halt == null) return { endT, due: ctx.now >= endT, halt: null };
+  const [prev, last] = ctx.raw.bars.slice(-2);
+  const step = last && prev ? Math.min(BAR, last.t - prev.t) : MIN;
+  return { endT: halt, due: ctx.now >= halt || (last != null && last.t + step >= halt), halt };
+}
+
+/**
  * Follow a trade to its exit. Stop is checked before target inside every bar (stop-first).
  * closeExit(bar15) may end the trade at a 15-minute close ("rule"). Still open if the data
  * has not reached an exit yet. r is net of the 1 point cost and null while open.
+ * A holiday halt before endT becomes the time exit (see flatTime).
  */
 export function manage(ctx, trade, endT, closeExit) {
+  const flat = flatTime(ctx, trade.signalT, endT);
+  endT = flat.endT;
   let status = 'open', exitPx = null, exitT = null;
   const touch = (r) => {
     const hitStop = trade.dir > 0 ? r.l <= trade.stop : r.h >= trade.stop;
@@ -51,8 +68,8 @@ export function manage(ctx, trade, endT, closeExit) {
     }
     for (const r of ctx.raw.between(t, endT)) if (touch(r)) break scan; // bars of the 15m bar still forming
   }
-  if (status === 'open' && ctx.now >= endT) {
-    const last = ctx.raw.between(trade.signalT, endT).at(-1);
+  if (status === 'open' && flat.due) {
+    const last = ctx.raw.between(trade.signalT, endT).at(-1) || { c: trade.entry, t: trade.signalT };
     status = 'time'; exitPx = last.c; exitT = last.t;
   }
   const px = exitPx ?? ctx.raw.last?.c ?? trade.entry;

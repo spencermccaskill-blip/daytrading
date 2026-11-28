@@ -30,6 +30,15 @@ export function closures(list = HOLIDAYS) {
   });
 }
 
+let defaultClosures = null;
+/** The start of the first holiday closure that begins after `from` and before `to`, or null. */
+export function haltWithin(from, to, list = HOLIDAYS) {
+  const shut = list === HOLIDAYS ? (defaultClosures ??= closures()) : closures(list);
+  let first = null;
+  for (const c of shut) if (c.start > from && c.start < to && (first == null || c.start < first)) first = c.start;
+  return first;
+}
+
 /** Cut holiday closures out of a list of windows ({ start, end, ... }). Windows left shorter than 15 minutes are dropped. */
 export function clipToOpenHours(windows, list = HOLIDAYS) {
   const shut = closures(list), out = [];

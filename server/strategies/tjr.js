@@ -4,7 +4,7 @@
 //   T2  sweep + break + pullback resting entry at the fair value gap or order block, in the favourable half
 // Both work on closed 5-minute bars, trade only with the daily bias, and put the stop beyond the sweep.
 import { MIN, HOUR, BAR, etTime, londonTime, addDays } from '../time.js';
-import { Series, side, MIN_RISK } from './common.js';
+import { Series, side, MIN_RISK, flatTime } from './common.js';
 
 export const M5 = 5 * MIN;
 export const TJR_COST = 1.5;   // NQ points per trade: fees plus a tick of slippage each way
@@ -145,6 +145,8 @@ function pickTarget(ctx, s5, levels, dir, entry, risk, atT) {
 
 /** Follow a trade on the raw bars from `fromT`. Stop first inside every bar. r is net of the cost. */
 export function follow(ctx, trade, fromT, endT, stoppedAtEntry = false) {
+  const flat = flatTime(ctx, fromT, endT);
+  endT = flat.endT;
   let status = 'open', exitPx = null, exitT = null;
   if (stoppedAtEntry) { status = 'stopped'; exitPx = trade.stop; exitT = fromT - M5; }
   else for (const r of ctx.raw.between(fromT, endT)) {
@@ -153,7 +155,7 @@ export function follow(ctx, trade, fromT, endT, stoppedAtEntry = false) {
     if (hitStop) { status = 'stopped'; exitPx = trade.stop; exitT = r.t; break; }
     if (hitTgt) { status = 'target'; exitPx = trade.target; exitT = r.t; break; }
   }
-  if (status === 'open' && ctx.now >= endT) {
+  if (status === 'open' && flat.due) {
     const last = ctx.raw.between(fromT - M5, endT).at(-1) || { c: trade.entry, t: fromT };
     status = 'time'; exitPx = last.c; exitT = last.t;
   }
