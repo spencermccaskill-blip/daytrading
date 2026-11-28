@@ -182,3 +182,156 @@ previous three bars all closed on (above = long, below = short). Stop 1 point be
 extreme. Target 2R. Flat 16:00 ET.
 
 Variants tried now: about 16 before, plus these 7 = about 23.
+
+
+# Addendum, 2026-11-28: TJR setups on 5-minute bars, and the recency check
+
+Written **before any of these tests were run** and committed on its own first. It follows the
+research report in `reports/MNQ day trading evidence review.md`, which the trader approved on
+2026-11-28. Nothing below may be changed after results are seen; a badly specified rule is
+recorded under "Changes after seeing results" in `research/RESULTS.md`, never edited here.
+
+No promise is made that any of these setups wins. TJR never trades NQ or MNQ in his course, his
+method is discretionary, and no verified record of his results exists. This is one fixed,
+mechanical reading of what he teaches. The earlier "London TJR" test (October 2026, no edge)
+stays in the count below.
+
+## Data
+
+- `data/history/mnq-5m-yahoo.json`: MNQ front-month 5-minute bars from Yahoo Finance,
+  2026-09-18 to 2026-11-27 (13,503 bars, about 48 trading days). This is all the 5-minute
+  history the free service keeps. A multi-year 1-minute source (Dukascopy) refused the download.
+- Bad-tick rule, fixed here: a bar whose open is more than 2% away from the previous bar's close
+  and whose close is back within 0.5% of that close is dropped. It removes one bar
+  (2026-10-30 19:00 UTC, a 1,300-point print that vanished in the same bar). The large move on
+  2026-11-23 13:55 UTC is kept: price stayed there.
+- 15-minute, 1-hour, 4-hour and daily candles are built from these bars. A trading day runs
+  18:00 to 17:00 New York time and counts only with at least 10 hours of bars.
+- Because the sample is about 48 days, **no result from it can pass or fail a setup**. See Labels.
+
+## Definitions (TJR Boot Camp, Day 6, applied the same way on every timeframe)
+
+- Up candle: close above open. Down candle: close below open.
+- Swing high: an up candle immediately followed by a down candle. Level = the higher high of the
+  two. Swing low: a down candle immediately followed by an up candle; level = the lower low.
+- "Most recent swing high / low" at a candle = the last one completed by the candle before it.
+- Structure direction: becomes **up** when a candle closes above the most recent swing high and
+  **down** when a candle closes below the most recent swing low. Otherwise it stays as it was.
+- Daily bias = the structure direction of the daily candles finished before the window opens.
+  It needs at least 5 finished daily candles and a known direction; otherwise no trade.
+
+## Marked levels
+
+Session blocks on the New York clock: Asia 18:00 to the London open (08:00 London); London from
+its open to 09:30; New York morning 09:30 to 12:00; New York afternoon 12:00 to 17:00.
+At a window's open the marked levels are the high and the low of each of the **four most
+recently finished blocks** (a block needs at least 6 bars). A high is **live** if no bar between
+the end of its block and the window open traded above it; a low likewise.
+
+## Windows
+
+| Window | Opens | Last entry | Flat |
+|---|---|---|---|
+| NY open | 09:30 New York | 11:00 (his "first hour and a half") | 16:00 New York |
+| NY midday | 12:00 New York | 15:00 | 16:00 New York |
+| Asia evening | 18:00 New York (4 PM Denver) | 23:00 New York (9 PM Denver) | 24:00 New York (10 PM Denver) |
+| London | 08:00 London | 11:00 London | 12:00 London |
+
+Only the NY open is a session he trades for indices. The other three are outside what he
+teaches and are labelled so on The Desk.
+
+## Setup T1: TJR sweep + break (his entry model 1)
+
+1. Sweep: the first 5-minute bar at or after the window open that trades beyond a live marked
+   level (above a high, below a low). The sweep stays active for 12 bars after the latest
+   swept level. Extreme = the highest high (lowest low) from the first sweep bar onward.
+2. Break: while a high sweep is active, a 5-minute bar (the sweep bar or a later one) closes
+   below the most recent 5-minute swing low. For a low sweep, the mirror.
+3. Bias: a break down is taken only when the daily bias is down; a break up only when it is up.
+4. Entry at the close of the break bar, at or before the window's last entry time.
+5. Stop: 2 points beyond the extreme. Signals with a stop closer than 5 points are skipped.
+6. Target: the nearest liquidity at least 1R from the entry. Candidates: 15-minute swing lows
+   (highs for longs) formed in the previous 24 hours that price has not traded through since,
+   and live marked levels. No candidate at least 1R away: the signal is skipped.
+7. A skipped signal does not use up the day; the first signal that meets every rule is the trade.
+   One trade per window per day.
+8. Exit at the stop, the target or the flat time. Stop first when both are inside one bar.
+
+## Setup T2: TJR sweep + break + pullback (his entry models 2 to 4)
+
+Steps 1 to 3 as T1. Then, once the break bar has closed:
+
+4. Two zones are marked. **Gap:** the latest three consecutive candles, finishing at or before
+   the break bar and with the middle candle at or after the bar that made the extreme, where the
+   first candle's low is above the third candle's high (mirror for longs). The zone is the space
+   between them; the entry edge is the side nearest the price. **Order block:** the last up
+   candle (down candle for longs) at or before the bar that made the extreme, looking back at
+   most 6 bars; the zone is that candle's low to high; the entry edge is the side nearest price.
+5. Equilibrium: an edge may be used only if it sits in the half of the move nearer the extreme,
+   measured from the extreme to the lowest low (highest high) made since, up to the previous bar.
+6. Entry is a resting order at the edge. It counts as filled when a later bar trades at least
+   one tick (0.25) beyond the edge, at or before the last entry time. Fill price = the edge, or
+   the bar's open if the bar opens beyond it. If both edges are reached in one bar the nearer is used.
+7. Stop: 2 points beyond the extreme as it stood at the break. If price reaches the stop level
+   before any fill, the setup is over and the search for a new sweep goes on.
+8. Target, skip rules, one trade per window per day and exits as T1, with R measured from the
+   resting entry. In the fill bar only the stop is checked (stop first); the target is checked
+   from the next bar.
+
+## Simulation rules for T1 and T2
+
+- Signals on closed 5-minute bars only.
+- Cost: **1.5 NQ points per trade** (about $1.30 to $1.90 of fees per micro plus a tick of
+  slippage each way; higher than the 1 point used for the 15-minute setups because these stops
+  are tighter).
+- TJR's news rule (no trade on CPI, PPI, FOMC or payrolls days; wait 30 minutes after other
+  major US releases) is **not** applied in the test: there is no checked list of past release
+  dates in the data. The Desk shows it as a notice on the day.
+- Control: 500 seeded runs. In each run every trade is replaced by an entry on a randomly chosen
+  other trading day at the same New York clock time, in a random direction, with the same stop
+  distance and target distance in points, the same flat time and the same cost. Reported: the
+  mean and the 95th percentile of the average R. This is the check that the result is more than
+  the time of day.
+- Reported for each of the eight: trades, win %, average R, t-stat, worst drawdown, median stop
+  in points, the share of signals that fit $100 and $250 on one micro, and the control.
+
+## Labels for T1 and T2
+
+- Fewer than 150 closed trades in the test: **Too early to judge**, whatever the numbers.
+- From 150 trades: "Promising, not proven" if the average is above zero and above the control's
+  95th percentile; "Benched" if the average is at or below zero; otherwise "No edge". "Passed"
+  needs the original six-rule pass bar on at least two calendar years of data.
+
+## Count of variants tried
+
+Eight more (two entry models in four windows). The count shown on The Desk goes from 23 to **31**.
+With 31 tries, a t-stat near 2 on one of them is what luck alone produces.
+
+## Ranking on The Desk
+
+When two setups are equally active, the one with the better tested average leads. From now on
+that average is shrunk for small samples before comparing: average R x trades / (trades + 50).
+A setup with 20 trades cannot outrank one with 380 on a lucky month.
+
+## The recency check: do the last 4 weeks predict the next 4?
+
+The trader's view is that recent weeks matter most. This check tests that on The Desk's own
+history, with the rule for reading the answer fixed here first.
+
+- Data: every trade of the 14 fifteen-minute setups over the whole history (2018-12 to 2026-10),
+  from the same backtest code.
+- Blocks: consecutive 28-day blocks starting Monday 2019-01-07. For each setup and block: trades,
+  win rate, average R. A block counts for a setup with at least 5 trades.
+- Test A, persistence: for each setup subtract its own average over all its blocks, then take
+  the correlation between one block and the next, pooled over all setups. One-sided permutation
+  p-value from 2,000 seeded shuffles of the block order within each setup.
+- Test B, follow the leader: at each block boundary the leader is the setup with the highest win
+  rate in the block just finished (ties: higher average R). Its average R in the next block is
+  compared with the plain average of all counted setups in that next block. Reported: the mean
+  difference and its t-stat across boundaries.
+- Reading: recent results **carry over** only if Test A has a positive correlation with
+  p below 0.05 **and** Test B has a t-stat of at least 2.0. Then The Desk keeps leading with the
+  last-4-weeks win rate. Otherwise they **do not carry over**, The Desk says so beside the
+  number, and it leads with a blended estimate:
+  (wins in the last 4 weeks + 50 x long-run win rate) / (trades in the last 4 weeks + 50).
+- Either way the last-4-weeks win rate stays on the page with its 95% range (Wilson interval).
