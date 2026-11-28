@@ -37,6 +37,7 @@
         <div class="g"><span class="lbl">Daily loss used</span><b class="mono" id="gLoss">–</b><i class="meter"><i id="gLossBar"></i></i></div>
         <div class="g"><span class="lbl">Trades today</span><b class="mono" id="gTrades">–</b></div>
         <div class="g"><span class="lbl">Losses</span><b class="mono" id="gLosses">–</b></div>
+        <div class="g"><span class="lbl">Losses to the limit</span><b class="mono" id="gLeft">–</b></div>
         <div class="g g-status"><span class="lbl">Guard</span><b id="gStatus">–</b></div>
       </div>
     </section>
@@ -140,6 +141,7 @@
         <div class="seg" role="tablist" aria-label="Playbook sections" data-seg="playbook">
           <button role="tab" data-pane="p-strategies" aria-selected="true">Strategies</button>
           <button role="tab" data-pane="p-results">Results so far</button>
+          <button role="tab" data-pane="p-research">Research</button>
           <button role="tab" data-pane="p-how">How scoring works</button>
         </div>
         <span class="mute small" id="pbData"></span>
@@ -156,18 +158,27 @@
       <div class="pane" id="p-results" hidden>
         <section class="panel">
           <div class="p-head"><h2>How the suggestions have done</h2><span class="mute small" id="tallySince"></span></div>
-          <p class="note gap">Finished suggestions from the replay log, at the rule exits, before commissions. This covers weeks, not years: a setup with a handful of trades can look great or awful by luck alone. The count is beside every number for that reason.</p>
+          <p class="note gap">Finished suggestions from the replay log, at the rule exits, after the test cost (1 point a trade; 1.5 for the starred setups). This covers weeks, not years: a setup with a handful of trades can look great or awful by luck alone. The count is beside every number for that reason.</p>
           <div id="logTally" class="table-wrap"></div>
+        </section>
+      </div>
+
+      <div class="pane" id="p-research" hidden>
+        <section class="panel">
+          <div class="p-head"><h2>What the November 2026 research changed</h2><span class="mute small">Course topics and outside evidence, each checked on The Desk's own data</span></div>
+          <p class="note gap">Nothing was added because it is in a course. Each topic got a check with the rules written down first, and was built only if the check supported it. Setups from this research carry an asterisk <sup class="star">*</sup> everywhere.</p>
+          <div id="pbResearch"></div>
         </section>
       </div>
 
       <div class="pane" id="p-how" hidden>
         <div class="grid two">
           <section class="panel">
-            <div class="p-head"><h2>The two win rates</h2></div>
+            <div class="p-head"><h2>The win rates</h2></div>
             <ul class="plain">
-              <li><b>Last 4 weeks</b> is the big number on the Desk. It comes from the replay log: what each setup's suggestions actually did recently. It is usually only a few trades.</li>
-              <li><b>Since 2024</b> is the long test on about three years of history, a few hundred trades per setup. It moves slowly and is the better guide to whether a setup has an edge.</li>
+              <li><b>Best estimate</b> is the big number on the Desk. It is the long test (a few hundred trades since 2024) nudged by the last 4 weeks: recent wins plus 50 trades' worth of the long-run rate, divided by recent trades plus 50.</li>
+              <li><b>Last 4 weeks</b> sits beside it with its likely range. When tested on every setup since 2019, a setup's last 4 weeks did not predict its next 4, so a hot or cold month moves the estimate only a little.</li>
+              <li><b>Starred setups</b> <sup class="star">*</sup> come from the November 2026 course research. They have only a short test (about 48 days), shown with its range and marked "too early to judge".</li>
               <li>A setup can win often and still lose money if its losses are bigger than its wins, so the average result per trade (in R) is shown next to each win rate.</li>
             </ul>
           </section>
@@ -261,7 +272,12 @@
               <label>Daily stop<input name="dailyStop" inputmode="decimal"></label>
               <label>Losses and done<input name="maxLossesPerDay" inputmode="numeric"></label>
               <label class="check wide"><input type="checkbox" name="thinCushion"> When room to the limit is under $1,000: one loss and done for the day</label>
-              <p class="wide note">This protects a small cushion without blocking trades for their size. Your risk per trade stays the same.</p>
+              <label class="check wide"><input type="checkbox" name="smallCushion"> While the cushion is small: one micro only, with a lower risk per trade</label>
+              <label>Small means room under<input name="smallUnder" inputmode="decimal"></label>
+              <label>Risk per trade while small<input name="smallRisk" inputmode="decimal"></label>
+              <p class="wide note">A small cushion cannot take many full-size losses; the guard strip shows how many are left at the current risk. A trade whose stop costs more than this on one micro is still shown, marked as too wide, and can still be logged. Above the level, your normal risk per trade returns.</p>
+              <label>Fees per micro, round trip<input name="commission" inputmode="decimal"></label>
+              <p class="wide note">Taken off every estimated result. About $1.30 to $1.90 at firms that use Tradovate; check your Lucid statement.</p>
               <label class="check wide"><input type="checkbox" name="feedAuto"> Fetch prices automatically when no chart tab is open</label>
               <p class="wide note">Free and about 10 minutes delayed, from Yahoo Finance. It is an unofficial service and can stop working without notice. An open TradingView chart with the bridge extension is always used instead when there is one.</p>
               <p class="wide note">A stop too wide for your risk is marked Block and shows what one micro would cost. Never shrink a stop to make a trade fit.</p>

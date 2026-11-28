@@ -42,7 +42,7 @@ button, select, input[type="checkbox"], label.check { cursor: pointer; }
 
 /* Guard strip */
 .guard { border-top: 1px solid var(--line); }
-.guard-row { display: grid; grid-template-columns: repeat(5, 1fr); }
+.guard-row { display: grid; grid-template-columns: repeat(6, 1fr); }
 .g { position: relative; padding: 10px 18px 12px; border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .g:first-child { border-left: 0; padding-left: 0; }
 .g b { font-size: 1.25rem; font-weight: 500; line-height: 1.25; white-space: nowrap; }
@@ -235,7 +235,7 @@ tr:last-child td { border-bottom: 0; }
   .meta { gap: 10px; } .feed { font-size: .8125rem; } .clock { font-size: .8125rem; }
   .tabs { order: 3; width: 100%; justify-content: space-between; }
   .tabs button { padding: 8px 6px; flex: 1; }
-  .guard-row { grid-template-columns: repeat(4, auto); justify-content: space-between; }
+  .guard-row { grid-template-columns: repeat(5, auto); justify-content: space-between; }
   .g { padding: 6px 10px 8px; } .g b { font-size: 1rem; } .lbl { font-size: .6875rem; }
   .g-status { grid-column: 1 / -1; flex-direction: row; align-items: baseline; gap: 8px; border-left: 0; border-top: 1px solid var(--line); padding: 5px 0 6px; }
   .g-status b { font-size: .9375rem; }
@@ -267,6 +267,12 @@ tr:last-child td { border-bottom: 0; }
 .nums small { display: block; font: 400 .75rem var(--ui); margin-top: 1px; }
 .pend-row:first-child { border-top: 0; padding-top: 0; }
 .chip.focus { color: var(--cyan); font-size: .75rem; }
+/* Setups from the November 2026 course research: an asterisk after the name, wherever it appears. */
+.star { color: var(--cyan); font-weight: 600; font-size: .8em; margin-left: 2px; }
+.star-note { margin: 10px 0 0; font-size: .875rem; color: var(--mute); }
+.tag.Too { color: var(--cyan); }
+table.research td { vertical-align: top; white-space: normal; min-width: 150px; } table.research td.mute { color: var(--mute); }
+#gLeft small { color: var(--mute); font-weight: 400; }
 .chip.moved { color: var(--ink); font-size: .75rem; }
 .chip.sev { font-size: .75rem; } .chip.sev.High { color: var(--short); } .chip.sev.Medium { color: var(--armed); } .chip.sev.Low { color: var(--mute); }
 

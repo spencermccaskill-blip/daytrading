@@ -47,6 +47,7 @@ function standardLevels(ctx, key, price, setupLevels, since) {
 }
 
 const pts = (x) => Math.round(x * 4) / 4;
+const money = (x) => '$' + Math.round(x).toLocaleString('en-US');
 
 /**
  * Everything the page shows about one setup right now: what it is, how it has done, its state,
@@ -72,11 +73,13 @@ function card(e, { guard, settings, dataNow, key, journal, prefs, recent, carrie
   };
   if (t && t.status === 'open') {
     const check = sized(t.risk), blocked = check.verdict === 'BLOCK';
+    // A stop that costs more than the risk cap on one micro: the signal is still shown, marked as too wide, never as a lockout.
+    const wide = blocked && !guard.lockout && check.contracts === 0;
     // The tested entry is the close of the signal bar. One bar later, or a quarter of the risk away, it has passed.
     const minsAgo = Math.max(0, Math.round((dataNow - (t.signalT + BAR)) / MIN)), fresh = dataNow - (t.signalT + BAR) < BAR && Math.abs(t.rNow) <= 0.25;
     const late = !blocked && !fresh;
-    return { ...base, tone: blocked ? 'bad' : t.dir > 0 ? 'long' : 'short', state: blocked ? 'Blocked' : late ? `${t.side} running` : t.side, headline: blocked ? 'Blocked' : late ? 'Entry passed' : t.side, side: t.side, fresh, live: true,
-      sub: blocked ? check.reason : late ? `${t.side} from ${minsAgo} min ago at ${pts(t.entry)}. Price is now ${t.rNow >= 0 ? '+' : ''}${t.rNow.toFixed(2)}R from it. Do not chase. If you are in, the stop and target have not moved.` : t.reason + '.',
+    return { ...base, tone: wide ? 'armed' : blocked ? 'bad' : t.dir > 0 ? 'long' : 'short', state: wide ? 'Too wide' : blocked ? 'Blocked' : late ? `${t.side} running` : t.side, headline: wide ? 'Too wide' : blocked ? 'Blocked' : late ? 'Entry passed' : t.side, side: t.side, fresh, live: true, wide,
+      sub: wide ? `${t.side} signal (${t.reason}), but the stop is ${pts(t.risk)} points: ${money(pts(t.risk) * pv)} on one micro, over your ${money(guard.riskPerTrade)} risk. Shown for information. Never shrink the stop to fit.` : blocked ? check.reason : late ? `${t.side} from ${minsAgo} min ago at ${pts(t.entry)}. Price is now ${t.rNow >= 0 ? '+' : ''}${t.rNow.toFixed(2)}R from it. Do not chase. If you are in, the stop and target have not moved.` : t.reason + '.',
       entry: pts(t.entry), stop: pts(t.stop), target: t.target != null ? pts(t.target) : null, stopPoints: pts(t.risk), oneRisk: Math.round(pts(t.risk) * pv),
       contracts: check.contracts, riskDollars: check.riskDollars, check, signalT: t.signalT + BAR, rNow: t.rNow, flatAt: res.times.flat, signalId: `${s.id}:${key}`, taken: taken() };
   }

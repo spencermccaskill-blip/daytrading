@@ -117,11 +117,12 @@ test('every setup in the window is a full card: name, win rate, state and its ow
   assert.ok(a.others.length >= 3);
 });
 
-test('a stop too wide for your risk still shows what one micro would cost, and stays blocked', () => {
+test('a stop too wide for your risk is marked too wide, shows what one micro would cost, and fails the guard check', () => {
   const s = defaultSettings(); s.personal.riskPerTrade = 100;
   const v = loadVerdicts(); v.setups = v.setups.filter(x => x.id === 'ny_sweep_shift');
   const a = buildState({ ...demoInput('long'), verdicts: v, settings: s }).answer;
-  assert.deepEqual([a.state, a.contracts, a.oneRisk, a.check.verdict], ['Blocked', 0, 195, 'BLOCK']);
+  assert.deepEqual([a.state, a.tone, a.contracts, a.oneRisk, a.check.verdict], ['Too wide', 'armed', 0, 195, 'BLOCK']);
+  assert.match(a.sub, /LONG signal.*\$195 on one micro, over your \$100 risk/);
   const armed = buildState({ ...demoInput('armed'), verdicts: v, settings: s }).answer;
   assert.deepEqual([armed.pending[0].contracts, armed.pending[0].oneRisk, armed.pending[0].signalId], [0, 142, N1]);
 });

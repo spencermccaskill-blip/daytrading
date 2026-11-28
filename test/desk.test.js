@@ -113,7 +113,7 @@ test('a signal too wide to take does not hide a setup that can still be traded',
   const s = buildState({ ...demoInput('late'), verdicts: v, settings: tight }); // 10:41 ET: the first hour is set, so the breakout setup is armed
   assert.equal(s.answer.setup.id, 'ny_ib');
   assert.equal(s.answer.state, 'Armed');
-  assert.ok(s.answer.others.some(o => o.setup.name === 'NY sweep + shift' && o.state === 'Blocked'));
+  assert.ok(s.answer.others.some(o => o.setup.name === 'NY sweep + shift' && o.state === 'Too wide'));
   const normal = buildState({ ...demoInput('late'), verdicts: v });
   assert.equal(normal.answer.setup.id, 'ny_sweep_shift');                    // at $250 it fits, so the live signal leads
 });

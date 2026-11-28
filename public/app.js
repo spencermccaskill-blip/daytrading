@@ -67,7 +67,9 @@ function drawGuard(g) {
   $('gTrades').textContent = g.tradesToday + (g.openTrades ? ` (${g.openTrades} open)` : '');
   setHTML($('gLosses'), `${g.lossesToday} <small>of ${g.maxLosses}</small>`);
   $('gLosses').className = 'mono ' + (g.lossesToday >= g.maxLosses ? 'bad' : g.lossesToday ? 'warn' : '');
-  $('gStatus').textContent = g.lockout ? (g.breached ? 'Limit reached' : 'Locked out') : g.thin ? 'Thin cushion: one loss and done' : g.status === 'caution' ? 'Careful' : 'Clear to trade';
+  setHTML($('gLeft'), g.breached ? '0' : `${g.lossesLeft} <small>at ${usd(g.riskPerTrade)}</small>`);
+  $('gLeft').className = 'mono ' + (g.lossesLeft <= 2 ? 'bad' : g.lossesLeft <= 5 ? 'warn' : '');
+  $('gStatus').textContent = g.lockout ? (g.breached ? 'Limit reached' : 'Locked out') : g.small ? `Small cushion: 1 micro, ${usd(g.riskPerTrade)} risk` : g.thin ? 'Thin cushion: one loss and done' : g.status === 'caution' ? 'Careful' : 'Clear to trade';
   $('gStatus').title = g.lockout?.reason || `Balance ${usd(g.balance)}. Limit at ${usd(g.floor)}${g.floorLocked ? ' (locked)' : ''}. Up to ${g.maxContracts} MNQ.`;
 }
 
@@ -89,6 +91,8 @@ function drawTimeline(s) {
 
 // ── One setup's trade numbers, used for the leading setup and for every other one ──
 const takeInfo = new Map();
+// Setups from the November 2026 course research carry an asterisk wherever their name appears.
+const star = (x) => (x?.research ? '<sup class="star" title="New from the November 2026 course research">*</sup>' : '');
 const chip = (c) => `<span class="chip ${c.verdict === 'PASS' ? 'pass' : 'block'}">${c.verdict}</span>`;
 const cells = (list) => `<div class="nums">${list.map(([l, v, c, note]) => `<div><span class="lbl">${l}</span><b class="${c || ''}">${v}</b>${note ? `<small class="${c || 'mute'}">${note}</small>` : ''}</div>`).join('')}</div>`;
 // Size and risk: when the stop is too wide for your risk, show what one micro would cost instead of "none".
@@ -108,21 +112,34 @@ function tradeBlock(c) {
   if (c.entry != null) {
     const list = [['Entry', px(c.entry), ''], ['Stop', px(c.stop), 'bad'], ['Target', c.target != null ? px(c.target) : 'none', 'good']];
     if (c.exit != null) list.push(['Out at', px(c.exit), ''], ['Result', signed(c.r, 2) + 'R', c.r > 0 ? 'good' : 'bad']);
-    else if (c.fresh === false && c.state !== 'Blocked') list.push(['Now', signed(c.rNow, 2) + 'R', c.rNow >= 0 ? 'good' : 'bad'], ['Entry was', short(c.signalT), '']);
+    else if (c.fresh === false && c.state !== 'Blocked' && c.state !== 'Too wide') list.push(['Now', signed(c.rNow, 2) + 'R', c.rNow >= 0 ? 'good' : 'bad'], ['Entry was', short(c.signalT), '']);
     else list.push(...sizeCells(c));
     return cells(list) + plus(c);
   }
-  if (c.pending?.length) return `<div class="pend">${c.pending.map(p => `<div class="pend-row"><p><b class="${p.side === 'LONG' ? 'good' : 'bad'}">${p.side}</b> if a 15m bar closes ${p.side === 'LONG' ? 'above' : 'below'} <span class="mono">${px(p.trigger)}</span> ${chip(p.check)}</p>${cells([['Stop', px(p.stop), 'bad'], ['Target', px(p.target), 'good'], ...sizeCells(p)])}${plus(c, p)}</div>`).join('')}</div>`;
+  if (c.pending?.length) return `<div class="pend">${c.pending.map(p => `<div class="pend-row"><p><b class="${p.side === 'LONG' ? 'good' : 'bad'}">${p.side}</b> ${p.kind === 'limit' ? `with a resting ${p.side === 'LONG' ? 'buy' : 'sell'} order at` : `if a ${c.barMin || 15}m bar closes ${p.side === 'LONG' ? 'above' : 'below'}`} <span class="mono">${px(p.trigger)}</span>${p.zone ? ` <span class="mute small">(${esc(p.zone)})</span>` : ''} ${chip(p.check)}</p>${cells([['Stop', px(p.stop), 'bad'], ['Target', px(p.target), 'good'], ...sizeCells(p)])}${plus(c, p)}</div>`).join('')}</div>`;
   return '';
 }
-/** Track record: the last four weeks first and biggest, the long test smaller beside it. */
+/**
+ * Track record. Recent weeks did not predict the next weeks when tested, so the big number is the best
+ * estimate (the long test, nudged by the last 4 weeks); the last 4 weeks sit beside it with their range.
+ * Setups from the new research have only a short test: that is shown, with its range, and said plainly.
+ */
 function recordBlock(c) {
   if (c.score == null && !c.recent) return '';
-  const r = c.recent, tone = (x) => (x > 0 ? 'good' : 'bad');
-  const main = r ? `<b class="mono ${tone(r.avgR)}">${r.winPct}%</b><span>${r.wins} of ${r.closed} trade${r.closed === 1 ? '' : 's'} won · avg <span class="${tone(r.avgR)}">${signed(r.avgR, 2)}R</span>${r.closed < 10 ? ' · <span class="warn">small sample</span>' : ''}</span>`
-    : `<b class="mono mute">–</b><span>No finished trades from this setup in the last 4 weeks.</span>`;
-  const side = c.winPct != null ? `<b class="mono">${c.winPct}%</b><span>${c.trades} trades · avg <span class="${tone(c.avgR)}">${signed(c.avgR, 2)}R</span>${c.avgR <= 0 ? ' · lost money in testing' : ''} · ${c.proven ? 'passed' : 'not proven'}</span>` : '<b class="mono mute">–</b><span>Not tested.</span>';
-  return `<div class="rec"><div class="rec-main"><span class="lbl">Win rate, last 4 weeks</span>${main}</div><div class="rec-side"><span class="lbl">Since 2024</span>${side}</div></div>`;
+  const r = c.recent, tone = (x) => (x > 0 ? 'good' : 'bad'), rng = (x) => (x ? ` · likely range ${x.lo}% to ${x.hi}%` : '');
+  const avg = c.avgR != null ? `avg <span class="${tone(c.avgR)}">${signed(c.avgR, 2)}R</span>` : '';
+  const recent = r ? `<b class="mono">${r.winPct}%</b><span>${r.wins} of ${r.closed} trade${r.closed === 1 ? '' : 's'} won · avg <span class="${tone(r.avgR)}">${signed(r.avgR, 2)}R</span>${rng(r.range)}</span>` : '<b class="mono mute">–</b><span>No finished trades in the last 4 weeks.</span>';
+  if (c.setup.research) {
+    const main = c.winPct != null ? `<b class="mono">${c.winPct}%</b><span>only ${c.trades} tested trade${c.trades === 1 ? '' : 's'} · ${avg}${rng(c.range)} · <span class="warn">too early to judge</span></span>` : '<b class="mono mute">–</b><span>No tested trades yet.</span>';
+    return `<div class="rec"><div class="rec-main"><span class="lbl">Win rate in the short test</span>${main}</div><div class="rec-side"><span class="lbl">Last 4 weeks</span>${recent}</div></div>
+      <p class="star-note"><sup class="star">*</sup> New from the November 2026 course research (TJR Boot Camp), on 5-minute bars.${c.setup.outside ? ' He does not trade this window for indices, so this is outside what he teaches.' : ''} The test covers about 48 days.</p>`;
+  }
+  if (c.carries) {
+    const side = c.winPct != null ? `<b class="mono">${c.winPct}%</b><span>${c.trades} trades · ${avg} · ${c.proven ? 'passed' : 'not proven'}</span>` : '<b class="mono mute">–</b><span>Not tested.</span>';
+    return `<div class="rec"><div class="rec-main"><span class="lbl">Win rate, last 4 weeks</span>${recent}</div><div class="rec-side"><span class="lbl">Since 2024</span>${side}</div></div>`;
+  }
+  const est = c.estimate, main = est ? `<b class="mono ${tone(c.avgR)}">${est.pct}%</b><span>long test ${c.winPct}% of ${c.trades} trades${est.blended ? ', nudged by the last 4 weeks' : ''} · ${avg}${c.avgR <= 0 ? ' · lost money in testing' : ''} · ${c.proven ? 'passed' : 'not proven'}</span>` : '<b class="mono mute">–</b><span>Not tested.</span>';
+  return `<div class="rec"><div class="rec-main"><span class="lbl">Best estimate of the win rate</span>${main}</div><div class="rec-side"><span class="lbl">Last 4 weeks</span>${recent}</div></div>`;
 }
 const stateTone = (c) => ({ long: 'good', short: 'bad', good: 'good', bad: 'bad', armed: 'warn', watch: '', idle: 'mute' }[c.tone] ?? '');
 
@@ -133,7 +150,7 @@ function drawAnswer(s) {
   $('answer').dataset.tone = a.tone;
   setHTML($('aWindow'), cur ? `${esc(cur.name)} window · <span class="mono" data-until="${cur.end}" data-prefix="ends in "></span>${cur.shortened ? ` <span class="warn">· short day (${esc(cur.shortened)})</span>` : ''}` : 'Between windows');
   setHTML($('aFocus'), sig && a.focus ? '<span class="chip focus">Your focus</span>' : '');
-  $('aName').textContent = sig ? a.setup.name : ''; $('aName').hidden = !sig;
+  setHTML($('aName'), sig ? esc(a.setup.name) + star(a.setup) : ''); $('aName').hidden = !sig;
   const word = $('aWord');
   if (word.textContent !== a.headline) { word.textContent = a.headline; if (lastWord !== null && !reduceMotion) { word.classList.remove('pop'); void word.offsetWidth; word.classList.add('pop'); } lastWord = a.headline; }
   $('aSub').textContent = a.sub || '';
@@ -146,8 +163,8 @@ function drawAnswer(s) {
   const others = sig ? a.others || [] : [];
   $('aOthers').hidden = !others.length;
   setHTML($('aOthers'), others.length ? `<h2>Also in this window</h2>${others.map(o => {
-    const rate = o.recent ? `${o.recent.winPct}% <small>last 4 wks (${o.recent.closed})</small>` : o.winPct != null ? `${o.winPct}% <small>since 2024</small>` : '';
-    return `<details class="oc" ${fold('oc-' + o.setup.id)}><summary><span class="oc-name">${esc(o.setup.name)}${o.focus ? ' <span class="chip focus">Focus</span>' : ''}</span><span class="oc-state ${stateTone(o)}">${esc(o.headline === 'No setup today' ? 'Done' : o.headline)}</span><span class="oc-rate mono">${rate}</span></summary><div class="oc-body"><p class="a-sub">${esc(o.sub || '')}</p>${tradeBlock(o)}${recordBlock(o)}</div></details>`;
+    const rate = o.setup.research ? (o.winPct != null ? `${o.winPct}% <small>of ${o.trades} tested</small>` : '') : o.carries && o.recent ? `${o.recent.winPct}% <small>last 4 wks (${o.recent.closed})</small>` : o.estimate ? `${o.estimate.pct}% <small>best estimate</small>` : '';
+    return `<details class="oc" ${fold('oc-' + o.setup.id)}><summary><span class="oc-name">${esc(o.setup.name)}${star(o.setup)}${o.focus ? ' <span class="chip focus">Focus</span>' : ''}</span><span class="oc-state ${stateTone(o)}">${esc(o.headline === 'No setup today' ? 'Done' : o.headline)}</span><span class="oc-rate mono">${rate}</span></summary><div class="oc-body"><p class="a-sub">${esc(o.sub || '')}</p>${tradeBlock(o)}${recordBlock(o)}</div></details>`;
   }).join('')}` : '');
 
   const late = sig && s.feed.delayed ? ` Prices are delayed${s.feed.delayMin >= 3 ? ' about ' + s.feed.delayMin + ' minutes' : ''}, so this is that far behind the real market.` : '';
@@ -242,7 +259,7 @@ async function refresh() {
   } catch { return offline(); }
   document.body.classList.remove('offline');
   try {
-    state = next; fetchedAt = Date.now();
+    state = next; fetchedAt = Date.now(); riskLimit = state.guard.riskPerTrade ?? riskLimit;
     $('demo').hidden = !state.demo;
     $('feed').dataset.status = state.feed.status;
     $('feedLabel').textContent = state.feed.label + (state.feed.source === 'yahoo' ? ' · MNQ, fetched automatically' : state.feed.symbol && state.feed.status !== 'error' ? ' · ' + state.feed.symbol.split(':').pop() + ' from your chart' : '');
@@ -298,7 +315,6 @@ async function api(method, url, body) {
   const j = await r.json(); if (!r.ok) throw new Error(j.error || 'Something went wrong.'); return j;
 }
 const say = (id, text, ok) => { const n = $(id); n.textContent = text; n.className = 'msg ' + (ok ? 'ok' : 'err'); };
-api('GET', '/api/settings').then(r => { riskLimit = r.settings.personal.riskPerTrade; }).catch(() => {});
 
 // ── Journal ──
 // Fill the time box with this Mac's current time; change it when logging a trade from earlier.
@@ -320,7 +336,7 @@ function drawLog(log) {
   const out = (s) => ({ target: 'Target', stopped: 'Stop', time: 'Time', rule: 'Rule exit', open: '' }[s.status]);
   const add = (s) => { takeInfo.set(s.id, { id: s.id, pending: false, name: s.name, side: s.side, entry: s.entry, stop: s.stop, target: s.target, contracts: Math.max(1, s.contracts || 0) }); return s.taken ? '<span class="took">In journal</span>' : `<button class="plus small" type="button" data-take="${esc(s.id)}" aria-label="Add ${esc(s.name)} to the journal">+</button>`; };
   $('logSince').textContent = log.total ? `${log.total} suggested trades since ${tzDate.format(log.since)}` : '';
-  setHTML($('logList'), rows.length ? `<table><thead><tr><th>Signal (Denver)</th><th>Setup</th><th>Side</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Target</th><th class="n">Size</th><th>Out</th><th class="n">Result</th><th>Took it?</th></tr></thead><tbody>${rows.map(s => `<tr><td>${tzDate.format(s.signalT)}</td><td>${esc(s.name)}</td><td class="${s.side === 'LONG' ? 'good' : 'bad'}">${s.side}</td><td class="n">${px(s.entry)}</td><td class="n">${px(s.stop)}</td><td class="n">${s.target != null ? px(s.target) : ''}</td><td class="n">${s.contracts >= 1 ? s.contracts : '<span class="warn" title="Too wide for your risk at any size">1*</span>'}</td><td>${out(s)}</td><td class="n">${res(s)}</td><td>${add(s)}</td></tr>`).join('')}</tbody></table>${!logAll && log.signals.length > 25 ? `<p><button class="btn ghost" id="logMore" type="button">Show all ${log.signals.length}</button></p>` : ''}<p class="note">1* means the stop was too wide for your risk even on one micro.</p>` : '<p class="empty">No suggested trades yet. They appear here once prices have loaded, including any from days The Desk was off.</p>');
+  setHTML($('logList'), rows.length ? `<table><thead><tr><th>Signal (Denver)</th><th>Setup</th><th>Side</th><th class="n">Entry</th><th class="n">Stop</th><th class="n">Target</th><th class="n">Size</th><th>Out</th><th class="n">Result</th><th>Took it?</th></tr></thead><tbody>${rows.map(s => `<tr><td>${tzDate.format(s.signalT)}</td><td>${esc(s.name)}${star(s)}${s.trial ? ' <span class="mute small">on trial</span>' : ''}</td><td class="${s.side === 'LONG' ? 'good' : 'bad'}">${s.side}</td><td class="n">${px(s.entry)}</td><td class="n">${px(s.stop)}</td><td class="n">${s.target != null ? px(s.target) : ''}</td><td class="n">${s.contracts >= 1 ? s.contracts : '<span class="warn" title="Too wide for your risk at any size">1*</span>'}</td><td>${out(s)}</td><td class="n">${res(s)}</td><td>${add(s)}</td></tr>`).join('')}</tbody></table>${!logAll && log.signals.length > 25 ? `<p><button class="btn ghost" id="logMore" type="button">Show all ${log.signals.length}</button></p>` : ''}<p class="note">1* means the stop was too wide for your risk even on one micro.</p>` : '<p class="empty">No suggested trades yet. They appear here once prices have loaded, including any from days The Desk was off.</p>');
 }
 $('logList').addEventListener('click', (e) => { if (e.target.id === 'logMore') { logAll = true; drawLog(lastLog); } });
 $('jList').addEventListener('click', async (e) => {
@@ -343,7 +359,7 @@ $('cForm').addEventListener('submit', async (e) => {
 });
 
 // Checklist: kept in this browser, resets each day.
-const CHECKS = ['The guard says I can trade', 'My last trade is in the Journal', 'I know which strategy this is and how it has been doing', 'The signal came from a closed 15-minute bar', 'The stop is where the rule puts it, and I know the dollars at risk', 'I will not move the stop or add to the trade', 'I know my loss limit for today (it is in the guard strip)'];
+const CHECKS = ['The guard says I can trade', 'My last trade is in the Journal', 'I know which strategy this is and how it has been doing', 'The signal came from a closed bar (15-minute; 5-minute for the starred setups)', 'The stop is where the rule puts it, and I know the dollars at risk', 'I will not move the stop or add to the trade', 'I know my loss limit for today (it is in the guard strip)'];
 function drawChecklist() {
   const key = 'desk-checks-' + new Date().toLocaleDateString('en-CA', { timeZone: 'America/Denver' });
   let on = []; try { on = JSON.parse(localStorage.getItem(key) || '[]'); } catch { /* private window: nothing saved */ }
@@ -404,12 +420,13 @@ async function loadPlaybook() {
   pbWin ||= state?.session.current?.id || state?.session.next?.id || 'nyopen';
   const passed = pb.setups.filter(s => s.label === 'Passed');
   $('pbData').textContent = pb.data ? `Long test: NQ 15-minute bars, ${pb.data.start} to ${pb.data.end}` : 'Backtest not run yet';
+  drawResearch();
   $('pbLead').textContent = passed.length ? `${passed.length} setup${passed.length > 1 ? 's' : ''} passed every test rule: ${passed.map(s => s.name).join(', ')}.`
     : `No setup has passed every rule of the long test, so each one is marked "not proven". About ${pb.variantsTried} variants have been tried on this data; a few looking good is what luck alone produces.`;
   setHTML($('pbTabs'), pb.windows.map(w => `<button role="tab" aria-selected="${w.id === pbWin}" data-win="${w.id}" style="--c:${WIN_VAR[w.id]}">${esc(w.name)} <small>${pb.setups.filter(s => s.window === w.id && !s.carried).length}</small></button>`).join(''));
   drawPlaybook();
   $('tallySince').textContent = pb.tallySince ? `Since ${tzDate.format(pb.tallySince)}` : '';
-  setHTML($('logTally'), pb.tally.length ? `<table><thead><tr><th>Setup</th><th class="n">Finished</th><th class="n">Won</th><th class="n">Avg R</th><th class="n">Total R</th></tr></thead><tbody>${pb.tally.map(t => `<tr><td>${esc(t.name)}</td><td class="n">${t.closed}</td><td class="n">${t.winPct}%</td><td class="n ${t.avgR > 0 ? 'good' : 'bad'}">${signed(t.avgR, 2)}</td><td class="n ${t.totalR > 0 ? 'good' : 'bad'}">${signed(t.totalR, 1)}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">No finished suggestions yet.</p>');
+  setHTML($('logTally'), pb.tally.length ? `<table><thead><tr><th>Setup</th><th class="n">Finished</th><th class="n">Won</th><th class="n">Avg R</th><th class="n">Total R</th></tr></thead><tbody>${pb.tally.map(t => { const m = pb.setups.find(x => x.id === t.setupId); return `<tr><td>${esc(t.name)}${star(m)}${m?.trial ? ' <span class="mute small">on trial</span>' : ''}</td><td class="n">${t.closed}</td><td class="n">${t.winPct}%</td><td class="n ${t.avgR > 0 ? 'good' : 'bad'}">${signed(t.avgR, 2)}</td><td class="n ${t.totalR > 0 ? 'good' : 'bad'}">${signed(t.totalR, 1)}</td></tr>`; }).join('')}</tbody></table>` : '<p class="empty">No finished suggestions yet.</p>');
 }
 $('pbTabs').addEventListener('click', (e) => { const w = e.target.closest('button')?.dataset.win; if (!w) return; pbWin = w; for (const b of $('pbTabs').children) b.setAttribute('aria-selected', b.dataset.win === w); drawPlaybook(); });
 $('pbBody').addEventListener('click', async (e) => {
@@ -419,11 +436,46 @@ $('pbBody').addEventListener('click', async (e) => {
   if (kind === 'focus' && cur.focus.includes(id)) cur.off = cur.off.filter(x => x !== id);
   try { await api('POST', '/api/settings', { setups: cur }); await loadPlaybook(); refresh(); } catch (err) { alert(err.message); }
 });
+/** A setup from the new research: its short test, its control, and whether it is suggested or only tracked. */
+function researchCard(s, rc, focus, off, tag) {
+  const r = s.result, j = r?.judge;
+  const stats = `<span class="st"><small>Last 4 weeks</small><b class="mono">${rc ? rc.winPct + '%' : '–'}</b><small>${rc ? `${rc.closed} trade${rc.closed === 1 ? '' : 's'}, ${signed(rc.avgR, 2)}R` : 'no trades'}</small></span><span class="st"><small>Short test</small><b class="mono">${s.winPct != null ? Math.round(s.winPct) + '%' : '–'}</b><small class="${s.avgR > 0 ? 'good' : 'bad'}">${s.trades} trades${s.avgR != null ? ', ' + signed(s.avgR, 2) + 'R' : ''}</small></span>`;
+  const res = j ? `<div class="table-wrap"><table><thead><tr><th>Period</th><th class="n">Trades</th><th class="n">Win %</th><th class="n">Avg R</th><th class="n">t-stat</th><th class="n">Worst drawdown</th></tr></thead><tbody><tr><td>${r.period.from} to ${r.period.to}</td><td class="n">${j.trades}</td><td class="n">${f1(j.win)}</td><td class="n ${j.avgR > 0 ? 'good' : 'bad'}">${f3(j.avgR)}</td><td class="n">${f1(j.t, 2)}</td><td class="n">${f1(j.maxDD)}R</td></tr></tbody></table></div>
+      <p class="small mute">Random entries at the same clock times averaged ${f3(r.control.mean)}R (95th percentile ${f3(r.control.p95)}R). Median stop ${f1(r.medianStop, 0)} points; ${f1(r.fit100, 0)}% of signals fit $100 on 1 MNQ and ${f1(r.fit250, 0)}% fit $250. Cost ${r.cost} points a trade.</p>
+      <p class="small">${s.range ? `With ${j.trades} trades the true win rate could be anywhere from ${s.range.lo}% to ${s.range.hi}%. ` : ''}Under 150 trades the label stays "Too early to judge" whatever the numbers.</p>` : '<p class="mute">Not tested yet.</p>';
+  const where = s.trial ? '<p class="note">On trial: its average in the short test was not above zero and above random entries, so it is not suggested on the Desk. Its suggestions are still tracked under Results so far, to build a record without money.</p>'
+    : `<div class="row gap"><button class="btn ${focus ? '' : 'ghost'}" type="button" data-pref="focus" data-id="${s.id}" aria-pressed="${focus}">${focus ? 'Focused: leads the Desk' : 'Focus on this'}</button><button class="btn ghost" type="button" data-pref="off" data-id="${s.id}" aria-pressed="${off}">${off ? 'Hidden: show it again' : 'Hide from the Desk'}</button></div>`;
+  return `<details class="strat${off || s.trial ? ' off' : ''}" ${fold('pb-' + s.id)}><summary><span class="s-name"><b>${esc(s.name)}${star(s)}</b>${s.trial ? ' <span class="chip">On trial</span>' : ''}${focus ? ' <span class="chip focus">Focus</span>' : ''}${off ? ' <span class="chip">Hidden</span>' : ''}<small>${tag}</small></span>${stats}</summary><div class="s-body">${where}<div class="setup-cols"><div><h3>Rules</h3><ul class="plain">${s.rules.map(x => `<li>${esc(x)}</li>`).join('')}</ul><p class="small mute">${esc(s.source)}${s.outside ? '. He does not trade this window for indices: outside what he teaches.' : ''}</p></div><div><h3>Short test</h3>${res}</div></div></div></details>`;
+}
+
+/** What the November 2026 research checked, what each check found, and what was built or left out. */
+function drawResearch() {
+  const c = pb.checks; if (!c) return setHTML($('pbResearch'), '<p class="empty">The research checks have not been run yet.</p>');
+  const t = pb.setups.filter(s => s.research), w = (id) => pb.windows.find(x => x.id === id)?.name || id;
+  const line = (m) => t.filter(s => s.id.startsWith(m)).map(s => `${w(s.window)}: ${s.trades} trades, ${s.avgR != null ? signed(s.avgR, 2) + 'R' : 'none'} (${s.trial ? 'on trial' : 'shown'})`).join('; ');
+  const d = c.bias.daily.whole, al = c.afterLoss, rc = c.recency;
+  const rows = [
+    ['Risk size on a small cushion', 'A simulation of this account: the chance of reaching the limit before the cushion is rebuilt, at different risk per trade.', 'With a small real edge: about 51% at $250, 33% at $100, 23% at $68. With no edge, about 66% at any size.', 'Built. Under $1,500 of room: one micro, $100 cap, losses left shown in the guard. Change it in Settings.', 'good'],
+    ['Do the last 4 weeks predict the next 4?', `Every trade of the 14 older setups since 2019, in 28-day blocks (${rc.persistence.pairs} block pairs).`, `No. Correlation ${signed(rc.persistence.r, 3)} (chance alone gives this ${Math.round(rc.persistence.p * 100)}% of the time). Following last block's best setup made ${f3(rc.leader.leaderNext)}R next block against ${f3(rc.leader.averageNext)}R for the plain average.`, 'Built. The big number is now a best estimate (long test, nudged by recent weeks). The last 4 weeks stay beside it with their range.', 'good'],
+    ['TJR entry 1: sweep, then a break of structure', 'His rules on 5-minute bars, about 48 days, all four windows, against random entries at the same clock times.', line('tjr1_') + '. Far too few trades to judge.', 'Added where the short test was above zero and above random entries; the rest are on trial. All starred.', 'warn'],
+    ['TJR entries 2 to 4: the pullback into the gap or order block', 'The same test with a resting entry in the favourable half of the move.', line('tjr2_') + '. Far too few trades to judge.', 'Same rule. Starred.', 'warn'],
+    ['Trading only with the daily bias', `${c.bias.trades.toLocaleString('en-US')} past trades of the 14 older setups, split by whether they agreed with his daily bias.`, `No difference: with the bias minus against it was ${f3(d.diff)}R (t ${f1(d.t, 2)}). All three timeframes agreeing did not help either.`, 'Not added to the older setups. It stays inside the TJR setups, where it is part of his rules.', 'mute'],
+    ['Stopping after a losing trade', 'Whether the trade after a loss that day did worse than the rest.', `Not supported (${f3(al.diff)}R, and the comparison is muddied by which setups trade later in the day).`, 'No new switch. "One loss and done" stays only as protection while the cushion is small.', 'mute'],
+    ['Skipping big news days', 'No checked list of past CPI, PPI, FOMC and payrolls dates was available.', 'Could not be tested.', 'No new rule. The scheduled-release notice the Desk already has stays.', 'mute'],
+    ['Fair value gaps and order blocks by themselves', 'Outside tests found them no better than random levels; he also says a touch alone is never an entry.', 'No support.', 'Not built as signals. Used only inside the pullback entry.', 'mute'],
+    ['Mindset lessons, written plan, weekly preview, journal prompts', 'Nothing in the price data can test these.', 'Could not be tested.', 'Not built.', 'mute'],
+    ['Fees', 'About $1.30 to $1.90 a micro for the round trip at firms that use Tradovate.', 'Small on wide stops, about 6% of the risk on a 25-point stop.', 'Built. Taken off every estimate; set your own number in Settings.', 'good'],
+  ];
+  setHTML($('pbResearch'), `<div class="table-wrap"><table class="research"><thead><tr><th>Topic</th><th>What was checked</th><th>What it found</th><th>On the Desk</th></tr></thead><tbody>${rows.map(([a, b, x, y, k]) => `<tr><td><b>${a}</b></td><td>${b}</td><td>${x}</td><td class="${k}">${y}</td></tr>`).join('')}</tbody></table></div>
+    <p class="small mute">Rules for every check were written down before it was run (research/PREREGISTRATION.md). Results: research/RESULTS.md. Full report: reports/MNQ day trading evidence review.md.</p>`);
+}
+
 function drawPlaybook() {
   const list = pb.setups.filter(s => s.window === pbWin), prefs = pb.prefs || {};
   setHTML($('pbBody'), list.map(s => {
     const r = s.result, rc = pb.recent?.[s.id], focus = (prefs.focus || []).includes(s.id), off = (prefs.off || []).includes(s.id);
     const tag = `<span class="tag ${s.label.split(/[ ,]/)[0]}">${esc(s.label)}</span>`;
+    if (s.research) return researchCard(s, rc, focus, off, tag);
     const stats = s.carried ? '<span class="st mute">Old test, not re-run</span>'
       : `<span class="st"><small>Last 4 weeks</small><b class="mono">${rc ? rc.winPct + '%' : '–'}</b><small>${rc ? `${rc.closed} trade${rc.closed === 1 ? '' : 's'}, ${signed(rc.avgR, 2)}R` : 'no trades'}</small></span><span class="st"><small>Since 2024</small><b class="mono">${s.winPct != null ? Math.round(s.winPct) + '%' : '–'}</b><small class="${s.avgR > 0 ? 'good' : 'bad'}">${s.trades} trades, ${s.avgR != null ? signed(s.avgR, 2) + 'R' : ''}</small></span>`;
     let res = '';
@@ -444,7 +496,7 @@ function drawPlaybook() {
 // ── Settings ──
 let plans = {};
 function fillSettings({ settings: s, plans: p }) {
-  plans = p; riskLimit = s.personal.riskPerTrade;
+  plans = p;
   const f = $('sForm').elements, a = s.account;
   f.plan.value = a.plan; $('planNote').textContent = p[a.plan]?.note || '';
   for (const k of ['startBalance', 'maxLossLimit', 'lockBalance', 'lockTrigger', 'maxMicros']) f[k].value = a[k];
@@ -453,6 +505,7 @@ function fillSettings({ settings: s, plans: p }) {
   for (const k of ['riskPerTrade', 'dailyStop', 'maxLossesPerDay']) f[k].value = s.personal[k];
   f.feedAuto.checked = s.feed?.auto !== false;
   f.thinCushion.checked = s.personal.thinCushion !== false;
+  f.smallCushion.checked = s.personal.smallCushion !== false; f.smallUnder.value = s.personal.smallUnder ?? 1500; f.smallRisk.value = s.personal.smallRisk ?? 100; f.commission.value = s.instrument?.commission ?? 1.5;
   const an = a.anchor;
   f.anchorBalance.value = ''; f.anchorFloor.value = '';
   $('anchorNote').textContent = an ? `Counting from ${usd(an.balance)} with the limit at ${usd(an.floor)}, set ${tzDate.format(an.at)} Denver. Journal entries before that are ignored. Update these any time your Lucid dashboard disagrees with the guard.` : 'Not set: the guard counts from the $50,000 starting balance and your journal. If you traded this account before using The Desk, enter both numbers from your Lucid dashboard.';
@@ -463,7 +516,7 @@ async function loadSettings() { fillSettings(await api('GET', '/api/settings'));
 $('sForm').elements.plan.addEventListener('change', async (e) => { try { fillSettings(await api('POST', '/api/settings', { account: { plan: e.target.value } })); say('sMsg', `Switched to ${plans[e.target.value].name} defaults.`, true); refresh(); } catch (err) { say('sMsg', err.message, false); } });
 $('sForm').addEventListener('submit', async (e) => {
   e.preventDefault(); const f = e.target.elements;
-  const body = { account: { startBalance: f.startBalance.value, maxLossLimit: f.maxLossLimit.value, lockBalance: f.lockBalance.value, lockTrigger: f.lockTrigger.value, maxMicros: f.maxMicros.value, trailing: f.trailing.value, dll: { on: f.dllOn.checked, amount: f.dllAmount.value }, consistencyPct: f.consistencyPct.value === '' ? null : f.consistencyPct.value, useScaling: f.useScaling.checked, payoutRequested: f.payoutRequested.checked }, personal: { riskPerTrade: f.riskPerTrade.value, dailyStop: f.dailyStop.value, maxLossesPerDay: f.maxLossesPerDay.value, thinCushion: f.thinCushion.checked }, feed: { auto: f.feedAuto.checked } };
+  const body = { account: { startBalance: f.startBalance.value, maxLossLimit: f.maxLossLimit.value, lockBalance: f.lockBalance.value, lockTrigger: f.lockTrigger.value, maxMicros: f.maxMicros.value, trailing: f.trailing.value, dll: { on: f.dllOn.checked, amount: f.dllAmount.value }, consistencyPct: f.consistencyPct.value === '' ? null : f.consistencyPct.value, useScaling: f.useScaling.checked, payoutRequested: f.payoutRequested.checked }, personal: { riskPerTrade: f.riskPerTrade.value, dailyStop: f.dailyStop.value, maxLossesPerDay: f.maxLossesPerDay.value, thinCushion: f.thinCushion.checked, smallCushion: f.smallCushion.checked, smallUnder: f.smallUnder.value, smallRisk: f.smallRisk.value }, instrument: { commission: f.commission.value }, feed: { auto: f.feedAuto.checked } };
   try { fillSettings(await api('POST', '/api/settings', body)); say('sMsg', 'Saved.', true); refresh(); } catch (err) { say('sMsg', err.message, false); }
 });
 

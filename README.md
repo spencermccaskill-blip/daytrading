@@ -17,24 +17,38 @@ Journal, Playbook (rules, checklist, backtest results) and Settings are behind t
 
 ## What the Desk shows
 
-Each of the four windows has three or four setups (fourteen in all). The Desk leads with one and
-lists the rest under "Also in this window"; each of those opens on its own to show its full numbers
-and its own green +. The setup's name is always above the big status word.
+Each of the four windows has three or four older setups (fourteen in all) plus the two from the
+November 2026 course research where their short test allowed it. The Desk leads with one and lists
+the rest under "Also in this window"; each of those opens on its own to show its full numbers and
+its own green +. The setup's name is always above the big status word.
 
-Two win rates sit under every suggestion:
+Under every suggestion:
 
-- **Last 4 weeks** (the big one): what that setup's suggestions actually did recently, from the
-  replay log, with the number of trades beside it. It is usually 10 to 20 trades, so it swings a lot.
-- **Since 2024** (smaller): the long test, a few hundred trades. It says whether the setup has shown
-  an edge over time. None has passed every test rule, so each is marked "not proven".
+- **Best estimate of the win rate** (the big one): the long test since 2024, nudged a little by the
+  last 4 weeks. When tested on every setup since 2019, a setup's last 4 weeks did not predict its
+  next 4, so a hot or cold month moves this number only slightly.
+- **Last 4 weeks** (beside it): what that setup's suggestions actually did recently, with the number
+  of trades and the likely range. With 19 trades the range is about 20 points either side.
 
 A setup can win often and still lose money, so the average result per trade (in R) is next to each.
+None has passed every test rule, so each is marked "not proven".
+
+**Starred setups (\*).** "TJR sweep + break" and "TJR sweep + break + pullback" come from the course
+research. They work on 5-minute bars and have only a short test (about 48 days, 3 to 16 trades each),
+so they are marked "too early to judge". Only the ones whose short test was above zero and above
+random entries are suggested; the others are "on trial": tracked in the Playbook, never suggested.
+Playbook > Research lists every course topic that was checked, what the check found, and what was
+built or left out. The full report is `reports/MNQ day trading evidence review.md`.
+
+**Small cushion.** While the room to the limit is under $1,500 the guard allows one micro and caps
+the risk at $100 a trade, and shows how many full losses are left before the limit. Above $1,500 your
+normal risk per trade returns. All three numbers are in Settings.
 
 **Focus and hide.** In Playbook, open a strategy and press "Focus on this" to make it lead the Desk
 whenever its window is open, or "Hide from the Desk" to leave it out.
 
-**Too-wide stops.** When a stop is wider than your risk allows, the trade is marked Block and shows
-what one micro would cost. You can still log it with +; it is recorded as over your risk.
+**Too-wide stops.** When a stop costs more than your risk on one micro, the trade is marked "Too wide"
+and shows what one micro would cost. You can still log it with +; it is recorded as over your risk.
 
 **Holidays.** The clock knows Thanksgiving, Black Friday, Christmas and New Year hours through
 1 January 2027 (`server/holidays.js`). Windows are shortened or removed, and the Desk and News tab say
@@ -148,7 +162,7 @@ so the guard would show a fresh $50,000 account.
 ## Where the prices come from
 
 The Desk fetches MNQ prices by itself, so **no chart tab needs to be open**. They come from Yahoo
-Finance, free and about 10 minutes delayed. It is an unofficial service: it can refuse requests or
+Finance, free and about 10 minutes delayed (5-minute bars, the last 60 days). It is an unofficial service: it can refuse requests or
 stop working without notice, and when it does The Desk says "Feed stalled" and shows no signal.
 The top right of the page says "fetched automatically" when this feed is in use.
 
@@ -176,7 +190,8 @@ The desk cannot see Tradovate, so the guard only knows about trades that are in 
 
 - **Green + next to a suggested trade** ("I took this"): adds it to the journal at the size the desk
   suggested. When the trade reaches its target, stop or time exit, the desk fills in the result by
-  itself. Results are worked out from the rule exit, before commissions, and are marked "estimate".
+  itself. Results are worked out from the rule exit, less the fees per micro set in Settings ($1.50
+  unless you change it), and are marked "estimate".
   If your real fill or exit was different, click "estimate · fix" in the Journal and type the real number.
 - **Suggested trades** (Journal tab): every trade the setups suggested, worked out from the price
   history when The Desk starts, including days it was off. Finished ones are saved, so the list keeps
@@ -193,8 +208,8 @@ dashboard under "Set it from your Lucid dashboard": the current balance and the 
 The guard counts from there. Do this again any time the guard and Lucid disagree.
 
 With less than $1,000 of room to the limit, the guard switches to **one loss and done for the day**.
-It does not shrink your risk per trade, so trades are not blocked for their size. You can turn this
-off in Settings.
+With less than $1,500 it also switches to **one micro and a $100 risk cap** (see "Small cushion" above).
+Both can be changed or turned off in Settings.
 
 Two losses, $500 down on the day, or too little room to the Lucid limit, and the desk locks and blocks
 signals. Check **Settings** once: plan, whether your account has a daily loss limit, and your own rules.
@@ -209,7 +224,8 @@ Runs all checks, including "the live engine reproduces the backtest trade for tr
 ```
 npm.cmd run backtest
 ```
-Re-runs every registered setup on `data/history` and rewrites `research/RESULTS.md`.
+Re-runs every registered setup on `data/history`, the 5-minute test of the starred setups and the
+three research checks, and rewrites `research/RESULTS.md`.
 
 To see every screen state with made-up data, add `?demo=` to the address, for example
 http://localhost:3000/?demo=long . Names: closed, standdown, watching, armed, long, late, short, won, lost,
