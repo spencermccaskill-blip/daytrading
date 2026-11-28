@@ -427,3 +427,692 @@ With equilibrium added:
 - "imbalance" and "fair value gap" are mostly used as the same thing but are separated at [0:09:59].
 
 ---
+
+## Day 34: Daily Bias (part 1)
+
+File: `day34.txt`. Length: about 20 minutes (last marker 0:19:51), about 3,100 words.
+
+Summary: How he decides which direction to trade for the day before looking for an entry: weekly for the general direction, daily market structure for the bias, 4-hour and 1-hour for confirmation and zones, then 15-minute and 5-minute for the entry. He says himself it was "me just spewing" [0:19:51], and day 35 [0:00:31] says the previous video "didn't have a graphic", so the chart he is pointing at may not even have been visible to viewers.
+
+### Rules and definitions stated
+
+Why
+
+- [0:00:02] "not executing purely based off of the execution strategy but playing into your daily bias as well"
+- [0:00:34] Against-bias trades: "odds are you'll probably end up being a very short-lived trade" or a loss.
+
+Step order (top-down)
+
+- [0:00:34] Weekly first: "start on the weekly time frame figure out where is Price going on the weekly"
+- [0:00:34] How, on the weekly: "literally just look at it look at recent price action"
+- [0:01:40] He uses a line chart for it: "the line chart is saying go up"
+- [0:01:06] Daily: "what are we looking for on the daily we're looking for Trend"
+- [0:01:40] to [0:02:11] "I like to use the daily current market structure to figure out my daily bias"
+- [0:02:11] What makes it bearish: "we get a breaker [=break of] structure to the downside so I'm bearish on the daily"
+- [0:02:11] It flips on one candle: "prior to this candle to the downside I would have been bullish not anymore"
+- [0:02:11] to [0:02:42] Bearish means shorts only: "we're in a downtrend on The Daily so what are we looking for we're looking for cells [=sells]"
+- [0:02:42] Then higher-timeframe versions of the execution tools, starting with "we're looking for draws on liquidity".
+- [0:02:42] 4-hour: "we had a liquidity sweep today on the four hour okay and I like to look at the four hour Trend as well"
+- [0:03:13] Ideal case, daily and 4-hour agree: "all you got to do from there is go on the hourly find high Confluence areas and execute"
+- [0:11:01] to [0:11:32] His one-line version: "to find your daily bias it's as simple as this what's the trend on The Daily look at the market structure"
+- [0:11:32] The weekly is background only: "that's just giving US Weekly bias and we don't really care about that because we're trading day to day"
+- [0:12:03] Then: "confirmation on high time frames like the four hour or the one hour"
+- [0:12:33] Mental model: "imagine you're trying to take a swing trade on the four hour in the one hour"
+- [0:13:40] Bullish daily, 4-hour pulling back: "the four hour maybe we're in a downtrend because we're in a retracement on The Daily that's that's ideal"
+- [0:13:40] "we see price come into a four hour fair value Gap a four hour order block"
+- [0:13:40] "we scale down to the one hour we see the one hour has already broken structure scale down to the 15 minute"
+- [0:14:13] The entry tools and their timeframes: "that liquidity sweep on the 15 minute find the break of structure on the five minute find an order block on the 15 minute"
+- [0:14:44] Higher-timeframe marking can be loose: "we're not trading on the high time frames so we don't even have to be exact"
+
+When timeframes disagree
+
+- [0:03:43] The case on the day: weekly up, "on The Daily though we're bearish and on the four hour We're bullish", one hour "in between".
+- [0:04:13] What he does: "we probably wouldn't want to trade the S P 500 unless we can find some sort of bearish confirmation"
+- [0:04:44] Targets are capped until the 4-hour agrees: "we cannot Target these absurd long time frame take profits"
+- [0:05:15] "we need to be tentative with our take profits on this"
+- [0:08:55] Bullish daily and a 4-hour break down is a pullback, not a reversal: "even if we break structure to the downside on the four hour that means we're retracing on the daily"
+- [0:17:16] Lower-timeframe signals against the bias are ignored: "on the 15 minute you're probably seeing Oh liquidity sweep breaking structure to the upside right are we bullish no bro we're bearish"
+- [0:17:16] "we're waiting for these price points to get hit and then giving to give us bearish confirmation"
+- [0:18:17] Daily against weekly: "if we're in a downtrend on The Daily what does that mean we're doing on the weekly it means we're retracing on the weekly"
+
+Session and timing
+
+- [0:05:15] to [0:05:46] "the majority of the daily moves on the S P if that's what we're talking about is going to be during New York session" and "everything else is just chop".
+- [0:07:51] "the daily candle moves are off of those big session moves"
+- [0:07:51] to [0:08:22] Aim: "make a short-term execution within several hours right to catch that move that's happening on the day"
+- [0:08:22] When, for the S&P: "for the s p during New York Stock Exchange open"
+- [0:14:44] to [0:15:14] A valid-looking signal in London is skipped on the S&P: "we get a breaker [=break of] structure on the hourly right here during London session are we gonna trade that hell no"
+- [0:04:13] News: "I didn't trade today because we had pal [=Powell] speaking"
+
+Entry trigger once in a higher-timeframe zone
+
+- [0:09:27] "we're waiting for like hourly hourly confirmation" then "we get a break obstruction [=break of structure] to the upside on the hourly".
+- [0:10:30] Then lower: "15-minute breaker [=break of] structure five minute breaker structure five minute order block"
+- [0:16:14] to [0:16:45] A reversal candle is not enough: "we're not waiting for just a down candle we're waiting for five minute break of structure"
+- [0:17:46] "wait for a five minute break of structure"
+- [0:15:44] An alternative he allows: "maybe we purely enter off of equilibrium"
+
+Targets (preview)
+
+- [0:15:44] "we can Target some four hour retracement levels": an imbalance, equilibrium of the 4-hour swing, and [0:16:14] "we have the leg down that cause the move up this is a take profit".
+- [0:16:45] "daily or hourly or four hour take profits on off of a five minute execution"
+- [0:17:46] to [0:18:17] Also "equilibrium off the four hour" and "daily draws on liquidity".
+
+### Worked examples
+
+1. S&P on the day of recording, no trade taken [0:01:40] to [0:07:19].
+   - Weekly: up (line chart). Daily: structure broken to the downside, so bearish. 4-hour: a liquidity sweep that day, but still in an uptrend. 1-hour: "in between".
+   - He did not trade (Powell speaking).
+   - What he says he would have looked for [0:06:17] to [0:06:48]: "we see this High get taken out okay cool", "then we get a breaking structure to the downside on the 15 minute", an order block there, "this would be like a an elite entry for me".
+   - Chart only: which high, which 15-minute swing broke, the order block, any stop or target. No result.
+2. An older bullish example during the New York open [0:08:22] to [0:10:30].
+   - Daily: structure broken to the upside. 4-hour: retracing down into equilibrium and a fair value gap. 1-hour: structure broken to the upside; an order block that is not hit; a bearish hourly candle; equilibrium and the gap are hit.
+   - "this was literally doing during New York Stock Exchange open"
+   - Summary he gives: "we're bullish on The Daily we see a four hour retrace down we see hourly confirmation to the upside"
+   - Then down to 15-minute and 5-minute for break of structure and a 5-minute order block.
+   - Chart only: instrument, date, every level, entry, stop, target, result.
+3. S&P "right now", a short he is considering [0:14:13] to [0:18:17].
+   - Daily: structure broken to the downside, bearish. Draw on liquidity: highs above. 4-hour: those highs are swept. 1-hour: structure broken during London (not traded).
+   - Then a sweep, a break of structure, a fair value gap, an order block and equilibrium are all marked; "maybe we purely enter off of equilibrium".
+   - Targets: a 4-hour imbalance, 4-hour equilibrium, the leg down that caused the move up, daily draws on liquidity.
+   - Finer entry: wait for a 5-minute break of structure at the gap and order block.
+   - [0:17:46] "this is honestly a good trade too". Not taken on camera; no result.
+   - Chart only: all levels; stop not mentioned.
+
+### Behaviour and process rules
+
+- [0:05:46] to [0:06:17] A loss taken with the bias and the plan is acceptable: the market "just wanted to change direction".
+- [0:14:44] Mark higher-timeframe zones roughly; precision is for the entry timeframe.
+- [0:18:50] to [0:19:21] He will cover daily bias in his trade recaps from now on.
+- [0:19:51] "don't over risk don't over leverage"
+
+### Refers to the chart without saying it
+
+- [0:02:11] "prior to this candle": which daily candle and which swing low it broke.
+- [0:02:42] "draws on liquidity right would be here here": levels not named.
+- [0:03:13] "maybe we can close below this low and break structure again": which 4-hour low.
+- [0:07:19] "write this up up we don't break structure the upside okay this was probably a liquidity sweep on the hourly": unclear in captions; he seems to be reading the 4-hour move up as a sweep and not a break.
+- [0:15:44] to [0:16:14] "this is a take profit this is a take profit": three targets pointed at, not named by price.
+- [0:18:17] Weekly fair value gap, liquidity and order block are pointed at ("what do I see here").
+- Day 35 [0:00:31] says of this lesson "I know I didn't have a graphic in the previous video." If so, all of the above was missing for viewers too.
+
+### Unclear or contradictory
+
+- [0:01:40] "this is where we find our daily bias on the hourly time frames" against, seconds later, "I like to use the daily current market structure to figure out my daily bias". My reading: bias comes from the daily, the entry zone from the hourly charts.
+- 4-hour state on the same day: "we're in an uptrend on the four hour" [0:03:13] and "we broke structure to the upside on the four hour" [0:15:44], against "we don't break structure the upside" [0:07:19]. The examples may be different charts; it cannot be settled from the captions.
+- Daily bearish and 4-hour bullish: at [0:04:13] it is a day he "probably wouldn't want to trade" without bearish confirmation; at [0:08:55] and [0:13:40] the mirror case (daily bullish, 4-hour down) is called "ideal".
+- The weekly: "we don't really care about that" [0:11:32], but he starts with it and uses it for targets at [0:18:17]. Day 36 gives it more weight.
+- "bullish confirmation" is never defined beyond "our building blocks our execution points" [0:12:33].
+
+---
+
+## Day 35: Daily Bias pt. 2
+
+File: `day35.txt`. Length: about 15 minutes (last marker 0:14:43), about 2,500 words. Captions look machine-translated ("block of orders" and "block of warrants" = order block, "balance" = equilibrium, "breakout of the structure" = break of structure).
+
+Summary: A recording of his pre-market Zoom call with his Discord, about 17 minutes before the open. He goes through the S&P, GU and gold, states a bias for each from the weekly and daily, marks the zones he wants price to reach, and says what lower-timeframe confirmation he will wait for. The trades themselves are in a separate recap video, not in this file.
+
+### Rules and definitions stated
+
+When he does it
+
+- [0:00:00] Before the session: "The market opens in about 17 minutes."
+- [0:10:10] Later in the same call: "The market opens in about seven minutes."
+
+Deciding the bias
+
+- [0:01:01] "for daily offset [=bias], I like to start with a weekly period"
+- [0:01:01] "We can even use a line graph."
+- [0:02:36] to [0:03:06] Then the daily: "Because we try to base our trades on daily candlesticks."
+- [0:03:06] Why trade with the trend: "expansions are always much larger and much more than corrections"
+- [0:04:06] What turned the S&P bullish again: "We recently closed above this daily timeframe. We broke the structure, returning to growth on the daily timeframe." My reading: a daily close above the prior daily high is the break of structure.
+- [0:04:06] "So we're back to being bullish on the S&P 500."
+- [0:01:32] to [0:02:02] Same logic on the monthly, conditional on the close: "we have broken the monthly structure towards the upside unless today closes below this low, this high"
+- [0:04:36] His own opinion does not override it: "We must make a deal based on what the market gives us."
+- [0:05:06] GU: "we have broken the downward structure on the daily timeframe on GU. So what are we now? We are bears." My reading: structure broken to the downside, so bearish.
+- [0:05:36] Weekly up, daily down: he stays bearish until the daily turns up, and "The weekly simply gives us an overview."
+- [0:05:36] Daily bearish, 4-hour up is the pullback to sell: "We are correcting on the daily chart, which probably means we have broken the structure at 4 o'clock [=on the 4-hour]." and "But that's when it's time to try to catch a short position."
+- [0:08:39] Gold: weekly bearish, daily bearish, and the daily is in a pullback ("We are adjusting on a daily basis. Even better.").
+- [0:12:42] to [0:13:12] Best case, everything agrees: "The S&P looks great for longs today." because hourly, 4-hour, daily, weekly and 15-minute are all in an uptrend.
+- [0:13:43] Bias against the 1-hour and 4-hour needs more proof: "I want at least a 15- minute breakout of the structure because we are bullish on the hourly and bullish on the 4- hour"
+
+From bias to entry
+
+- [0:06:38] First find the higher-timeframe zone: "What setups are we trying to find first on these higher timeframes, right? Boom. Imbalance order block."
+- [0:07:09] Then the lower-timeframe sequence: "looking for liquidity shifts [=sweeps] at the 15th minute [=on the 15-minute]."
+- [0:07:09] "We are looking for a breakout of the structure on the 15- minute interval, and then an entry into the block of orders on the 15-minute interval."
+- [0:07:09] "We zoom out [=in] to a five-minute interval, and then we get a breakout of the structure, and that's our sniper entry."
+- [0:06:08] Minimum for GU that day: "If we get a breakout structure [=break of structure] at 15 minutes, I'm ready to go."
+- [0:08:09] Why go lower: "so that we can get that good entry so that we can target the take profit on the high timeframe"
+- [0:09:10] to [0:09:40] Gold: price should first take the highs and fill the gap ("It will likely move towards these highs. It will probably fill this imbalance."), then "Breakout of the liquidity structure on the 15- minute period."
+- [0:13:12] The S&P plan in one line: "These price points are for filling. Break your structure up on the lower timeframe for confirmation. Enter."
+- [0:12:12] to [0:12:42] He does not predict which zone is hit: "where the market goes, we just have to adapt to it"
+- [0:12:42] "We mark up all these, all these building blocks that correspond to our daily bias"
+
+Timeframes by market
+
+- [0:11:42] "I like to trade Forex, like the 15- minute and the five-minute S&P, you know, it's like the five-minute and the one-minute." My reading: forex entries on the 15-minute and 5-minute, S&P entries on the 5-minute and 1-minute.
+- [0:12:12] S&P version of the trigger: "a structure breakout on a five-minute loan, included in the order block with a structure breakout on a one-minute loan" ("loan" is a caption error, unclear in captions; my reading is "chart").
+
+Order block and equilibrium details
+
+- [0:10:41] Why a down move is an order block: "It washed away [=swept] this liquidity without closing below it. Causes huge upward growth."
+- [0:11:42] Same test again: liquidity taken, then growth.
+- [0:08:39] to [0:09:10] Gold short: "We are not at a discount yet." and the gap is "right here, within the discount". The captions say "discount" for a short; see "Unclear".
+- [0:14:13] For shorts: "anything above that 50% mark, money"
+
+Other
+
+- [0:03:36] A mistake from the day before: he shorted because the daily had broken down and intraday liquidity had been taken, but "We had no confirmation on lower timeframes. And this is where I was wrong."
+- [0:09:40] A market can be skipped for how it is moving: "I'm not going to trade GJ just because it's trading pretty sloppily."
+- [0:02:02] "We have news today that will be released in 30 minutes at the market opening."
+- [0:02:02] His view on size of news moves: "no candle on the S&P will fall by, you know, two, 3% in a day without any major news with a big impact"
+- [0:14:43] "Trade after the news is released in 30 minutes."
+
+### Worked examples
+
+These are plans made before the open. No entry, stop, target or result is in this file.
+
+1. S&P, long bias [0:01:01] to [0:04:36] and [0:10:41] to [0:13:12].
+   - Weekly: up. Monthly: structure broken to the upside if the month's last day does not close back below. Daily: had broken down earlier (he shorted the day before and was wrong), now closed back above, so bullish.
+   - Zones: hourly lows below price as liquidity; on the 15-minute a down move that swept liquidity without closing below it (order block) together with an imbalance; a second order block lower; a further imbalance lower still.
+   - Plan: let price drop into one of the zones at the open, then a break of structure to the upside on the 5-minute (or 1-minute inside the order block), then long.
+   - Chart only: all prices; which zone was actually used.
+2. GU, short bias [0:05:06] to [0:08:39] and [0:13:43].
+   - Weekly: bullish, with a weekly order block. Daily: structure broken to the downside, bearish, currently pulling back up. 1-hour and 4-hour: bullish.
+   - Zones above price: a fair value gap, an order block (already partly entered), an imbalance almost filled.
+   - Plan: price pushes up into them; wait for at least a 15-minute break of structure to the downside; then 15-minute order block entry or 5-minute break of structure.
+3. Gold, short bias [0:08:39] to [0:10:10] and [0:14:13].
+   - Weekly bearish, daily bearish, daily pulling back. Equilibrium drawn; price has not reached the far side of 50% yet; a fair value gap sits beyond it; liquidity above nearby highs.
+   - Plan: wait for the highs to be taken and the gap filled, then a 15-minute sweep and break of structure. He doubts price will get there.
+4. GJ: skipped as "sloppily" trading [0:09:40].
+
+### Behaviour and process rules
+
+- [0:00:00] Do the bias work before the open, market by market.
+- [0:04:06] to [0:04:36] Do not trade a personal or fundamental view against the chart's structure.
+- [0:12:42] Mark every zone that fits the bias beforehand and react to whichever is reached.
+- [0:14:43] Wait until the scheduled news is out before trading.
+
+### Refers to the chart without saying it
+
+- [0:01:32] "So my next liquidity push will be here": level not named.
+- [0:04:06] "We recently closed above this": which daily high.
+- [0:06:08] "What is it? This is a block of orders, right? What is this?": GU zones pointed at.
+- [0:08:39] to [0:09:10] Gold equilibrium anchors are not said.
+- [0:10:41] to [0:12:12] Every S&P zone is "here", "right here", "this whole thing here"; he says "I'm not even going to highlight it because it would be too many squares."
+- [0:14:13] "we've already explained this liquidity imbalance, the reduced price": refers back to the gold chart.
+
+### Unclear or contradictory
+
+- News timing: "released in 30 minutes at the market opening" [0:02:02] while the market "opens in about 17 minutes" [0:00:00]. Both cannot be exact. Unclear in captions.
+- "discount" for a gold short [0:08:39] to [0:09:10], while [0:14:13] says "anything above that 50% mark". My reading: for shorts he wants price above 50% of the measured leg, and the captions (or he) use "discount" loosely for the favourable half in both directions.
+- [0:07:09] "We zoom out to a five-minute interval": moving from 15-minute to 5-minute is zooming in.
+- The S&P daily was bearish the day before and bullish now after one close; the same one-candle flip as day 34 [0:02:11].
+- GU with the 1-hour and 4-hour against the daily: here he will still trade it with a 15-minute break of structure. Day 34 [0:04:13] called the equivalent S&P case a day he "probably wouldn't want to trade".
+
+---
+
+## Day 36: Daily Bias pt. 3
+
+File: `day36.txt`. Length: about 22 minutes (last marker 0:22:22), about 3,600 words. Captions look machine-translated ("structural failure" = break of structure, "shrinkage", "retraction" and "contraction" = retracement, "diary" and "journal" = daily chart, "Legal" = "cool").
+
+Summary: A recap of the daily-bias method on the S&P, GU and gold, with more weight on how the weekly limits how far a daily move against it should run, and on how a break of structure on one timeframe is only a pullback on the next one up. It ends with numbered take-profit levels and reward-to-risk figures for a gold short.
+
+### Rules and definitions stated
+
+Role of the weekly
+
+- [0:00:32] Daily breaks down inside a weekly uptrend: "are in an uptrend on the weekly chart, there's a chance it will be a weekly pullback"
+- [0:00:32] "the larger the timeframe, the more power it has"
+- [0:01:05] How far a weekly pullback should go at least: "I'd like the weekly time chart to at least reach equilibrium, right? Or fill that fair value gap."
+- [0:10:58] to [0:11:28] GU: "because the weekly chart isn't even at a discount yet. This is the minimum I look for in retractions [=retracements]."
+- [0:11:28] It caps the daily move: "this downward trend probably won't extend this far. Why? Because the weekly chart is trending upwards."
+- [0:14:33] to [0:15:04] When the pullback is over: the daily breaks structure back up, and then "the next upward leg for the weekly chart, is ready".
+
+Daily bias and the timeframes under it
+
+- [0:05:45] "What is the structure of the daily market? Oh, we had a structural failure [=break] upwards. Legal. We are looking to buy."
+- [0:05:45] "what is the 4-hour timeframe chart telling us? Buying is perfect, even better for long positions."
+- [0:06:16] On the 1-hour and 4-hour: "We use our building blocks to find areas of high confluence to enter an operation."
+- [0:06:50] to [0:07:20] On the 15-minute and 5-minute, once price is in a higher-timeframe zone, map more zones and wait for: "We might see a liquidity sweep, then a structural breakout in the next five minutes [=on the five-minute]. Perfect. Buy it, right?"
+- [0:07:20] All agreeing: "the daily, weekly, 4-hour, 1-hour, and 15- minute tests are all giving us confirmation"
+- [0:07:50] The nesting rule: "Structure failure in 15 minutes, shrinkage in 1 hour, structure failure in 1 hour, shrinkage in 4 hours"
+- [0:07:50] continued: "structure failure in 4 hours, daily shrinkage, daily structure failure, weekly shrinkage"
+- [0:08:20] "A one-minute structural breakdown might very well just be a five- minute setback"
+- [0:08:20] "we use a confluence of a larger timeframe with execution on a smaller timeframe"
+- [0:08:51] to [0:09:21] Trade the extension, not the pullback: "That's your goal every day, to be getting the extension."
+- [0:09:21] "when the price isn't aligned with your daily bias, you 're screwed"
+
+When the 4-hour disagrees with the daily
+
+- [0:13:02] GU (daily down): "Yes, the 4-hour chart broke the upward structure, but look at the daily chart."
+- [0:13:02] "What happened to the one-hour chart? We broke the structure down. That's basically all I need."
+- [0:13:32] Location still matters: "Maybe I don't want to sell below a premium level"
+- [0:16:40] to [0:17:10] Gold: "just because the 4 o'clock position broke the structure upwards, what does that mean? Daily contraction [=retracement]."
+- [0:18:13] "we're using the 4-hour order blocks to find an execution point within that timeframe"
+
+No reaction, no trade
+
+- [0:06:16] "That's why I didn't trade the S&P on Friday." (little to work with on the chart).
+- [0:09:21] "if you get here and don't give us a reaction , that's fine. We don't execute."
+- [0:18:44] "These are simply high-probability price ranges, and we are executing based on confirmation."
+- [0:17:42] to [0:18:13] What confirmation is, on gold: "We are expecting confirmation within one hour or 15 minutes for execution points."
+- [0:18:13] "Do we already have a downward structural breakout within the first 15 minutes [=on the 15-minute]? No, we don't have any."
+- [0:18:44] "A downward structural break in the 15-minute chart."
+- [0:19:16] Nested zones: "15-minute order block within a one-hour order block."
+
+Order block test
+
+- [0:06:50] "Because he [=it] swept away those lows, it caused a surge, and orders were filled."
+
+Targets
+
+- [0:10:58] Daily-chart confluences are used "as price points to take profits on our very small timeframe chart trades".
+- [0:14:03] "A daily trade where we can then look for daily profit targets."
+- [0:14:03] "First profit target after a 5- minute execution." is nearby liquidity at a low.
+- [0:14:33] Order after that, for a short: "liquidity target in a downtrend is simply the most recent low. Then we have the discount level. Then we have liquidity here."
+- [0:14:33] Then an order block.
+- [0:19:16] to [0:19:48] Gold: two daily draws on liquidity and two possible order blocks: "This is take profit one, two, three, four."
+- [0:20:18] "Our initial take profit on the daily timeframe would have had a risk-reward ratio of 1 to 4.79."
+- [0:20:18] Holding to the last target: "it would be a risk-reward ratio of 1 to 13.5"
+- [0:20:50] He does not hold everything for the last target: "Because I do partial payments [=partials], okay? Because I like to make a profit"
+- [0:13:02] Not held over the weekend: "something we could have kept over the weekend, but I just don't like doing that"
+- [0:19:48] Not held for days: "if you want to hold off on your operation for three or four days. I don't like doing this"
+
+### Worked examples
+
+1. S&P, long bias, no trade [0:05:45] to [0:07:20].
+   - Monthly: structure broken up (he personally doubts it). Daily: structure broken up. 4-hour: buy. 1-hour: buy.
+   - "there isn't much" on the chart, so he did not trade it on Friday.
+   - Zones: liquidity below 1-hour lows, a large imbalance, another below it, a bearish candle that swept lows and caused a surge (order block).
+   - Plan: price drops into a zone; a sweep on the lower timeframe; a 5-minute break of structure up; buy.
+2. GU short, taken the day before [0:10:28] to [0:15:04].
+   - Weekly: uptrend, pullback not yet at a discount. Daily: downtrend.
+   - 4-hour: had broken structure to the upside. 1-hour: broke structure down.
+   - Location: price up at a 4-hour order block with a liquidity sweep, and at a 1-hour order block; reactions seen on the 15-minute and 5-minute. "It makes sense to sell."
+   - "These were the sales we made today, or rather, yesterday."
+   - Targets in order: nearby low (liquidity), the most recent low, the discount (equilibrium) level, further liquidity, an order block.
+   - Result is not given here. Day 37 [0:08:12] describes a Friday short from a one-hour order block that was closed at break-even; it is probably this trade (my inference).
+   - Chart only: every price; the entry candle; the stop.
+3. Gold, short bias, waiting [0:15:35] to [0:20:18].
+   - Weekly: downtrend. Daily: downtrend. Monthly: uptrend ("Who really cares").
+   - Daily has pulled back; price has filled an imbalance and is inside a 1-hour order block. 4-hour: broke structure up, read as a daily pullback.
+   - Waiting for: a 15-minute break of structure down; perhaps a push into a 15-minute order block inside the 1-hour order block first.
+   - Targets: daily liquidity twice, then two possible order blocks (take profit one to four). First target 1 to 4.79, last 1 to 13.5.
+   - Chart only: entry, stop and target prices. The stop is never described, so the ratios cannot be reproduced.
+
+### Behaviour and process rules
+
+- [0:09:21] to [0:09:51] On the pre-market call he maps the areas and waits; if price arrives and gives no reaction, the area is dropped.
+- [0:07:50] to [0:08:20] Do not change bias because a lower timeframe broke structure the other way.
+- [0:21:21] If the trading plan from day 29 is still not being followed: "You need to switch to the demo account."
+
+### Refers to the chart without saying it
+
+- [0:01:05] to [0:01:37] "it was below that monthly low": which low.
+- [0:06:16] to [0:06:50] S&P zones ("Massive imbalance here. Another imbalance below here.").
+- [0:11:28] to [0:12:32] GU zones and "liquidity below these minimums [=lows]".
+- [0:13:32] "this zone, which was the confluence we used yesterday": the actual entry zone of the GU trade.
+- [0:19:16] to [0:19:48] The four gold targets, and the stop that the 4.79 and 13.5 figures are measured against.
+- [0:17:42] "I'm not going to mark that on the graph because we can only visualize it."
+
+### Unclear or contradictory
+
+- [0:11:28] "Ideally, we're not short selling because the daily chart is trending down, right?" contradicts the rest of the passage, where they are short because the daily is down ([0:12:32] to [0:13:02]). Probably a caption or translation error; unclear in captions.
+- [0:14:33] to [0:15:04] "we're not going to have a downside bias until we break the structure back up on the daily chart": the sense of the passage is that the bias stays down until the daily breaks back up. Unclear in captions.
+- [0:13:32] "when it comes to a discount ... 4-hour order block ... It makes sense to sell. We're offering a discount." Just before, he says he would not sell "below a premium level". "Discount" and "premium" are mixed up in the captions for shorts, as in day 35.
+- [0:18:13] "within the first 15 minutes": could be read as the first 15 minutes of the session; my reading is "on the 15-minute chart", consistent with [0:18:44].
+- 4-hour against the daily: here a 1-hour break back in the daily's direction is "basically all I need" [0:13:02]; in day 34 [0:04:13] the same disagreement made it a day he "probably wouldn't want to trade"; in day 35 [0:13:43] he wanted "at least a 15- minute" break.
+- Weekly: day 34 [0:11:32] "we don't really care about that"; here it sets how far the daily move should run.
+
+---
+
+## Day 37: Taking Profits
+
+File: `day37.txt`. Length: about 11 minutes (last marker 0:10:45), about 2,000 words.
+
+Summary: Where he puts take-profit orders: at the same building blocks (liquidity, fair value gaps, order blocks) lying ahead of the trade. The first target is the first draw on liquidity one timeframe above the entry timeframe, and he usually sets three or four targets. He calls this the least important of the four skills.
+
+### Rules and definitions stated
+
+- [0:01:37] to [0:02:07] "where are we looking to take profit at okay it's at our building blocks"
+- [0:02:07] Which timeframe: "at our building blocks on whatever time frame that you're executing on okay or whatever like one Higher time frame you're on"
+- [0:02:07] to [0:02:38] Entry, said in passing: "we take a short off of this liquidity sweep breaking struck through [=break of structure to] the downside we enter on this candle close"
+- [0:03:09] Order block as a target: "you'd have a take profit at the top of this order block or a take profit at the bottom of this order block"
+- [0:03:09] Fair value gap as a target: "you could have a take profit boom within here and at the bottom of it"
+- [0:03:39] His first target: "I set it off of Boom the one Higher time frame draw on liquidity on whatever execution time frame on I'm on"
+- [0:03:39] Example: "short position on the five minute okay I would probably scale up to the 15 minute and find the first the first draw in liquidity"
+- [0:03:39] It must be "within the direction that we're taking the trade".
+- [0:04:09] How many: "I usually set like three or four take profits okay that's not really necessary"
+- [0:04:09] to [0:04:40] A plan line he offers: "the first take profit is going to be the one Higher time frame draw on liquidity and then I'm going to use building blocks for the rest"
+- [0:04:40] A 15-minute entry into a 4-hour idea does not force a 4-hour first target: it "could be if you want to stay in the trade for that long".
+- [0:04:40] to [0:05:10] "I like to set take profits based on the execution time frame that we're on"
+- [0:05:10] to [0:05:40] Order of importance: "the largest thing would be daily bias and then following that would be execution and then following that it would be stop loss and then following that it would be taking profits"
+- [0:05:40] Typical first-target reward: "most you guys aren't going to have a one to ten risks reward for your first take profit" but one to one up to about one to five.
+- [0:06:10] to [0:06:41] Minimum: "most of the time my first take profit is going to be minimum one to one okay that's kind of the goal"
+- [0:07:12] "we ideally just want a one-to-one"
+- [0:07:42] to [0:08:12] Why these levels: "use your building blocks because those are price magnets"
+- [0:09:12] Do not use the lowest timeframe for targets: "I'd like to set take profits not based off of one minute confluences"
+- [0:09:12] "higher time frame holds higher power"
+- [0:09:42] A target sits just past the level: "right underneath this second draw of liquidity"
+
+Not stated in this lesson: how much of the position comes off at each target; any rule for moving the stop to break-even; any trailing stop.
+
+### Worked examples
+
+1. Hypothetical short used only to show targets [0:02:07] to [0:04:09].
+   - He says it is a bad trade (against an uptrend). Sweep, break of structure to the downside, "we enter on this candle close".
+   - Targets: an order block below (its top or its bottom), liquidity that lines up with the bottom of that order block, a fair value gap (inside it and at its bottom). His own first target would be the first 15-minute draw on liquidity if the entry was on the 5-minute.
+   - Chart only: instrument, levels, stop.
+2. A 4-hour long [0:06:10] to [0:07:12].
+   - Liquidity taken, structure broken to the upside on the 4-hour, the fair value gap is filled, "Boom for [=fair] Value Gap entry stop underneath here".
+   - One to one lines up with a high (draw on liquidity): first target. Second: another draw on liquidity. An order block is skipped because it "kind of envelops this high already". Third: liquidity higher up.
+   - Chart only: what the stop is under; all prices; no result.
+3. A forex long [0:07:12] to [0:08:12].
+   - Sweep, break of structure to the upside, enter on that alone.
+   - Targets: the top of an imbalance (about one to one); the base of a 4-hour order block; a 1-hour order block; liquidity at the top.
+4. The Friday short, a real trade [0:08:12] to [0:10:14].
+   - Price came into a one-hour order block; "we entered off a five minute break of structure and then like a one one minute order block".
+   - "our entry was up here stop was like slightly above here"
+   - First target: a 5-minute order block (a sweep of liquidity followed by a rally). Next: just under the second draw of liquidity. Then, on the 15-minute, a fair value gap (two targets in it).
+   - Result: "closed for Break Even because price was taken [=taking]" too long.
+   - Chart only: instrument (GU is my inference from day 36), prices, where the stop sat relative to the sweep.
+
+### Behaviour and process rules
+
+- [0:04:09] Put the number of targets and the rule for the first one in the trading plan.
+- [0:05:10] to [0:05:40] Spend effort in this order: daily bias, execution, stop loss, take profit.
+- [0:08:12] He closed a trade at break-even because it was taking too long. No time limit is given.
+
+### Refers to the chart without saying it
+
+- [0:02:38] "our first take profit would essentially be here".
+- [0:06:10] "stop underneath here": which low.
+- [0:06:41] "this high drawing liquidity perfect First Take profit".
+- [0:08:42] to [0:09:12] "I think it was off this order block": he is recalling where the first target was.
+- [0:09:12] "stop was like slightly above here": which high.
+- Throughout: whether a target at an order block or gap is its near edge or far edge is chosen by pointing.
+
+### Unclear or contradictory
+
+- First target timeframe: "one Higher time frame" than the entry [0:03:39], "based on the execution time frame that we're on" [0:04:40] to [0:05:10], and "whatever time frame that you're executing on ... or ... one Higher" [0:02:07]. In the Friday trade the entry was a 1-minute order block after a 5-minute break and the first target was a 5-minute order block.
+- First target type: "draw on liquidity" in the rule [0:03:39], but an order block in the Friday trade [0:08:42] and the top of an imbalance in the forex example [0:07:12].
+- "minimum one to one" is "most of the time" and "kind of the goal" [0:06:10], not a hard rule.
+- Day 36 targets daily levels from a 5-minute entry ([0:14:03]); this lesson prefers targets on the entry timeframe.
+- Partials are confirmed (day 36 [0:20:50]) but no sizes are given anywhere in days 29-39.
+
+---
+
+## Day 38: Stop Losses
+
+File: `day38.txt`. Length: about 13 minutes (last marker 0:12:48), about 2,100 words.
+
+Summary: Where the stop goes and why: beyond the liquidity sweep, because that is the point where the trade idea is wrong, with a small buffer for spread. He uses the S&P long he was stopped out of that morning as the example. Recorded on a Zoom call the day before a US bank holiday.
+
+### Rules and definitions stated
+
+- [0:01:00] to [0:01:30] The standard setup he assumes: sweep, break of structure, order block entry. For a short: "put their stop loss above the liquidity sweep me myself included okay I almost always put my stop loss above the liquidity sweep"
+- [0:01:30] Reason: "if liquidity was actually taken out then price has no reason to come back above this high"
+- [0:02:01] Buffer: "we put our stop loss slightly above the highs as well to cover for spread"
+- [0:02:01] to [0:02:31] "our stop loss is essentially our invalidation area"
+- [0:03:03] to [0:03:34] The entry type does not change it: "whether you're entering off of a fair value Gap or an order block your stop-loss should still be above the liquidity sweep"
+- [0:03:34] Not above a nearer high: "it should not be right above this High why because price could easily come back a little bit higher and then come back down"
+- [0:05:09] Both directions: "just put it boom below or above the liquidity sweep"
+- [0:04:07] Exception, when the sweep is far away: "the liquidity sweep is so high up that it pretty much would give you a terrible risker [=risk to] reward then I try and find other confluences"
+- [0:04:38] In that case: "I would put my stop like above the order block"
+- [0:04:38] to [0:05:09] Why he dislikes the exception: "price could still technically move up and take you out of the trade and still go within our bias"
+- [0:05:39] to [0:06:12] Size of the buffer: "at least put it like I would like to say like five like point five points 0.5 points below the actual price point"
+- [0:06:12] Or: "figure out what your spread is on your broker for the specific pair"
+- [0:06:42] Why: "you are going to get stopped out by spread"
+- [0:07:12] The stop is only meant to go when the level itself breaks: "your trade is only invalidated once this price point gets broken below"
+- [0:07:12] Buffer on that day's trade: "ours was like what was it it was four four below" (unclear in captions: the unit is not said).
+- [0:05:39] Entry on that trade: "we entered off of this break of structure off of this candle closure"
+- [0:07:42] Which low counted as the sweep: "we had a liquidity sweep on the five minute right here and then a break of structure only [=on the] one minute to the upside so I was considering this my liquidity sweep"
+- [0:08:43] to [0:09:15] Second exception, a higher-timeframe trade or no clear sweep: a stop under the 15-minute sweep would have been far away with a low reward-to-risk, so "you could scale into a relatively higher time frame okay and try and find you know maybe a a low like one scale lower that's underneath the liquidity sweep if you want to be extra safe" (the sentence continues over the marker; unclear in captions which low he means).
+- [0:09:15] "all of this is just purely based off of your own risk tolerance"
+- [0:10:46] Not a fixed distance: the stop "shouldn't be based purely off of points or Pips" but on "where your bias is invalidated at that point".
+- [0:11:18] The invalidation is for the trade, not the day: his daily bias was bullish and came good, but "for this specific execution" the sweep low was the invalidation.
+
+Size and day type (preview of day 39)
+
+- [0:09:15] to [0:09:46] "I use a set sets lot size"
+- [0:09:46] "usually on the S P my normal is like a hundred lots"
+- [0:09:46] to [0:10:16] His broker: "it's 10 units per lot instead of 100 units per lot size which is what most most Brokers are"
+- [0:10:16] "my usual is 200 I risk [=risked] 100 locks [=lots] today"
+- [0:10:16] to [0:10:46] Why half size: "we had high impact news and we also have a bank holiday tomorrow"
+- [0:10:46] "I'll probably de-risk myself this entire week"
+- [0:12:18] to [0:12:48] No trading on the US bank holiday, in any market: "the U.S bank holidays typically slow all the markets"
+
+### Worked examples
+
+1. That morning's S&P long, stopped out [0:05:09] to [0:08:12] and [0:11:18] to [0:11:48].
+   - Bias: daily bullish.
+   - Level swept: a low on the 5-minute.
+   - Structure break: to the upside on the 1-minute.
+   - Entry: at the close of the break-of-structure candle.
+   - Stop: under the 5-minute sweep low with a buffer ("four below").
+   - Size: half his usual (high-impact news, holiday next day).
+   - Result: stopped out, "barely" wicked out [0:12:48]; price then went higher and "we would still be in profit". A 5-minute break of structure printed during the recording [0:08:12].
+   - He adds that there was also a 15-minute sweep and 15-minute break of structure to the upside [0:08:43]; a stop under that sweep would have survived but with a much lower reward-to-risk.
+   - Chart only: prices, the size of the stop, the targets ("go look at the trade recap").
+2. Generic short diagram [0:01:00] to [0:05:09]: sweep of a high, break of structure, order block entry, stop above the swept high; then the variant where the sweep is far above and the stop goes above the order block. This is drawn, not a real chart.
+
+### Behaviour and process rules
+
+- [0:06:12] Find out the spread on the broker and instrument before placing stops.
+- [0:10:46] to [0:11:18] Place the stop where the idea is wrong, then let size follow from that.
+- [0:10:16] Cut size on high-impact-news days and around bank holidays.
+- [0:12:18] Do not trade on a US bank holiday, and do not swap to another market that day.
+- [0:07:12] to [0:07:42] On being stopped by a few ticks: "maybe we should have covered ourselves by putting price lower". No rule is drawn from it.
+
+### Refers to the chart without saying it
+
+- [0:03:34] "it should not be right above this High": the nearer high is on the drawing.
+- [0:04:07] "if price looks like this": the far-away-sweep case is a drawing; no distance or ratio is given for "terrible".
+- [0:06:12] to [0:07:12] "this exact price", "right here", "under here": the low, the stop and the wick that took it.
+- [0:08:43] to [0:09:15] "all the way down here" and "one scale lower": which low on which timeframe.
+
+### Unclear or contradictory
+
+- Buffer size: "five like point five points 0.5 points" [0:05:39] to [0:06:12]. My reading is 0.5 of an S&P point. Then "four four below" for the actual trade [0:07:12], unit unknown.
+- Usual lot size: "my normal is like a hundred lots" [0:09:46] and thirty seconds later "my usual is 200 I risk 100" [0:10:16]. Day 39 uses 25 lots as "normal" in a worked example with a made-up $100,000 balance.
+- The exception (stop above the order block) is offered and then discouraged in the same passage.
+- The second exception [0:08:43] to [0:09:15] is not a clear rule in the captions.
+- Sweep and break on different timeframes: this trade used a 5-minute sweep with a 1-minute break of structure; day 34 [0:14:13] has the sweep on the 15-minute and the break on the 5-minute.
+- News: half size on a high-impact-news day here; no trade on the Powell day in days 33 and 34; day 29 lists avoiding major news as the safer choice.
+
+---
+
+## Day 39: Calculating Lot Size
+
+File: `day39.txt`. Length: about 15 minutes (last marker 0:15:03), about 2,550 words.
+
+Summary: Three ways to size a trade: a calculated lot size from balance, risk percent and stop distance (shown with a phone app and a website calculator); a set lot size based on the smallest stop he normally uses (his own method); and "full port", which is banned. He then shows his three set sizes: normal, half and double. Recorded on the Fourth of July.
+
+### Rules and definitions stated
+
+- [0:01:01] The three options: "you can use a set loss [=lot] size that's what I use and I use a range of set loss sizes", calculate it every time, or "full port which you will never do".
+
+Calculated lot size
+
+- [0:02:02] Inputs: "account balance at the top risk amount and percent and then stop loss in Pips"
+- [0:02:02] to [0:02:32] Forex example: $1,000 balance, 1% risk, 30-pip stop, GBP/USD.
+- [0:03:33] Answer: "for this I would use 0.03 Lots" and "what are we risking ten dollars".
+- [0:03:33] Rounding: "we can't go any farther past two decimal places"
+- [0:01:32] The phone app is spelled out "s-t-i-n-u"; [0:02:32] it has forex pairs and gold but not the S&P. [0:03:02] He uses an unnamed website for the S&P.
+- [0:04:39] Stop distance comes from the chart's position tool: "that is it that's your stop-loss and Pips"
+- [0:06:14] S&P units: "the s p is usually in points" and "pip is less than a point".
+- [0:08:47] to [0:10:19] He treats 400 pips as four points and 800 pips as eight points on the S&P ("an 800 pip an eight point stop loss").
+- [0:06:45] Contract size: "most offshore brokerages okay most of them are um are 100 units per lot"
+- [0:07:15] Where to check it: MetaTrader, the SPX symbol, "details", the line "contract size". His shows 10.
+- [0:07:45] "a lot of prop firms" are 10 units per lot; check with every new broker or firm "because this could really mess you up".
+- He gives no formula in words; the calculator does it. My inference, which matches both of his worked numbers: lots = (balance x risk %) / (stop distance x money value of one unit of distance for one lot). S&P check: $100,000 x 1% = $1,000; 4 points x 10 units per lot = $40 per lot; $1,000 / $40 = 25 lots, his figure at [0:09:17]. Forex check: $10 / (30 pips x about $10 per pip per standard lot) = 0.033, rounded to his 0.03.
+
+Set lot size (his method)
+
+- [0:08:47] His usual stop on the S&P: "anywhere from 400 Pips to" about seven points; "for this example we'll just say Four Points to seven points" [0:08:47] to [0:09:17].
+- [0:09:17] Base it on the smallest usual stop: "you're going to set your your minimum right like what's like usually the lowest your stop loss will will be during a trade"
+- [0:09:17] to [0:09:48] Example: $100,000 balance, 400 pips (4 points), 1%, 10 units per lot gives "25 Lots" and "that is going to be our set lot size".
+- [0:09:48] to [0:10:19] Consequence: 1% if the stop is 4 points, and "I'll be risking two percent of my account" if the stop is 8 points.
+- [0:10:50] to [0:11:22] Three times the stop is 3%: "most of the time it never goes to three percent risk"
+- [0:10:19] to [0:10:50] "since I'm on a live account I don't really care too much about percents because I just have that set loss [=lot] size"
+- [0:11:22] Per instrument: the set size "is going to be different for every single pair" (he says "set stop loss"; set lot size is my reading).
+
+His three sizes
+
+- [0:12:28] "normal risk 25 blocks [=lots]"
+- [0:12:28] to [0:13:00] "my dearest [=de-risk] day 50 [=50%] of my normal"
+- [0:13:00] When de-risk applies: "if we have high impact news if we have to wait for news to come out", or a bank holiday the next day.
+- [0:13:00] to [0:13:31] When normal applies: "a day with no news a day with like news that won't really affect the market that much"
+- [0:13:31] to [0:14:01] Confident: "I double it", which starts at 2% and can reach 4% or more with a wider stop.
+- [0:14:01] When confident applies: "on a day with like no news I love the setup it's like all the biases are in line"
+- [0:14:32] Summary: "my normal risk is just one percent", "d-risk [=de-risk] is 50 of it confident is two times it".
+- [0:14:32] For viewers: "you guys should never use a confident lot size you guys feel free to use normal or de-risk"
+- [0:11:53] The tiered sizes are for after profitability: "turn profitable calculating lot size or using a cent [=set] lot size then come back to this".
+
+### Worked examples
+
+No chart trades. Three sizing calculations:
+
+1. [0:02:02] to [0:04:08] $1,000, 1%, 30 pips, GBP/USD: 0.03 lots, $10 at risk.
+2. [0:05:42] to [0:08:17] $100,000 on the S&P with the stop read off the position tool in pips and contract size 10. The stop and resulting lot size are shown on screen and not spoken ("this is the lot size").
+3. [0:09:17] to [0:11:22] $100,000, 4-point minimum stop, 1%: 25 lots; the same 25 lots is 2% at 8 points and 3% at 12 points (the 12 is my arithmetic; he only says "3x").
+
+### Behaviour and process rules
+
+- [0:01:01] to [0:01:32] Never go "full port".
+- [0:07:45] Check the contract size whenever a new account is opened anywhere.
+- [0:11:22] "you guys should only be trading one pair right now anyways"
+- [0:13:00] The day before, he used the de-risk size because of high-impact news and the holiday (the trade in day 38).
+- [0:14:32] Viewers: normal or de-risk only.
+
+### Refers to the chart without saying it
+
+- [0:03:02] The website calculator is never named ("this nice little website right here").
+- [0:04:08] "okay so for this we would have to do a 0.01 block size oops I said 200. 30. boom 0.03": he is typing into the calculator; unclear in captions.
+- [0:04:39] "see this number right here": the pip readout on the position tool.
+- [0:06:14] "this would be um four thousand seven hundred this one would be 789": numbers read off the screen with no context. Unclear in captions.
+- [0:08:17] The S&P lot size the calculator returned is not spoken.
+
+### Unclear or contradictory
+
+- Risk per trade is "one percent" [0:14:32] only when the stop is at his minimum; the same method gives 2% or 3% with wider stops, and 2% to "six percent or eight percent" on a confident day [0:14:01]. This does not fit day 29 [0:06:18] ("We know exactly how much we are losing") or his day 29 advice to write "I risk $100 per day".
+- Day 29 [0:07:49]: "Many of you should not use fixed lots". Here: "feel free to use normal or de-risk" [0:14:32].
+- Normal size is 25 lots in the example here, "a hundred lots" and "200" in day 38. The $100,000 balance here is hypothetical ("let's say it's a hundred thousand because whatever" [0:05:42]), so 25 is probably not his real size (my reading).
+- Typical S&P stop: "400 Pips to" something left unfinished, then "Four Points to seven points" only "for this example" [0:08:47].
+- "pip" on the S&P is never defined; 100 pips per point is my inference from his own pairs of numbers.
+- High-impact news: "de-risk" here and in day 38; skip the day entirely in days 33 and 34 (Powell).
+
+---
+
+# End sections
+
+References below are written as D34 [0:13:40] = day 34, caption block 0:13:40.
+
+## (a) TJR's trade model, step by step
+
+This is the order in which the steps happen on a trading day, as he describes it in days 34-36 (top-down) and days 30-33 (entry). He taught them in a different order (plan, entry, bias, targets, stop, size), and he ranks their importance as daily bias, then execution, then stop loss, then take profit (D37 [0:05:10]).
+
+STATED = he says it outright. INFERRED = my reading of an example or of garbled captions.
+
+1. Work from a written plan that fixes risk, the one instrument, the session and the number of trades (one) before the day starts. D29 [0:05:48], [0:09:20], [0:09:51], [0:13:24]. STATED.
+2. Check the calendar. No trading on a US bank holiday. D29 [0:19:32], D38 [0:12:18]. STATED. On major news he either does not trade (D33 [0:06:23], D34 [0:04:13]) or trades half size (D38 [0:10:16], D39 [0:13:00]). STATED both ways; which applies when is not stated.
+3. Before the open, read the weekly chart for the general direction, from recent price action or a line chart. D34 [0:00:34], D35 [0:00:00], [0:01:01]. STATED. It is background, not the bias (D34 [0:11:32], D35 [0:05:36]), but it limits how far a daily move against it is expected to run (D36 [0:11:28]). STATED.
+4. Set the daily bias from daily market structure: the direction of the most recent break of structure on the daily chart. Up = bullish, down = bearish. D34 [0:02:11], [0:11:01]; D36 [0:05:45]. STATED. That the break is counted on a daily close beyond the level: D35 [0:04:06], said about one example. INFERRED as a general rule.
+5. Trade only in the direction of the daily bias: longs when bullish, shorts when bearish. D29 [0:18:29], D34 [0:02:11], D35 [0:12:42]. STATED.
+6. Check the 4-hour and 1-hour trend. If the 4-hour runs against the daily, treat it as the daily's retracement, which is where he wants to enter. D34 [0:08:55], [0:13:40]; D36 [0:16:40]. STATED. If they disagree and nothing confirms the daily direction, stand aside or keep targets close. D34 [0:04:13], [0:05:15]. STATED.
+7. On the 4-hour and 1-hour, mark the zones that fit the bias: fair value gaps, order blocks, equilibrium of the retracement, and liquidity resting beyond highs or lows. D34 [0:13:40], D35 [0:06:38], [0:12:42], D36 [0:06:16]. STATED.
+8. Wait for his session (the New York Stock Exchange open; entries only in the first hour and a half) and for price to reach a marked zone. If it gets there and gives no reaction, no trade. D29 [0:10:52], D34 [0:08:22], D36 [0:09:21]. STATED.
+9. On the lower timeframe, look for a liquidity sweep: a prior high or low being taken out. D30 [0:01:32], D34 [0:14:13], D35 [0:07:09]. STATED. Timeframes: 15-minute and 5-minute for forex, 5-minute and 1-minute for the S&P. D35 [0:11:42]. INFERRED from a garbled sentence; D38 [0:07:42] is consistent with it for the S&P.
+10. Wait for a break of structure in the bias direction after the sweep. A sweep without it is not an entry. D30 [0:03:05], D32 [0:04:40]. STATED. The break is a candle closing beyond the level: D32 [0:10:24], D33 [0:09:28], D38 [0:05:39]. STATED in examples only.
+11. Enter in one of these ways:
+    - at the close of the break-of-structure candle. D37 [0:02:07], D38 [0:05:39]. STATED.
+    - on the retrace into the order block, on the touch. D30 [0:04:08], D32 [0:10:54], [0:15:11]. STATED.
+    - on the retrace into the fair value gap, on the touch or after a reaction. D30 [0:04:39], [0:05:10]. STATED, with the trigger left open.
+    - either retrace entry with price also at equilibrium. D30 [0:05:40], D33 [0:14:07]. STATED.
+    - His default: wait for the gap or order block unless sweep plus break of structure already gives good reward-to-risk. D29 [0:17:28]. STATED.
+    - In the top-down version the order is reversed: the higher-timeframe zone is reached first, then a 15-minute or 5-minute break of structure is the trigger. D34 [0:16:14], D35 [0:13:12], D36 [0:18:44]. STATED.
+12. Put the stop beyond the extreme of the liquidity sweep, with a small buffer for spread (he says 0.5 points on the S&P, or the broker's spread), whichever entry was used. D38 [0:01:00], [0:03:03], [0:05:39]. STATED. Exception he dislikes: beyond the order block when the sweep is too far away. D38 [0:04:07]. STATED.
+13. Size the trade. Viewers: lot size from balance, risk percent and stop distance. D39 [0:02:02]. STATED. Himself: a set lot size that equals 1% at his smallest usual stop, halved on news or pre-holiday days, doubled on days he is confident. D39 [0:09:17], [0:12:28], [0:14:32]. STATED.
+14. Set three or four targets at building blocks ahead of the trade. First target: the first draw on liquidity on the timeframe one above the entry timeframe, usually at least one to one. The rest: next liquidity, fair value gaps, order blocks. D37 [0:03:39], [0:04:09], [0:06:10]. STATED.
+15. Take partial profits at the targets. D36 [0:20:50]. STATED; the amounts are not given. He prefers not to hold over the weekend or for several days. D36 [0:13:02], [0:19:48]. STATED. No rule for moving the stop to break-even is given; the only mention is a trade closed at break-even because it was taking too long. D37 [0:08:12]. Any break-even rule would be INFERRED.
+16. After the one trade, or once the day's risk is used, stop for the day. D29 [0:19:32]. STATED.
+
+## (b) Programmable rules from days 29-39
+
+Each rule gives what he said. "NOT SPECIFIED" marks a parameter a program would need that he never gives; I have not filled any of these in.
+
+1. Instrument: trade exactly one instrument. D29 [0:13:24], [0:14:25]. (His own: S&P 500 CFD.)
+2. Entry window: new entries only in the first 90 minutes after the New York Stock Exchange opens. D29 [0:10:52], [0:18:29]. Clock time and time zone NOT SPECIFIED. No forced exit when the window ends. D29 [0:11:22].
+3. Maximum trades per day: 1 (he allows himself 2 with the risk split so the total equals one trade's risk). D29 [0:07:49], [0:08:19], [0:09:20].
+4. Daily stop: no further entries once the day's trade is done or the day's risk amount is lost. D29 [0:19:32].
+5. Holiday filter: no trades on a US bank holiday. D29 [0:19:32], D38 [0:12:18].
+6. News filter, two versions he gives: (a) no trades on days with major events; he names CPI, NFP, FOMC, PPI as the kind that "breaks the market" and skipped a Powell speech day. D29 [0:11:22], D33 [0:06:23]. (b) Trade at 0.5 x size on high-impact-news days and the day before a bank holiday. D38 [0:10:16], D39 [0:13:00]. Which events fall under (a) and which under (b): NOT SPECIFIED. Wait until the scheduled release is out before trading: D35 [0:14:43].
+7. Post-news volatility cut-off: if a news candle moves more than X points in 5 minutes, no trade that day. D29 [0:12:54]. X is NOT SPECIFIED (his "five" is explicitly random).
+8. Daily bias: bullish if the most recent daily break of structure was to the upside, bearish if to the downside; it flips on the candle that breaks. D34 [0:02:11], D36 [0:05:45]. Break = daily close beyond the level, per D35 [0:04:06]. Which swing high or low defines "structure": NOT SPECIFIED in these lessons.
+9. Direction filter: longs only when the daily bias is bullish, shorts only when bearish. D29 [0:18:29], D34 [0:02:11].
+10. Counter-bias signals: a sweep plus break of structure against the daily bias on a lower timeframe is not a trade. D34 [0:17:16], D36 [0:07:50].
+11. Higher-timeframe alignment flag: compute the same structure direction on the 4-hour and 1-hour. All aligned with the daily = best case. D34 [0:03:13], D35 [0:12:42]. 4-hour opposite to daily = daily retracement; trading in the daily direction is allowed once a lower timeframe breaks structure in the daily direction (1-hour in D36 [0:13:02]; at least 15-minute in D35 [0:13:43]).
+12. Target cap when the 4-hour disagrees: do not use far higher-timeframe targets until the 4-hour agrees. D34 [0:04:44]. How near "tentative" is: NOT SPECIFIED.
+13. Zone list: on the 4-hour and 1-hour, in the bias direction, record fair value gaps, order blocks, the equilibrium (50%) of the retracement leg, and liquidity beyond highs or lows. D34 [0:13:40], D36 [0:06:16]. Order block test he uses: the move that swept liquidity and was followed by a strong move the other way. D32 [0:10:54], D35 [0:10:41], D36 [0:06:50]. Zone edges (body, wick, one candle or whole leg): NOT SPECIFIED.
+14. Zone requirement: an entry is considered only after price has reached one of the recorded zones. D34 [0:17:16], D35 [0:13:12], D36 [0:09:21].
+15. Liquidity sweep: a prior high (for shorts) or low (for longs) is taken out. D30 [0:01:32]. Lookback, minimum excursion, and wick-versus-close: NOT SPECIFIED.
+16. Break of structure: after the sweep, a candle closes beyond the opposing swing point in the trade direction (close below a low for shorts, above a high for longs). D32 [0:10:24], [0:13:34], D33 [0:09:28]. Which swing point: NOT SPECIFIED.
+17. No break, no trade: a sweep with no break of structure is ignored. D32 [0:04:40], D33 [0:07:55].
+18. Entry type A: market entry at the close of the break-of-structure candle. D37 [0:02:07], D38 [0:05:39].
+19. Entry type B: after the break of structure, enter when price first trades back into the order block (touch by wick is enough). D30 [0:04:08], D32 [0:10:54], [0:15:11].
+20. Entry type C: after the break of structure, enter when price trades back into the fair value gap. D30 [0:04:39]. Touch-only versus wait-for-reaction: he gives both. D30 [0:05:10].
+21. Entry type D: type B or C only if the zone is also at or beyond the 50% level of the measured leg (the lower half for longs; for shorts he says "above that 50% mark"). D30 [0:05:40], D35 [0:14:13]. Leg anchor points: NOT SPECIFIED consistently (D33 [0:19:39]).
+22. Entry type E (top-down): price is inside a 1-hour or 4-hour zone from rule 13, then a 15-minute or 5-minute candle closes beyond structure in the bias direction; enter. D34 [0:16:14], D35 [0:07:09], [0:13:12], D36 [0:18:44]. A single reversal candle is not enough. D34 [0:16:14].
+23. Choice between A and B/C: use A only if its reward-to-risk is "good"; otherwise wait for B or C. D29 [0:17:28], D30 [0:03:36]. Threshold: NOT SPECIFIED (the nearest number is rule 30's one to one).
+24. Timeframe pairs: forex 15-minute and 5-minute; S&P 5-minute and 1-minute. D35 [0:11:42] (my reading of a garbled sentence). Sweep and break may be on different timeframes, the break on the lower one: D34 [0:14:13] (15-minute sweep, 5-minute break), D38 [0:07:42] (5-minute sweep, 1-minute break).
+25. Stop: for shorts, above the high of the liquidity sweep; for longs, below its low. Same for every entry type. D38 [0:01:00], [0:03:03], [0:05:09].
+26. Stop buffer: at least 0.5 points beyond that extreme on the S&P, or at least the broker's spread for the instrument. D38 [0:05:39], [0:06:12].
+27. Stop exception: if rule 25 gives a "terrible" reward-to-risk, stop beyond the order block instead. D38 [0:04:07], [0:04:38]. Threshold: NOT SPECIFIED. He says he does not like it.
+28. Calculated size: lots = the size at which (stop distance x value per lot) = balance x risk percent, rounded to two decimals. Inputs stated at D39 [0:02:02]; rounding at D39 [0:03:33]; the formula itself is my inference checked against his two examples. Risk percent used in his examples: 1%. Contract size must be read from the broker. D39 [0:07:15].
+29. Set size (his method): base lots = calculated size for 1% risk at the smallest usual stop (4 points on the S&P in his example); use it unchanged whatever the actual stop. Day multiplier: 1.0 normal, 0.5 on high-impact-news or pre-holiday days, 2.0 on "confident" days. Viewers are told never to use 2.0. D39 [0:09:17], [0:12:28], [0:14:32].
+30. First target: the first swing high or low (draw on liquidity) in the trade direction on the timeframe one step above the entry timeframe (5-minute entry, 15-minute target). D37 [0:03:39]. It should be at least one to one "most of the time". D37 [0:06:10].
+31. Further targets, up to three or four in total: the next liquidity levels, fair value gaps (near edge or far edge) and order blocks (near edge or far edge) ahead of the trade. D37 [0:03:09], [0:04:09]. Do not use 1-minute levels as targets. D37 [0:09:12]. Share of the position closed at each: NOT SPECIFIED.
+32. Session filter for the S&P: ignore signals that form in the London session. D34 [0:14:44].
+33. Holding period: he prefers not to hold over the weekend or for several days. D36 [0:13:02], [0:19:48]. An intraday exit time: NOT SPECIFIED.
+
+Not available as a rule in these lessons: when to move the stop to break-even; any trailing stop; any time-based exit (only "price was taking forever", D37 [0:08:12]); partial sizes; a minimum number of confluences.
+
+## (c) Needs judgement
+
+Things he decides by eye or by feel, with no stated test:
+
+- Which highs and lows hold "liquidity" and how far back to look. Every sweep in days 32 and 33 is "this" or "here".
+- Whether a level was actually swept. He is unsure himself at D32 [0:11:56].
+- Which swing point must break for a "break of structure", on every timeframe including the daily one that sets the bias.
+- Where an order block starts and ends: one candle (D32 [0:10:54]) or a whole leg (D32 [0:19:21]); and whether an order block is good or poor (D32 [0:16:48]).
+- Fair value gap edges, and how "imbalance" differs from "fair value gap" when he separates them (D33 [0:09:59]).
+- The two anchor points for equilibrium (D33 [0:16:13], [0:19:39]).
+- What counts as "a reaction" at a zone (D30 [0:05:10], D33 [0:09:28], D36 [0:09:21]).
+- What to do when timeframes disagree: stand aside (D34 [0:04:13]), require a 15-minute break (D35 [0:13:43]), or accept a 1-hour break as enough (D36 [0:13:02]).
+- How much weight the weekly gets (D34 [0:11:32] against D36 [0:11:28]).
+- What "good" or "terrible" reward-to-risk means, which decides both the entry type (D29 [0:17:28]) and the stop exception (D38 [0:04:07]).
+- Which of several marked zones to act on (D35 [0:12:12]: he marks them all and adapts).
+- Which news is skipped, which is traded at half size, and which is ignored.
+- When a day is "confident" enough for double size (D39 [0:14:01]).
+- The "smallest usual stop" that fixes the set lot size (D39 [0:09:17]): it comes from his own trading history.
+- How much to close at each target, and when to give up on a slow trade (D37 [0:08:12]).
+- Skipping a market because it is "trading pretty sloppily" (D35 [0:09:40]) or because "there isn't much" on the chart (D36 [0:06:16]).
+- Overriding his own opinion: he states fundamental views against the chart in D35 and D36 and says the chart wins (D35 [0:04:36]), after having traded his view the day before (D35 [0:03:36]).
+
+## Contradictions across days 29-39
+
+1. Entry trigger. At the close of the break-of-structure candle (D37 [0:02:07], D38 [0:05:39]); on the touch of an order block (D32 [0:15:11]); on the touch of a fair value gap or after a reaction (D30 [0:05:10]); or only after a lower-timeframe break of structure inside a higher-timeframe zone (D34 [0:16:14]). He presents these as options to choose from (D30 [0:07:12]); he does not give one rule.
+2. Is a sweep required? Yes in every listed combination (D30) and in the plan (D29 [0:20:02]); but two examples in D33 have none ([0:11:02], [0:12:03]).
+3. Daily against 4-hour. "Probably wouldn't want to trade" (D34 [0:04:13]); the mirror case is "ideal" (D34 [0:13:40]); needs "at least a 15- minute" break (D35 [0:13:43]); a 1-hour break is "basically all I need" (D36 [0:13:02]).
+4. Weekly. "we don't really care about that" (D34 [0:11:32]) against its use to cap daily moves and set targets (D36 [0:00:32], [0:11:28]).
+5. First target. One timeframe above the entry (D37 [0:03:39]), on the entry timeframe (D37 [0:04:40]), or at daily levels from a 5-minute entry (D36 [0:14:03]).
+6. Stop. Always beyond the sweep (D38 [0:03:03]), or beyond the order block when the sweep is far (D38 [0:04:38]). Earlier mentions are looser: "stops above the highs" (D30 [0:04:08]), "below this low or these lows" (D33 [0:07:25]).
+7. Fixed risk. "We know exactly how much we are losing" (D29 [0:06:18]) against a set lot size that risks 1% to 3% depending on the stop (D39 [0:10:50]).
+8. Lot method for viewers. Calculated, not fixed (D29 [0:07:49]) against "feel free to use normal or de-risk" set sizes (D39 [0:14:32]).
+9. His normal size. "a hundred lots" and "200" within a minute (D38 [0:09:46], [0:10:16]); 25 lots in the D39 example on a hypothetical balance.
+10. Major news. Avoid it (D29 [0:11:52], D33 [0:06:23], D34 [0:04:13]) against trading it at half size (D38 [0:10:16], D39 [0:13:00]).
+11. Trades per day. One (D29 [0:09:20]) against one or two (D29 [0:08:49]).
+12. "Discount". Used for the favourable half in both directions; for shorts the captions say "discount" where the sense is the upper half (D35 [0:08:39], D36 [0:13:32]).
+13. Risk ranking of the four entry combinations is garbled (D30 [0:05:40]); only "sweep plus break of structure is the riskiest" is confirmed elsewhere (D32 [0:05:10]).
