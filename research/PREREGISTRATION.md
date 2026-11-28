@@ -335,3 +335,57 @@ history, with the rule for reading the answer fixed here first.
   number, and it leads with a blended estimate:
   (wins in the last 4 weeks + 50 x long-run win rate) / (trades in the last 4 weeks + 50).
 - Either way the last-4-weeks win rate stays on the page with its 95% range (Wilson interval).
+
+
+# Addendum 2, 2026-11-28: which course topics earn a place on The Desk
+
+Written the same day, **before any test in either addendum was run**. The trader's instruction:
+do not add something because it is in the videos; evaluate it and build it only if it helps.
+Each topic below gets a check on The Desk's own data and a rule, fixed here, for what happens
+to it. A topic that cannot be checked is not built as a rule.
+
+## Which TJR setups are shown on The Desk
+
+The 48-day test cannot prove a setup. It can show one doing worse than chance. So:
+
+- A T1 or T2 setup is **shown** in a window only if, in the test, its average R after costs is
+  above zero **and** above the mean of its control (random entries at the same clock times).
+- Otherwise it is **on trial**: listed in the Playbook, tracked in the replay log so a forward
+  record builds without money, and not suggested on The Desk.
+- Every one of the eight is labelled "Too early to judge" either way, and is re-read at 150 trades.
+
+## Check C1: does trading with the daily bias help?
+
+- Data: every closed trade of the 14 fifteen-minute setups over the whole history.
+- For each trade, at its signal time: the daily bias (as defined in the first addendum, from
+  daily candles of the same contract; a trading day needs at least 40 fifteen-minute bars), and
+  the 4-hour and 1-hour structure direction (4-hour candles start at 18:00 New York).
+  Trades with no known daily bias are left out.
+- Measures: (a) average R of trades with the daily bias minus trades against it; (b) average R
+  of trades where daily, 4-hour and 1-hour all agree with the trade minus all other trades.
+  Welch t-stat for each, pooled over the 14 setups. A per-setup table is reported for context.
+- Reading: a measure **helps** if the pooled difference is above zero with a t-stat of at least
+  2.0 over the whole history **and** is above zero in the judge period (2024 on). If (a) helps,
+  the daily bias is shown on every suggestion as "with" or "against". If (b) helps, timeframe
+  agreement is shown too. If neither helps, bias is not shown on suggestions for the existing
+  setups (it stays inside T1 and T2, where it is part of his rules).
+
+## Check C2: is the trade after a losing trade worse?
+
+- Data: the same trades, ordered by time. A trading day turns over at 18:00 New York.
+- Measure: average R of trades that start after an earlier trade that day closed at a loss,
+  minus the average R of all other trades. Welch t-stat.
+- Reading: if the difference is below zero with a t-stat of -2.0 or lower, "stop after a loss"
+  is supported as a rule about the setups and a "one trade a day" switch is added. If not, the
+  existing "one loss and done" stays only as protection for a small cushion (which the risk
+  maths supports) and no new switch is added. This check is about the setups; the published
+  finding that people take worse trades after losses is about the trader, and is not tested here.
+
+## Topics with no check available
+
+- News days (CPI, PPI, FOMC, payrolls): no checked list of past release dates, so no new rule.
+  The Desk's existing notice of scheduled releases stays as it is.
+- Mindset lessons (discipline, goals, fear, confidence), the written trading plan, the weekly
+  preview and the journal prompts: nothing on The Desk's data can test them. They are not built
+  unless they are needed by something that passed a check.
+- Risk size: already settled by the breach simulation in the report (not a backtest); built.
